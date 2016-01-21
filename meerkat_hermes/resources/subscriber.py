@@ -24,6 +24,22 @@ parser.add_argument('topics', action='append', required=True,
 #The Subscriber resource has just two methods - to create a new user and to deleted an existing user.
 class Subscriber(Resource):
 
+    def get(self, subscriber_id):
+        """
+        Get a subscriber's info from the database. 
+
+        Args:
+             subscriber_id for the desired subscriber. 
+        Returns:
+             The amazon dynamodb response.
+        """
+        response = table.get_item( 
+            Key={
+                'id':subscriber_id
+            }
+        )
+        return response, 200
+
     def put(self):
         """
         Add a new subscriber. Parse the given arguments to check it is a valid subscriber.
@@ -31,11 +47,12 @@ class Subscriber(Resource):
         wishing to delete it.
 
         Returns:
-            The amazon dynamodb response.
+            The amazon dynamodb response, with the assigned subscriber_id added.
         """
         args = parser.parse_args()
+        subscriber_id = uuid.uuid4().hex
         subscriber = {
-            'id': uuid.uuid4().hex,
+            'id': subscriber_id,
             'first_name': args['first_name'],
             'last_name': args['last_name'],
             'email': args['email'],
@@ -43,6 +60,7 @@ class Subscriber(Resource):
             'topics': args['topics'] 
         }
         response = table.put_item( Item=subscriber )
+        response['subscriber_id'] = subscriber_id
         return response, 200
 
     def delete(self, subscriber_id):
@@ -61,5 +79,4 @@ class Subscriber(Resource):
                 'id':subscriber_id
             }
         )
-
         return response, 200

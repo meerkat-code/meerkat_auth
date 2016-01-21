@@ -8,7 +8,7 @@ from flask.json import JSONEncoder
 from flask_restful import Api, reqparse
 import boto3
 
-from meerkat_hermes.resources.test import Subscriber
+from meerkat_hermes.resources.subscriber import Subscriber
 
 # Create the Flask app
 app = Flask(__name__)
@@ -26,4 +26,4 @@ def hello_world():
     return table.creation_date_time.strftime('%d/%m/%Y')
 
 #The api
-api.add_resource(Subscriber, "/subscriber", "/subscriber/<str:subscriber_id>")
+api.add_resource(Subscriber, "/subscriber", "/subscriber/<string:subscriber_id>")

@@ -8,7 +8,8 @@ from flask.json import JSONEncoder
 from flask_restful import Api, reqparse
 import boto3
 
-from meerkat_hermes.resources.test import Subscriber
+from meerkat_hermes.resources.subscriber import Subscriber
+from meerkat_hermes.resources.emailer import Emailer
 
 # Create the Flask app
 app = Flask(__name__)
@@ -27,3 +28,4 @@ def hello_world():
 
 #The api
 api.add_resource(Subscriber, "/subscriber", "/subscriber/<string:subscriber_id>")
+api.add_resource(Emailer, "/emailer")

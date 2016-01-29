@@ -58,3 +58,6 @@ target/
 
 #Linux
 *~
+
+#My secret config settings
+secret.cfg

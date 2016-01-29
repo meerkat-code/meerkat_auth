@@ -7,10 +7,15 @@ Configuration and settings
 
 class Config(object):
     DEBUG = False
-    TESTING = False
+    TESTING = True
+
+    SUBSCRIBERS = 'hermes_subscribers'
+    SUBSCRIPTIONS = 'hermes_subscriptions'
+    LOG = 'hermes_log'
+
     SENDER = 'jonathan.s.berry@googlemail.com'
     CHARSET = 'UTF-8'
-    SUBSCRIBERS = 'hermes_subscribers'
+    FROM = 'Meerkat'
 
 class Production(Config):
     DEBUG = False

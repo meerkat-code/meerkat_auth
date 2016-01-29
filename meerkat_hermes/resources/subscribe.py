@@ -8,9 +8,12 @@ import uuid, boto3, json
 from flask_restful import Resource, reqparse
 from flask import jsonify, current_app
 from boto3.dynamodb.conditions import Key, Attr
+from meerkat_hermes.authentication import require_api_key
 
 #The Subscriber resource has just two methods - to create a new user and to deleted an existing user.
+
 class Subscribe(Resource):
+
 
     def __init__(self):
         #Load the database and tables, upon object creation. 
@@ -27,6 +30,10 @@ class Subscribe(Resource):
         Returns:
              The amazon dynamodb response.
         """
+
+        #Require authentication
+        decorators = [require_api_key]
+
         response = self.subscribers.get_item( 
             Key={
                 'id':subscriber_id
@@ -50,6 +57,9 @@ class Subscribe(Resource):
         Returns:
             The amazon dynamodb response, with the assigned subscriber_id added.
         """
+
+        #Require authentication
+        decorators = [require_api_key]
 
         #Define an argument parser for creating a new subscriber.
         parser = reqparse.RequestParser()
@@ -85,6 +95,7 @@ class Subscribe(Resource):
 
         return response, 200
 
+    @require_api_key
     def delete(self, subscriber_id):
         """
         Delete a subscriber from the database. At the moment, if a user wishes to change

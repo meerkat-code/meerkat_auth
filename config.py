@@ -17,6 +17,8 @@ class Config(object):
     CHARSET = 'UTF-8'
     FROM = 'Meerkat'
 
+    API_KEY = "test-hermes"
+
 class Production(Config):
     DEBUG = False
     TESTING = False

@@ -8,6 +8,7 @@ import meerkat_hermes.util as util
 from flask_restful import Resource, reqparse
 from flask import jsonify, current_app
 from boto3.dynamodb.conditions import Key, Attr
+from meerkat_hermes.authentication import require_api_key
 
 #This simple Emailer resource has just one method, which sends a given email message.
 class Publish(Resource):
@@ -40,6 +41,9 @@ class Publish(Resource):
         Returns:
             The amazon SES response.
         """
+
+        #Require authentication
+        decorators = [require_api_key]
 
         #Define an argument parser for creating a valid email message.
         parser = reqparse.RequestParser()

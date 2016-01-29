@@ -5,6 +5,7 @@ from flask_restful import Resource, reqparse
 import uuid, boto3, json, uuid
 from flask import jsonify, current_app
 import meerkat_hermes.util as util
+from meerkat_hermes.authentication import require_api_key
 
 #This simple Emailer resource has just one method, which sends a given email message.
 class Sms(Resource):
@@ -20,7 +21,10 @@ class Sms(Resource):
 
         Returns:
             The Nexmo response.
-        """
+        """ 
+
+        #Require authentication
+        decorators = [require_api_key]
 
         #Define an argument parser for creating a valid email message.
         parser = reqparse.RequestParser()

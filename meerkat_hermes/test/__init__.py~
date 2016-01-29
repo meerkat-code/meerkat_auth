@@ -6,6 +6,7 @@ Unit tests for the Meerkat frontend
 """
 
 import json, unittest, boto3, meerkat_hermes
+import meerkat_hermes.util as util
 from boto3.dynamodb.conditions import Key, Attr
 
 class MeerkatHermesTestCase(unittest.TestCase):
@@ -38,7 +39,6 @@ class MeerkatHermesTestCase(unittest.TestCase):
             IndexName='message-index',
             KeyConditionExpression=Key('message').eq('Nosetest Message')
         )
-        print(query_response)
         
         with self.log.batch_writer() as batch:
             for message in query_response['Items']:
@@ -75,7 +75,6 @@ class MeerkatHermesTestCase(unittest.TestCase):
         delete_response = self.app.delete( '/subscribe/'+subscriber_id )
         #Get the response and check it equals 200.
         data = json.loads( delete_response.data.decode('UTF-8') )
-        print( data )
         self.assertEquals( data['ResponseMetadata']['HTTPStatusCode'], 200 )
 
     def test_email(self):
@@ -98,6 +97,24 @@ class MeerkatHermesTestCase(unittest.TestCase):
             }
         )
         self.assertEquals( get_response['Item']['destination'][0], email['email'] )
+
+    def test_replace_keywords(self):
+        subscriber = {
+            "email": "test@test.com",
+            "first_name": "Janet",
+            "id": "772b814e5d3a4321aed03c1fa694484f",
+            "last_name": "Berry",
+            "sms": "+441234567890",
+            "topics": [
+                "Topic1", "Topic2", "Topic3"
+            ]
+        }
+        for key in subscriber:
+            message = "<<"+key+">>"
+            value = str(subscriber[key])
+            if( key == 'topics' ):
+                value = "Topic1, Topic2 and Topic3"
+            self.assertEquals( value, util.replace_keywords(message, subscriber) )
         
 if __name__ == '__main__':
     unittest.main()

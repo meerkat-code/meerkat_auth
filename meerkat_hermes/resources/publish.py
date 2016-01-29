@@ -1,5 +1,6 @@
 """
-This resource provides a simple means of sending a given e-mail message to given e-mail addresses.
+This resource enables you to publish a message using given mediums to subscribers with subscriptions 
+to given topics. It is expected to hbe the primary function of meerkat hermes. 
 """
 
 import uuid, boto3, json, uuid
@@ -7,7 +8,6 @@ import meerkat_hermes.util as util
 from flask_restful import Resource, reqparse
 from flask import jsonify, current_app
 from boto3.dynamodb.conditions import Key, Attr
-
 
 #This simple Emailer resource has just one method, which sends a given email message.
 class Publish(Resource):
@@ -27,6 +27,7 @@ class Publish(Resource):
         PUT args:
 
             'id'*         - If another message with the same ID has been logged, this one won't send.
+                            Returns a 400 Bad Request error if this is the case.
             'message'*    - The message.
             'topics'*     - The topics the message fits into (determines destination address/es).
                             Accepts array of multiple topics.
@@ -45,16 +46,16 @@ class Publish(Resource):
         parser.add_argument('id', required=True, type=str, help='The message Id - must be unique.')
         parser.add_argument('message', required=True, type=str, help='The message to be sent')
         parser.add_argument('topics', required=True, action='append', type=str, 
-                            help='The destination address')
+                            help='The topics to publish to.')
         parser.add_argument('medium', required=False, action='append', type=str, 
-                            help='The destination address')
+                            help='The mediums by which to send the message.')
         parser.add_argument('html', required=False, type=str, 
                             help='If applicable, the message in html')
         parser.add_argument('subject', required=False, type=str, help='The email subject')
         args = parser.parse_args()
 
         #Check that the message hasn't already been sent.
-        if util.id_valid(args['id']):
+        if util.id_valid( args['id'] ):
 
             #Set the default values for the non-required fields.
             if 'medium' not in args: args['medium'] = ['email']
@@ -64,7 +65,7 @@ class Publish(Resource):
     
             #Collect the subscriber IDs for all subscriptions to the given topics.
             subscribers = []
-    
+           
             for topic in args['topics']:
                 query_response = self.subscriptions.query(
                     IndexName='topicID-index',
@@ -76,6 +77,7 @@ class Publish(Resource):
             #Record details about the sent messages.
             responses = []
             destinations = []
+            s= []
 
             #Send the messages to each subscriber.     
             for subscriber_id in subscribers:    
@@ -84,32 +86,35 @@ class Publish(Resource):
                     Key={ 'id':subscriber_id }
                 )['Item']
     
-                #TODO: Keywords management here.
+                #Enable mail merging on subscriber attributes.
+                message = util.replace_keywords( args['message'], subscriber )
+                sms_message = util.replace_keywords( args['sms-message'], subscriber )
+                html_message = util.replace_keywords( args['html-message'], subscriber )
 
                 #Assemble and send the messages for each medium.
                 for medium in args['medium']: 
                     
-
                     if medium == 'email':
                         temp = util.send_email(
-                            subscriber['email'],
+                            [subscriber['email']],
                             args['subject'],
-                            args['message'],
-                            args['html-message']
+                            message,
+                            html_message
                         )
                         temp['type'] = 'email'
+                        temp['message']=message
                         responses.append(temp)
                         destinations.append( subscriber['email'] )  
 
                     elif medium == 'sms' and 'sms' in subscriber:
                         temp = util.send_sms(
                             subscriber['sms'],
-                            args['sms-message']
+                            sms_message
                         )
                         temp['type'] = 'sms'
+                        temp['message']=sms_message
                         responses.append( temp )  
-                        destinations.append( subscriber['sms'] )
-                             
+                        destinations.append( subscriber['sms'] )                             
 
             util.log_message( args['id'], {
                 'destination': destinations, 

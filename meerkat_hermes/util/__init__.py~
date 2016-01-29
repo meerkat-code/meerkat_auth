@@ -1,4 +1,4 @@
-import boto3, urllib, datetime, time
+import boto3, urllib, datetime, time, json
 from flask import current_app
 
 def send_email(destination, subject, message, html):
@@ -6,12 +6,11 @@ def send_email(destination, subject, message, html):
     Sends an email using Amazon SES. 
        
     Args:
-        destination* - The email address to send to. 
-                       Accepts a String or a list of Strings.
-        subject*     - The email subject.
-        message*     - The message to be sent.
-        html         - The html version of the message to be sent.
-                       Defaults to the same as 'message'
+        destination* - The email address to send to. ([Str])
+        subject*     - The email subject. (Str)
+        message*     - The message to be sent. (Str)
+        html         - The html version of the message to be sent. (Str)
+                       Defaults to the same as 'message' 
 
     Returns:
         The Amazon SES response.
@@ -51,7 +50,6 @@ def send_email(destination, subject, message, html):
     )
 
     response['SesMessageId'] = response.pop('MessageId')
-    
     return response
     
 def log_message( messageID, details ):
@@ -95,7 +93,7 @@ def send_sms( destination, message ):
     }
 
     #If we are testing, don't actually send the message, we just return a dummy response.
-    if( current_app.config['TESTING'] ):
+    if current_app.config['TESTING']:
         response = { 
             "message-count": "1",
             "messages": [{
@@ -112,7 +110,8 @@ def send_sms( destination, message ):
     else:
         url = 'https://rest.nexmo.com/sms/json?' + urllib.parse.urlencode(params)
         response = urllib.request.urlopen(url)
-        
+        response =  json.loads( response.read().decode('UTF-8')  )
+
     return response
 
 def get_date():
@@ -141,4 +140,20 @@ def id_valid( messageID ):
         return False 
     else:
         return True
+
+def replace_keywords( message, subscriber ):
+
+    for key in subscriber:
+        placeholder = "<<"+key+">>"
+        replace = str(subscriber[key])
+        #If it's a list, e.g. topics, then it's a little more complicated.
+        if isinstance(subscriber[key], list):
+            replace = ""
+            for i in range(len(subscriber[key])):
+                replace += subscriber[key][i]
+                if i < len(subscriber[key])-2: replace += ', '
+                elif i == len(subscriber[key])-2: replace += ' and '
+        message = message.replace( placeholder, replace )
+    return message
     
+        

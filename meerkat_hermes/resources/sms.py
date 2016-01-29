@@ -33,8 +33,6 @@ class Sms(Resource):
             args['message']
         )
 
-        response =  json.loads( response.read().decode('UTF-8')  )
-
         util.log_message( 'G'+uuid.uuid4().hex, {
             'destination':args['sms'], 
             'medium':['sms'], 

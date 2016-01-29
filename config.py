@@ -7,7 +7,7 @@ Configuration and settings
 
 class Config(object):
     DEBUG = False
-    TESTING = True
+    TESTING = False
 
     SUBSCRIBERS = 'hermes_subscribers'
     SUBSCRIPTIONS = 'hermes_subscriptions'

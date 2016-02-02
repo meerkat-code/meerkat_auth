@@ -4,9 +4,9 @@ the dynamodb tables "hermes_subscribers" and "hermes_subscriptions".  Conceptual
 subscribers, there are topics (in "hermes_topics" table), and there are subscriptions which map
 between subscribers and topics using their id fields.   
 """
-import uuid, boto3, json
+import uuid, boto3
 from flask_restful import Resource, reqparse
-from flask import jsonify, current_app
+from flask import current_app
 from boto3.dynamodb.conditions import Key, Attr
 from meerkat_hermes.authentication import require_api_key
 
@@ -14,6 +14,8 @@ from meerkat_hermes.authentication import require_api_key
 
 class Subscribe(Resource):
 
+    #Require authentication
+    decorators = [require_api_key]
 
     def __init__(self):
         #Load the database and tables, upon object creation. 
@@ -30,9 +32,6 @@ class Subscribe(Resource):
         Returns:
              The amazon dynamodb response.
         """
-
-        #Require authentication
-        decorators = [require_api_key]
 
         response = self.subscribers.get_item( 
             Key={
@@ -58,9 +57,6 @@ class Subscribe(Resource):
             The amazon dynamodb response, with the assigned subscriber_id added.
         """
 
-        #Require authentication
-        decorators = [require_api_key]
-
         #Define an argument parser for creating a new subscriber.
         parser = reqparse.RequestParser()
         parser.add_argument('first_name', required=True, type=str, help='First name of the subscriber')
@@ -69,6 +65,8 @@ class Subscribe(Resource):
         parser.add_argument('sms', required=False, type=str, help='Mobile phone number of the subscriber')
         parser.add_argument('topics', action='append', required=True, 
                             type=str, help='List of topic IDs the subscriber wishes to subscribe to')
+
+        current_app.logger.warning( "Subcribe PUT called" )
 
         args = parser.parse_args()
         subscriber_id = uuid.uuid4().hex

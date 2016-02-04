@@ -63,6 +63,7 @@ class Subscribe(Resource):
         parser.add_argument('last_name', required=True, type=str, help='Last name of the subscriber')
         parser.add_argument('email', required=True, type=str, help='Email address of the subscriber')
         parser.add_argument('sms', required=False, type=str, help='Mobile phone number of the subscriber')
+        parser.add_argument('verified', required=False, type=bool, help='Are the contact details verified?')
         parser.add_argument('topics', action='append', required=True, 
                             type=str, help='List of topic IDs the subscriber wishes to subscribe to')
 
@@ -75,21 +76,15 @@ class Subscribe(Resource):
             'first_name': args['first_name'],
             'last_name': args['last_name'],
             'email': args['email'],
-            'topics': args['topics'] 
+            'topics': args['topics'] ,
+            'verified': args['verified']
         }
         if args['sms'] is not None: subscriber['sms'] = args['sms']
         response = self.subscribers.put_item( Item=subscriber )
         response['subscriber_id'] = subscriber_id
-      
-        with self.subscriptions.batch_writer() as batch:
-            for topic_id in args['topics']:
-                batch.put_item(
-                    Item={
-                        'subscriptionID': uuid.uuid4().hex,
-                        'topicID': topic_id,
-                        'subscriberID': subscriber_id
-                    }
-                )
+ 
+        if args['verified']:
+            create_subscriptions( subscriber_id, args['topics'] )
 
         return response, 200
 

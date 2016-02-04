@@ -15,6 +15,7 @@ app.config.from_envvar('MEERKAT_HERMES_SETTINGS')
 api=Api(app)
 
 # Import the API resources
+# Import them after creating the app, because they depend upon the app.
 from meerkat_hermes.resources.subscribe import Subscribe
 from meerkat_hermes.resources.email import Email
 from meerkat_hermes.resources.sms import Sms

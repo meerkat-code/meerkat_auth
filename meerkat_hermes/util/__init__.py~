@@ -156,4 +156,18 @@ def replace_keywords( message, subscriber ):
         message = message.replace( placeholder, replace )
     return message
     
+def create_subscriptions( subscriber_id, topics ):
+
+    db = boto3.resource('dynamodb')
+    table = db.Table('hermes_subscriptions')
+
+    with self.subscriptions.batch_writer() as batch:
+        for topic_id in topics:
+            batch.put_item(
+                Item={
+                    'subscriptionID': uuid.uuid4().hex,
+                    'topicID': topic_id,
+                    'subscriberID': subscriber_id
+                }
+            )
         

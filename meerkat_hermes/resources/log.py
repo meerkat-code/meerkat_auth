@@ -4,7 +4,7 @@ or to get a single
 """
 import uuid, boto3, json
 from flask_restful import Resource, reqparse
-from flask import Response current_app
+from flask import Response, current_app
 from boto3.dynamodb.conditions import Key, Attr
 from meerkat_hermes.authentication import require_api_key
 

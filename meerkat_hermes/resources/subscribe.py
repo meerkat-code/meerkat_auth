@@ -32,12 +32,13 @@ class Subscribe(Resource):
         Returns:
              The amazon dynamodb response.
         """
-
+        current_app.logger.warning('Get subcriber called.  subscriber_id: ' + subscriber_id )
         response = self.subscribers.get_item( 
             Key={
                 'id':subscriber_id
             }
         )
+        current_app.logger.warning( 'Response from dynamodb: ' + response )
         return Response( json.dumps( response ), 
                          status=response['ResponseMetadata']['HTTPStatusCode'],
                          mimetype='application/json' )

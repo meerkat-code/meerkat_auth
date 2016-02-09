@@ -3,10 +3,10 @@ This resource enables you to publish a message using given mediums to subscriber
 to given topics. It is expected to hbe the primary function of meerkat hermes. 
 """
 
-import uuid, boto3, uuid
+import uuid, boto3, uuid, json
 import meerkat_hermes.util as util
 from flask_restful import Resource, reqparse
-from flask import current_app, jsonify, Response
+from flask import current_app, Response
 from boto3.dynamodb.conditions import Key, Attr
 from meerkat_hermes.authentication import require_api_key
 

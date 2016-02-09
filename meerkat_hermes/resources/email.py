@@ -3,7 +3,7 @@ This resource provides a simple means of sending a given e-mail message to given
 """
 from flask_restful import Resource, reqparse
 import uuid, boto3, uuid, json
-from flask import current_app, Response, jsonify
+from flask import current_app, Response
 import meerkat_hermes.util as util
 from meerkat_hermes.authentication import require_api_key
 

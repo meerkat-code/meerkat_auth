@@ -4,9 +4,9 @@ the dynamodb tables "hermes_subscribers" and "hermes_subscriptions".  Conceptual
 subscribers, there are topics (in "hermes_topics" table), and there are subscriptions which map
 between subscribers and topics using their id fields.   
 """
-import uuid, boto3
+import uuid, boto3, json
 from flask_restful import Resource, reqparse
-from flask import current_app, jsonify
+from flask import current_app, Response
 from boto3.dynamodb.conditions import Key, Attr
 from meerkat_hermes.authentication import require_api_key
 

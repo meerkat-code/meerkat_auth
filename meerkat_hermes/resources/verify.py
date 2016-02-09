@@ -3,10 +3,10 @@ If the subscriber hasn't been verified, their subscriptions to different topics 
 created. This resource is used after a subscriber's details have been verified, to make their subscriptions
 active.
 """
-import uuid, boto3
+import uuid, boto3, json
 from flask_restful import Resource, reqparse
 import meerkat_hermes.util as util
-from flask import current_app, jsonify
+from flask import current_app, Response
 from boto3.dynamodb.conditions import Key, Attr
 from meerkat_hermes.authentication import require_api_key
 

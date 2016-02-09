@@ -52,6 +52,7 @@ class Subscribe(Resource):
             'email'* - The subscriber's email address (String)
             'sms' - The subscribers phone number for sms (String)
             'topics' - The ID's for the topics to which the subscriber wishes to subscribe ([String])
+            'verified' - Are their contact details verified? Defaults to False. (Bool)
 
         Returns:
             The amazon dynamodb response, with the assigned subscriber_id added.
@@ -77,9 +78,11 @@ class Subscribe(Resource):
             'last_name': args['last_name'],
             'email': args['email'],
             'topics': args['topics'] ,
-            'verified': args['verified']
         }
         if args['sms'] is not None: subscriber['sms'] = args['sms']
+        if args['verified'] is not None: subscriber['verified'] = args['verfied']
+        else subscriber['verified'] = False
+
         response = self.subscribers.put_item( Item=subscriber )
         response['subscriber_id'] = subscriber_id
  

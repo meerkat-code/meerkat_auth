@@ -20,7 +20,7 @@ class Config(object):
     API_KEY = "test-hermes"
 
 class Production(Config):
-    DEBUG = False
+    DEBUG = True
     TESTING = False
 
 class Development(Config):

@@ -38,7 +38,7 @@ class Subscribe(Resource):
                 'id':subscriber_id
             }
         )
-        return response, 200
+        return jsonify(response), 200
 
     def put(self):
         """
@@ -89,7 +89,7 @@ class Subscribe(Resource):
         if args['verified']:
             create_subscriptions( subscriber_id, args['topics'] )
 
-        return response, 200
+        return jsonify( response ), 200
 
     @require_api_key
     def delete(self, subscriber_id):
@@ -126,4 +126,4 @@ class Subscribe(Resource):
                     }
                 )       
         
-        return subscribers_response, 200
+        return jsonify(subscribers_response), 200

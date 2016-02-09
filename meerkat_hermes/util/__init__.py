@@ -21,7 +21,7 @@ def send_email(destination, subject, message, html):
 
     if( not html ):
         html = message
-
+    current_app.logger.warning('TESTING variable is currently: ' + str(current_app.config['TESTING']) )
     #If we are testing, use amazon mailbox simulators. 
     if current_app.config['TESTING']:
         destination = ['success@simulator.amazonses.com']

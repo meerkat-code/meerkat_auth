@@ -10,7 +10,7 @@ import boto3
 
 # Create the Flask app
 app = Flask(__name__)
-app.config.from_object('config.Development')
+app.config.from_object('config.Production')
 app.config.from_envvar('MEERKAT_HERMES_SETTINGS')
 api=Api(app)
 

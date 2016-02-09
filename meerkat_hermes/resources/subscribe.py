@@ -38,7 +38,7 @@ class Subscribe(Resource):
                 'id':subscriber_id
             }
         )
-        current_app.logger.warning( 'Response from dynamodb: ' + response )
+        current_app.logger.warning( 'Response from dynamodb: ' + str(response) )
         return Response( json.dumps( response ), 
                          status=response['ResponseMetadata']['HTTPStatusCode'],
                          mimetype='application/json' )

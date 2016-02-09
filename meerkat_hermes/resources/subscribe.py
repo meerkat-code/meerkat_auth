@@ -77,11 +77,11 @@ class Subscribe(Resource):
             'first_name': args['first_name'],
             'last_name': args['last_name'],
             'email': args['email'],
-            'topics': args['topics'] ,
+            'topics': args['topics']
         }
         if args['sms'] is not None: subscriber['sms'] = args['sms']
         if args['verified'] is not None: subscriber['verified'] = args['verfied']
-        else subscriber['verified'] = False
+        else: subscriber['verified'] = False
 
         response = self.subscribers.put_item( Item=subscriber )
         response['subscriber_id'] = subscriber_id

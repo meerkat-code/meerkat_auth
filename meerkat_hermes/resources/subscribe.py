@@ -6,7 +6,7 @@ between subscribers and topics using their id fields.
 """
 import uuid, boto3
 from flask_restful import Resource, reqparse
-from flask import current_app
+from flask import current_app, jsonify
 from boto3.dynamodb.conditions import Key, Attr
 from meerkat_hermes.authentication import require_api_key
 

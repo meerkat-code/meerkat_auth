@@ -6,7 +6,7 @@ to given topics. It is expected to hbe the primary function of meerkat hermes.
 import uuid, boto3, uuid
 import meerkat_hermes.util as util
 from flask_restful import Resource, reqparse
-from flask import current_app
+from flask import current_app, jsonify, Response
 from boto3.dynamodb.conditions import Key, Attr
 from meerkat_hermes.authentication import require_api_key
 
@@ -126,9 +126,15 @@ class Publish(Resource):
                 'time': util.get_date(),
                 'message': args['message']
             })
+
+            return Response( json.dumps( responses ), 
+                             status=200,
+                             mimetype='application/json' )
             
-            return responses, 200
 
         else:
             #If the message Id already exists, return with a 400 bad request response.
-            return "400 Bad Request: id already exists", 400
+            message = {"message":"400 Bad Request: id already exists"}
+            return Response( json.dumps( message ), 
+                             status=400,
+                             mimetype='application/json' )

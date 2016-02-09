@@ -50,6 +50,8 @@ def send_email(destination, subject, message, html):
     )
 
     response['SesMessageId'] = response.pop('MessageId')
+    response['Destination'] = destination
+
     return response
     
 def log_message( messageID, details ):

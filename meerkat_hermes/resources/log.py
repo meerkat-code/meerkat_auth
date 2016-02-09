@@ -36,9 +36,10 @@ class Log(Resource):
             }
         )
         if 'Item' in response:
-            return response, 200 
+            return Response( data=jsonify(response), status=200, mimetype="application/json" ) 
         else:
-            return "400 Bad Request: log_id doesn't exist", 400
+            message =  {"message":"400 Bad Request: log_id doesn't exist"}
+            return Response( data=jsonify(message), status=400, mimetype="application/json" ) 
 
     def delete(self, log_id):
         """
@@ -56,4 +57,6 @@ class Log(Resource):
             }
         )    
         
-        return log_response, 200
+        return Response( data=jsonify( log_response ), 
+                         status=response['responseMetaData']['HTTPStatusCode'],
+                         mimetype='application/json' )

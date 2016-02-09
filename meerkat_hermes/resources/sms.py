@@ -3,7 +3,7 @@ This resource provides a simple means of sending a given e-mail message to given
 """
 from flask_restful import Resource, reqparse
 import uuid, boto3, uuid
-from flask import current_app
+from flask import current_app, jsonify
 import meerkat_hermes.util as util
 from meerkat_hermes.authentication import require_api_key
 
@@ -44,4 +44,6 @@ class Sms(Resource):
             'message':args['message']
         })
             
-        return response, 200
+        return Response( json.dumps( response ), 
+                         status=200,
+                         mimetype='application/json' )

@@ -2,8 +2,8 @@
 This resource provides a simple means of sending a given e-mail message to given e-mail addresses.
 """
 from flask_restful import Resource, reqparse
-import uuid, boto3, uuid
-from flask import current_app
+import uuid, boto3, uuid, json
+from flask import current_app, Response, jsonify
 import meerkat_hermes.util as util
 from meerkat_hermes.authentication import require_api_key
 
@@ -57,5 +57,7 @@ class Email(Resource):
         })
 
         response['log_id'] = message_id
-            
-        return response, 200
+        
+        return Response( json.dumps( response ), 
+                         status=response['ResponseMetadata']['HTTPStatusCode'],
+                         mimetype='application/json' )

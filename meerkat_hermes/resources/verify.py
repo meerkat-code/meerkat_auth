@@ -6,7 +6,7 @@ active.
 import uuid, boto3
 from flask_restful import Resource, reqparse
 import meerkat_hermes.util as util
-from flask import current_app
+from flask import current_app, jsonify
 from boto3.dynamodb.conditions import Key, Attr
 from meerkat_hermes.authentication import require_api_key
 
@@ -62,10 +62,14 @@ class Verify(Resource):
                 }
             )
         
-            return "Subscriber verified", 200
+            message = { "message": "Subscriber verified" }
+            return Response( json.dumps( message ), 
+                             status=200,
+                             mimetype='application/json' )
 
         else:
-
-            return "400 Bad Request: Subscriber has already been verified.", 400
-
+            message = { "message":"400 Bad Request: Subscriber has already been verified." }
+            return Response( json.dumps( message ), 
+                             status=400,
+                             mimetype='application/json' )
 

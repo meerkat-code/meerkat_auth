@@ -38,7 +38,9 @@ class Subscribe(Resource):
                 'id':subscriber_id
             }
         )
-        return jsonify(response)
+        return Response( json.dumps( response ), 
+                         status=response['ResponseMetadata']['HTTPStatusCode'],
+                         mimetype='application/json' )
 
     def put(self):
         """
@@ -86,10 +88,12 @@ class Subscribe(Resource):
         response = self.subscribers.put_item( Item=subscriber )
         response['subscriber_id'] = subscriber_id
  
-        if args['verified']:
+        if subscriber['verified']:
             create_subscriptions( subscriber_id, args['topics'] )
 
-        return jsonify( response )
+        return Response( json.dumps( response ), 
+                         status=response['ResponseMetadata']['HTTPStatusCode'],
+                         mimetype='application/json' )
 
     @require_api_key
     def delete(self, subscriber_id):
@@ -125,5 +129,12 @@ class Subscribe(Resource):
                         'subscriptionID': record['subscriptionID']
                     }
                 )       
+
+        status = 500
+        if subscribers_response['responseMetaData']['HTTPStatusCode'] == 200:
+            if query_response['responseMetaData']['HTTPStatusCode'] == 200:
+                status = 200   
         
-        return jsonify(subscribers_response)
+        return Response( json.dumps( response ), 
+                         status=status,
+                         mimetype='application/json' )

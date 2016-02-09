@@ -30,6 +30,8 @@ class Email(Resource):
             The amazon SES response.
         """
 
+        current_app.logger.warning('Called email resource')
+
         #Define an argument parser for creating a valid email message.
         parser = reqparse.RequestParser()
         parser.add_argument('subject', required=True, type=str, help='The email subject')
@@ -47,6 +49,7 @@ class Email(Resource):
             args['html'] 
         )
 
+        current_app.logger.warning('Sent email: ' + str(response) )
         message_id = 'G'+uuid.uuid4().hex
 
         util.log_message( message_id, {

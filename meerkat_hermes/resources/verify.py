@@ -1,7 +1,8 @@
 """
 If the subscriber hasn't been verified, their subscriptions to different topics will not have been 
-created. This resource is used after a subscriber's details have been verified, to make their subscriptions
-active.
+created. This resource provides a generic means forcreating and storing verify codes (one at a time)
+that can be used to verify any communication medium. It is also used after a subscriber's details have
+been verified, to make their subscriptions active.
 """
 import uuid, boto3, json
 from flask_restful import Resource, reqparse
@@ -21,12 +22,83 @@ class Verify(Resource):
         self.subscribers = self.db.Table(current_app.config['SUBSCRIBERS'])
         self.subscriptions = self.db.Table(current_app.config['SUBSCRIPTIONS'])
 
+    def put(self):
+        """
+        Puts a new verify code into the verify attribute. This can then be checked using the 
+        post method and provides a generic means of verifying contact details for any communication medium. 
+
+        Put args:
+             subscriber_id - The ID for the subscriber who has been verified.
+             code - The new code to be stored with the subscriber
+        Returns:
+             The amazon dynamodb response.
+        """
+
+        #Define an argument parser for creating a valid email message.
+        parser = reqparse.RequestParser()
+        parser.add_argument('code', required=True, type=str, help='The new verify code')
+        parser.add_argument('subscriber_id', required=True, type=str, help='The subscriber\'s id')
+        args = parser.parse_args()
+
+        #Update the subscriber's verified field with the new verify code. 
+        response = self.subscribers.update_item(
+            Key={
+                'id':args['subscriber_id']
+            },
+            AttributeUpdates={
+                'verified':{
+                    'Value':args['code']
+                }
+            }
+        )
+
+        return Response( json.dumps(response),
+                         status=response['ResponseMetadata']['HTTPStatusCode'],
+                         mimetype='application/json' )
+
+    def post(self):
+        """
+        Given a verify code, this method returns a boolean saying whether the given code matches
+        the stored code. 
+   
+        Post args:
+             subscriber_id - The ID for the subscriber who has been verified.
+             code - The code to be checked. 
+        Returns:
+             The amazon dynamodb response.
+        """
+
+        #Define an argument parser for creating a valid email message.
+        parser = reqparse.RequestParser()
+        parser.add_argument('code', required=True, type=str, help='The code to be checked')
+        parser.add_argument('subscriber_id', required=True, type=str, help='The subscriber\'s id')
+        args = parser.parse_args()
+
+        #Get the stored verify code.  
+        response = self.subscribers.get_item(
+            Key={
+                'id':args['subscriber_id']
+            },
+            AttributesToGet=[
+               'verified'
+            ]
+        )
+
+        message = {'matched':False}
+        if response['Item']['verified'] == args['code']:
+            message['matched']=True
+
+        return Response( json.dumps(message),
+                         status=response['ResponseMetadata']['HTTPStatusCode'],
+                         mimetype='application/json' )
+
     def get(self, subscriber_id):
         """
         Creates the subscriptions and sets the subscriber's "verified" attribute to True. 
 
         Args:
              subscriber_id - The ID for the subscriber who has been verified. 
+
         Returns:
              The amazon dynamodb response.
         """

@@ -30,7 +30,7 @@ api.add_resource(Email, "/email")
 api.add_resource(Sms, "/sms")
 api.add_resource(Publish, "/publish")
 api.add_resource(Log, "/log/<string:log_id>")
-api.add_resource(Verify, "/verify/<string:subscriber_id>")
+api.add_resource(Verify, "/verify", "/verify/<string:subscriber_id>")
 
 #display something at /
 @app.route('/')

@@ -80,7 +80,7 @@ class Verify(Resource):
                 'id':args['subscriber_id']
             },
             AttributesToGet=[
-               'verified'
+               'code'
             ]
         )
 

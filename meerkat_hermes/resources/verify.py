@@ -46,7 +46,7 @@ class Verify(Resource):
                 'id':args['subscriber_id']
             },
             AttributeUpdates={
-                'verified':{
+                'code':{
                     'Value':args['code']
                 }
             }
@@ -84,13 +84,20 @@ class Verify(Resource):
             ]
         )
 
-        message = {'matched':False}
-        if response['Item']['verified'] == args['code']:
-            message['matched']=True
+        
+        if 'code' in response['Item']:
+            message = {'matched':False}
+            if response['Item']['code'] == args['code']:
+                message['matched']=True
+            return Response( json.dumps(message),
+                             status=response['ResponseMetadata']['HTTPStatusCode'],
+                             mimetype='application/json' )
+        else:
+            return Response( json.dumps({'message':'400 Bad Request: Verification code not set'}),
+                             status=400,
+                             mimetype='application/json' )
 
-        return Response( json.dumps(message),
-                         status=response['ResponseMetadata']['HTTPStatusCode'],
-                         mimetype='application/json' )
+        
 
     def get(self, subscriber_id):
         """

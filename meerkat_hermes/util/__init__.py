@@ -1,4 +1,4 @@
-import boto3, urllib, datetime, time, json
+import uuid, boto3, urllib, datetime, time, json
 from flask import current_app
 
 def send_email(destination, subject, message, html):

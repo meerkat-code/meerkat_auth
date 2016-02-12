@@ -9,6 +9,7 @@ from flask_restful import Resource, reqparse
 from flask import current_app, Response
 from boto3.dynamodb.conditions import Key, Attr
 from meerkat_hermes.authentication import require_api_key
+import meerkat_hermes.util as util
 
 #The Subscriber resource has just two methods - to create a new user and to deleted an existing user.
 
@@ -90,7 +91,7 @@ class Subscribe(Resource):
         response['subscriber_id'] = subscriber_id
  
         if subscriber['verified']:
-            create_subscriptions( subscriber_id, args['topics'] )
+            util.create_subscriptions( subscriber_id, args['topics'] )
 
         return Response( json.dumps( response ), 
                          status=response['ResponseMetadata']['HTTPStatusCode'],

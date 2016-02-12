@@ -124,9 +124,9 @@ class Verify(Resource):
         )
 
         current_app.logger.warning( "Exists: "+str(exists) )
-        current_app.logger.warning( "Verified: " + str(subscriber['Item']) )
+        current_app.logger.warning( "Verified: " + str(subscriber['Item']['verified']) )
 
-        if not (exists['Items'] or subscriber['Item']['Verfied']): 
+        if not (exists['Items'] or subscriber['Item']['verfied']): 
 
             topics = subscriber['Item']['topics']
 

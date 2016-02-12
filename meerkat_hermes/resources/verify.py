@@ -123,9 +123,6 @@ class Verify(Resource):
             }
         )
 
-        current_app.logger.warning( "Exists: "+str(exists) )
-        current_app.logger.warning( "Verified: " + str(subscriber['Item']['verified']) )
-
         if not (exists['Items'] or subscriber['Item']['verified']): 
 
             topics = subscriber['Item']['topics']
@@ -133,14 +130,17 @@ class Verify(Resource):
             #Create the subscriptions
             util.create_subscriptions( subscriber_id, topics )
 
-            #Update the verified field.
+            #Update the verified field and delete the code attribute.
             self.subscribers.update_item(
                 Key={
                     'id': subscriber_id
                 },
-                UpdateExpression='SET verified = :val1',
-                ExpressionAttributeValues={
-                    ':val1': True
+                AttributeUpdates={
+                'verified':{
+                    'Value':True
+                }
+                'code':{
+                    'Action':'DELETE'
                 }
             )
         

@@ -20,7 +20,8 @@ def send_email(destination, subject, message, html):
     client = boto3.client('ses')
 
     if( not html ):
-        html = message
+        html = message.replace( '\n', '<br />' )
+
     current_app.logger.warning('TESTING variable is currently: ' + str(current_app.config['TESTING']) )
     #If we are testing, use amazon mailbox simulators. 
     if current_app.config['TESTING']:

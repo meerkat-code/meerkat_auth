@@ -138,7 +138,7 @@ class Verify(Resource):
                 AttributeUpdates={
                 'verified':{
                     'Value':True
-                }
+                },
                 'code':{
                     'Action':'DELETE'
                 }

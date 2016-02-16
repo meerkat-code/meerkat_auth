@@ -1,5 +1,6 @@
 import uuid, boto3, urllib, datetime, time, json
-from flask import current_app
+from flask import current_app, Response
+from boto3.dynamodb.conditions import Key, Attr
 
 def send_email(destination, subject, message, html):
     """
@@ -69,7 +70,7 @@ def log_message( messageID, details ):
         The Amazon DynamoDB response.
     """ 
     db = boto3.resource('dynamodb')
-    table = db.Table('hermes_log')
+    table = db.Table(current_app.config['LOG'])
 
     details['id'] = messageID
     response = table.put_item( Item=details )
@@ -133,7 +134,7 @@ def id_valid( messageID ):
     Returns:
         Boolean - True for a valid message ID, false for one that has already been logged.
     """
-    table = boto3.resource('dynamodb').Table('hermes_log')
+    table = boto3.resource('dynamodb').Table(current_app.config['LOG'])
     response = table.get_item( 
         Key={
             'id':messageID
@@ -162,7 +163,7 @@ def replace_keywords( message, subscriber ):
 def create_subscriptions( subscriber_id, topics ):
 
     db = boto3.resource('dynamodb')
-    table = db.Table('hermes_subscriptions')
+    table = db.Table(current_app.config['SUBSCRIPTIONS'])
 
     with table.batch_writer() as batch:
         for topic_id in topics:
@@ -173,4 +174,56 @@ def create_subscriptions( subscriber_id, topics ):
                     'subscriberID': subscriber_id
                 }
             )
-        
+
+def delete_subscriber(subscriber_id):
+    """
+    Delete a subscriber from the database. At the moment, if a user wishes to change
+    information, they need to delete themselves and then re-add themselves with the
+    new information.
+
+    Args:
+         subscriber_id
+    Returns:
+         The amazon dynamodb response.
+    """
+
+    db = boto3.resource('dynamodb')
+    subscribers = db.Table(current_app.config['SUBSCRIBERS'])
+    subscriptions = db.Table(current_app.config['SUBSCRIPTIONS'])
+
+    subscribers_response = subscribers.delete_item( 
+        Key={
+            'id':subscriber_id
+        }
+    )
+
+    #dynamoDB doesn't currently support deletions by secondary indexes (it may appear in the future). 
+    #Deleteing by subscriber index is therefore a two hop process.
+    #(1) Query for the primary key values i.e.topicID (2) Using topicID's, batch delete the records.
+    query_response = subscriptions.query(
+        IndexName='subscriberID-index',
+        KeyConditionExpression=Key('subscriberID').eq(subscriber_id)
+    )
+
+    with subscriptions.batch_writer() as batch:
+        for record in query_response['Items']:
+            batch.delete_item(
+                Key={ 
+                   'subscriptionID': record['subscriptionID']
+                }
+            )       
+
+    
+    status = 200   
+    response = "<html><body><H2>You have been successfully unsubscribed.</H2></body</html>"
+    mimetype = 'text/html'
+
+    if not subscribers_response['ResponseMetadata']['HTTPStatusCode'] == 200:
+        if not query_response['ResponseMetadata']['HTTPStatusCode'] == 200:
+            status = 500
+            response = "{'message':'500 Internal Server Error: Unable to complete deletion.'}"
+            mimetype = 'application/json'
+
+    return Response( response, 
+                     status=status,
+                     mimetype=mimetype ) 

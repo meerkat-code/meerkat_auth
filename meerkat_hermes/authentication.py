@@ -11,17 +11,12 @@ def require_api_key(f):
     @wraps(f)
     def decorated(*args, **kwargs):
 
-        app.logger.warning( "request data: " + str(request.data.decode('UTF-8')) )
-
         if request.data:
            key = json.loads(request.data.decode('UTF-8'))['api_key']
         else:
            key = request.args.get('api_key')
 
-        app.logger.warning( "Key = " + str(key) )
-
-        if( key == app.config["API_KEY"] or 
-            app.config["API_KEY"] == "" ):
+        if( key == app.config["API_KEY"] or app.config["API_KEY"] == "" ):
             return f(*args, **kwargs)
         else:
             app.logger.warning("Unauthorized address trying to use API: {}".format(request.remote_addr))

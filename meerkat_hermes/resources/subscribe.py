@@ -7,7 +7,6 @@ between subscribers and topics using their id fields.
 import uuid, boto3, json
 from flask_restful import Resource, reqparse
 from flask import current_app, Response
-from boto3.dynamodb.conditions import Key, Attr
 from meerkat_hermes.authentication import require_api_key
 import meerkat_hermes.util as util
 
@@ -100,9 +99,7 @@ class Subscribe(Resource):
     @require_api_key
     def delete(self, subscriber_id):
         """
-        Delete a subscriber from the database. At the moment, if a user wishes to change
-        information, they need to delete themselves and then re-add themselves with the
-        new information.
+        Delete a subscriber from the database.
 
         Args:
              subscriber_id
@@ -110,33 +107,4 @@ class Subscribe(Resource):
              The amazon dynamodb response.
         """
 
-        subscribers_response = self.subscribers.delete_item( 
-            Key={
-                'id':subscriber_id
-            }
-        )
-
-        #dynamoDB doesn't currently support deletions by secondary indexes (it may appear in the future). 
-        #Deleteing by subscriber index is therefore a two hop process.
-        #(1) Query for the primary key values i.e.topicID (2) Using topicID's, batch delete the records.
-        query_response = self.subscriptions.query(
-            IndexName='subscriberID-index',
-            KeyConditionExpression=Key('subscriberID').eq(subscriber_id)
-        )
-
-        with self.subscriptions.batch_writer() as batch:
-            for record in query_response['Items']:
-                batch.delete_item(
-                    Key={ 
-                        'subscriptionID': record['subscriptionID']
-                    }
-                )       
-
-        status = 500
-        if subscribers_response['responseMetaData']['HTTPStatusCode'] == 200:
-            if query_response['responseMetaData']['HTTPStatusCode'] == 200:
-                status = 200   
-        
-        return Response( json.dumps( response ), 
-                         status=status,
-                         mimetype='application/json' )
+        return util.delete_subscriber( subscriber_id )

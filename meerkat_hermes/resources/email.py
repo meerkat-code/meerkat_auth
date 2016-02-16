@@ -14,6 +14,11 @@ class Email(Resource):
     #Require authentication
     decorators = [require_api_key]
 
+    def __init__(self):
+        #Load the database and tables, upon object creation. 
+        db = boto3.resource('dynamodb')
+        self.subscribers = db.Table(current_app.config['SUBSCRIBERS'])
+
     def put(self):
         """
         Send an email with Amazon SES. 
@@ -23,7 +28,8 @@ class Email(Resource):
         PUT args:
             'subject'* - The e-mail subject (String)
             'message'* - The e-mail message (String)
-            'email'* - The destination address/es for the e-mail (String)
+            'email' - The destination address/es for the e-mail (String)
+            'subscriber_id' - The destination subscriber/s for the e-mail (String)
             'html' - The html version of the message, will default to the same as 'message' (String)
 
         Returns:
@@ -36,12 +42,33 @@ class Email(Resource):
         parser = reqparse.RequestParser()
         parser.add_argument('subject', required=True, type=str, help='The email subject')
         parser.add_argument('message', required=True, type=str, help='The message to be sent')
-        parser.add_argument('email', required=True, action='append', type=str, 
+        parser.add_argument('email', required=False, action='append', type=str, 
                             help='The destination address')
+        parser.add_argument('subscriber_id', required=False, action='append', type=str, 
+                            help='The destination subscriber id')
         parser.add_argument('html', required=False, type=str, 
                             help='If applicable, the message in html')
-
         args = parser.parse_args()
+
+        current_app.logger.warning( 'Args are: ' + str(args) )
+
+        #If no email is given, look at the subscriber ids and find their emails. 
+        if args['email'] is None:
+            #If the caller has made a mistake and not provided any destination, throw an error.
+            if args['subscriber_id'] is None:
+                return Response( "{'message':'404 Bad Request: No destination specified.'}",
+                                 status=404,
+                                 mimetype='application/json' )
+            else:
+                args['email'] = []
+                for subscriber_id in args['subscriber_id']: 
+                    response = self.subscribers.get_item(
+                        Key={
+                           'id':subscriber_id
+                        }
+                    )
+                    args['email'].append( response['Item']['email'] )   
+
         response = util.send_email( 
             args['email'], 
             args['subject'], 

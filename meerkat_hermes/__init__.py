@@ -22,6 +22,7 @@ from meerkat_hermes.resources.sms import Sms
 from meerkat_hermes.resources.publish import Publish
 from meerkat_hermes.resources.log import Log
 from meerkat_hermes.resources.verify import Verify
+from meerkat_hermes.resources.unsubscribe import Unsubscribe
 from meerkat_hermes.authentication import require_api_key
 
 # Add the API  resources.
@@ -31,6 +32,7 @@ api.add_resource(Sms, "/sms")
 api.add_resource(Publish, "/publish")
 api.add_resource(Log, "/log/<string:log_id>")
 api.add_resource(Verify, "/verify", "/verify/<string:subscriber_id>")
+api.add_resource(Unsubscribe, "/unsubscribe/<string:subscriber_id>")
 
 #display something at /
 @app.route('/')

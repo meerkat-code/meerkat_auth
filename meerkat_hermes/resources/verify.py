@@ -136,12 +136,13 @@ class Verify(Resource):
                     'id': subscriber_id
                 },
                 AttributeUpdates={
-                'verified':{
-                    'Value':True
-                },
-                'code':{
-                    'Action':'DELETE'
-                }
+				       'verified':{
+				           'Value':True
+				       },
+				       'code':{
+				           'Action':'DELETE'
+				       }
+					}
             )
         
             message = { "message": "Subscriber verified" }

@@ -53,8 +53,10 @@ class Publish(Resource):
                             help='The topics to publish to.')
         parser.add_argument('medium', required=False, action='append', type=str, 
                             help='The mediums by which to send the message.')
-        parser.add_argument('html', required=False, type=str, 
+        parser.add_argument('html-message', required=False, type=str, 
                             help='If applicable, the message in html')
+        parser.add_argument('sms-message', required=False, type=str, 
+                            help='If applicable, the seperate sms message')
         parser.add_argument('subject', required=False, type=str, help='The email subject')
         parser.add_argument('from', required=False, type=str, 
                             help='The address from which to send the message')
@@ -100,10 +102,8 @@ class Publish(Resource):
 
                 #Enable mail merging on subscriber attributes.
                 message = util.replace_keywords( args['message'], subscriber )
-                if 'sms-message' in args:
-                    sms_message = util.replace_keywords( args['sms-message'], subscriber )
-                if 'html-message' in args:
-                    html_message = util.replace_keywords( args['html-message'], subscriber )
+                sms_message = util.replace_keywords( args['sms-message'], subscriber )
+                html_message = util.replace_keywords( args['html-message'], subscriber )
 
                 #Assemble and send the messages for each medium.
                 for medium in args['medium']: 

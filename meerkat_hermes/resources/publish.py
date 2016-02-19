@@ -93,19 +93,23 @@ class Publish(Resource):
 
             #Send the messages to each subscriber.     
             for subscriber_id in subscribers:    
+
                 #Get subscriber's details.        
                 subscriber = self.subscribers.get_item(
                     Key={ 'id':subscriber_id }
                 )['Item']
     
-                current_app.logger.warning("Processing subscriber" + str(subscriber))
+                #Create some variables to hold the mailmerged messages.
+                message = args['message']
+                sms_message = args['sms_message']
+                html_message = args['html_message']
 
                 #Enable mail merging on subscriber attributes.
-                message = util.replace_keywords( args['message'], subscriber )
+                message = util.replace_keywords( message, subscriber )
                 if args['sms-message']: 
-                    sms_message = util.replace_keywords( args['sms-message'], subscriber )
+                    sms_message = util.replace_keywords( sms_message, subscriber )
                 if args['html-message']:
-                    html_message = util.replace_keywords( args['html-message'], subscriber )
+                    html_message = util.replace_keywords( html_message, subscriber )
 
                 #Assemble and send the messages for each medium.
                 for medium in args['medium']: 

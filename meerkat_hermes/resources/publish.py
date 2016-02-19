@@ -87,7 +87,7 @@ class Publish(Resource):
             #Record details about the sent messages.
             responses = []
             destinations = []
-            s= []
+            s = []
 
             #Send the messages to each subscriber.     
             for subscriber_id in subscribers:    
@@ -96,10 +96,14 @@ class Publish(Resource):
                     Key={ 'id':subscriber_id }
                 )['Item']
     
+                current_app.logger.warning("Processing subscriber" + str(subscriber))
+
                 #Enable mail merging on subscriber attributes.
                 message = util.replace_keywords( args['message'], subscriber )
-                sms_message = util.replace_keywords( args['sms-message'], subscriber )
-                html_message = util.replace_keywords( args['html-message'], subscriber )
+                if 'sms-message' in args:
+                    sms_message = util.replace_keywords( args['sms-message'], subscriber )
+                if 'html-message' in args:
+                    html_message = util.replace_keywords( args['html-message'], subscriber )
 
                 #Assemble and send the messages for each medium.
                 for medium in args['medium']: 

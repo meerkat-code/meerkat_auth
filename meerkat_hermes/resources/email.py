@@ -51,6 +51,7 @@ class Email(Resource):
                             help='If applicable, the message in html')
         parser.add_argument('from', required=False, type=str, 
                             help='The address from which to send the message')
+        args = parser.parse_args()
 
         current_app.logger.warning( 'Args are: ' + str(args) )
 

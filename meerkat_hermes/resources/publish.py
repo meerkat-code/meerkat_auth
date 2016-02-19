@@ -102,8 +102,10 @@ class Publish(Resource):
 
                 #Enable mail merging on subscriber attributes.
                 message = util.replace_keywords( args['message'], subscriber )
-                sms_message = util.replace_keywords( args['sms-message'], subscriber )
-                html_message = util.replace_keywords( args['html-message'], subscriber )
+                if args['sms-message']: 
+                    sms_message = util.replace_keywords( args['sms-message'], subscriber )
+                if args['html-message']:
+                    html_message = util.replace_keywords( args['html-message'], subscriber )
 
                 #Assemble and send the messages for each medium.
                 for medium in args['medium']: 

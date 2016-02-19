@@ -101,8 +101,8 @@ class Publish(Resource):
     
                 #Create some variables to hold the mailmerged messages.
                 message = args['message']
-                sms_message = args['sms_message']
-                html_message = args['html_message']
+                sms_message = args['sms-message']
+                html_message = args['html-message']
 
                 #Enable mail merging on subscriber attributes.
                 message = util.replace_keywords( message, subscriber )

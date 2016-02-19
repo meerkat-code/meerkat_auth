@@ -80,7 +80,7 @@ class Email(Resource):
             args['subject'], 
             args['message'], 
             args['html'],
-            from=args['from']
+            sender=args['from']
         )
 
         current_app.logger.warning('Sent email: ' + str(response) )

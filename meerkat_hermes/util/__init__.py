@@ -2,7 +2,7 @@ import uuid, boto3, urllib, datetime, time, json
 from flask import current_app, Response
 from boto3.dynamodb.conditions import Key, Attr
 
-def send_email(destination, subject, message, html, from=current_app.config['SENDER']):
+def send_email(destination, subject, message, html, sender=current_app.config['SENDER']):
     """
     Sends an email using Amazon SES. 
        
@@ -11,7 +11,9 @@ def send_email(destination, subject, message, html, from=current_app.config['SEN
         subject*     - The email subject. (Str)
         message*     - The message to be sent. (Str)
         html         - The html version of the message to be sent. (Str)
-                       Defaults to the same as 'message' 
+                       Defaults to the same as 'message'
+        sender       - The sender's address. Must be an AWS SES verified email address.
+                       Defaults to the config file SENDER value. 
 
     Returns:
         The Amazon SES response.
@@ -29,7 +31,7 @@ def send_email(destination, subject, message, html, from=current_app.config['SEN
         destination = ['success@simulator.amazonses.com']
 
     response = client.send_email( 
-        Source = from,
+        Source = sender,
         Destination = {
             'ToAddresses':destination
         },      

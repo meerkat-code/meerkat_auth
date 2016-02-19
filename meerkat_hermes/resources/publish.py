@@ -110,7 +110,7 @@ class Publish(Resource):
                             args['subject'],
                             message,
                             html_message,
-                            from=args['from']
+                            sender=args['from']
                         )
                         temp['type'] = 'email'
                         temp['message']=message

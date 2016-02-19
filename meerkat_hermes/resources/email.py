@@ -31,6 +31,7 @@ class Email(Resource):
             'email' - The destination address/es for the e-mail (String)
             'subscriber_id' - The destination subscriber/s for the e-mail (String)
             'html' - The html version of the message, will default to the same as 'message' (String)
+            'from' - The sender's address. Defaults to the config value SENDER. (String)
 
         Returns:
             The amazon SES response.
@@ -48,7 +49,8 @@ class Email(Resource):
                             help='The destination subscriber id')
         parser.add_argument('html', required=False, type=str, 
                             help='If applicable, the message in html')
-        args = parser.parse_args()
+        parser.add_argument('from', required=False, type=str, 
+                            help='The address from which to send the message')
 
         current_app.logger.warning( 'Args are: ' + str(args) )
 
@@ -69,11 +71,16 @@ class Email(Resource):
                     )
                     args['email'].append( response['Item']['email'] )   
 
+        #Set the from field to the config SENDER value if no from field is supplied.
+        if not args['from']: 
+            args['from'] = current_app.config['SENDER']
+
         response = util.send_email( 
             args['email'], 
             args['subject'], 
             args['message'], 
-            args['html'] 
+            args['html'],
+            from=args['from']
         )
 
         current_app.logger.warning('Sent email: ' + str(response) )

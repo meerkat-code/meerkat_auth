@@ -56,16 +56,22 @@ class Publish(Resource):
         parser.add_argument('html', required=False, type=str, 
                             help='If applicable, the message in html')
         parser.add_argument('subject', required=False, type=str, help='The email subject')
+        parser.add_argument('from', required=False, type=str, 
+                            help='The address from which to send the message')
         args = parser.parse_args()
 
         #Check that the message hasn't already been sent.
         if util.id_valid( args['id'] ):
 
             #Set the default values for the non-required fields.
-            if 'medium' not in args: args['medium'] = ['email']
-            if 'html-message' not in args: args['html-message'] = args['message']
-            if 'sms-message' not in args: args['sms-message'] = args['message']
-            if 'subject' not in args: args['subject'] = ''
+            if not ['medium']: 
+                args['medium'] = ['email']
+            if not ['html-message']:
+                args['html-message'] = args['message']
+            if not ['sms-message']:
+                args['sms-message'] = args['message']
+            if not args['from']: 
+                args['from'] = current_app.config['SENDER']
     
             #Collect the subscriber IDs for all subscriptions to the given topics.
             subscribers = []
@@ -103,7 +109,8 @@ class Publish(Resource):
                             [subscriber['email']],
                             args['subject'],
                             message,
-                            html_message
+                            html_message,
+                            from=args['from']
                         )
                         temp['type'] = 'email'
                         temp['message']=message

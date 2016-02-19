@@ -2,7 +2,7 @@ import uuid, boto3, urllib, datetime, time, json
 from flask import current_app, Response
 from boto3.dynamodb.conditions import Key, Attr
 
-def send_email(destination, subject, message, html):
+def send_email(destination, subject, message, html, from=current_app.config['SENDER']):
     """
     Sends an email using Amazon SES. 
        
@@ -29,7 +29,7 @@ def send_email(destination, subject, message, html):
         destination = ['success@simulator.amazonses.com']
 
     response = client.send_email( 
-        Source = current_app.config['SENDER'],
+        Source = from,
         Destination = {
             'ToAddresses':destination
         },      

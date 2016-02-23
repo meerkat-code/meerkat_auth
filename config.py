@@ -13,7 +13,7 @@ class Config(object):
     SUBSCRIPTIONS = 'hermes_subscriptions'
     LOG = 'hermes_log'
 
-    SENDER = 'jonathan.s.berry@googlemail.com'
+    SENDER = 'notifications@emro.info'
     CHARSET = 'UTF-8'
     FROM = 'Meerkat'
 

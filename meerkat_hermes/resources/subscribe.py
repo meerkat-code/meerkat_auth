@@ -53,6 +53,7 @@ class Subscribe(Resource):
             'first_name'* - The subscriber's first name (String)
             'last_name'* - The subscriber's last name (String)
             'email'* - The subscriber's email address (String)
+			'country'* - The country that the subscriber has signed up to (String)
             'sms' - The subscribers phone number for sms (String)
             'topics' - The ID's for the topics to which the subscriber wishes to subscribe ([String])
             'verified' - Are their contact details verified? Defaults to False. (Bool)
@@ -66,6 +67,7 @@ class Subscribe(Resource):
         parser.add_argument('first_name', required=True, type=str, help='First name of the subscriber')
         parser.add_argument('last_name', required=True, type=str, help='Last name of the subscriber')
         parser.add_argument('email', required=True, type=str, help='Email address of the subscriber')
+        parser.add_argument('country', required=True, type=str, help='Country subscribed to')
         parser.add_argument('sms', required=False, type=str, help='Mobile phone number of the subscriber')
         parser.add_argument('verified', required=False, type=bool, help='Are the contact details verified?')
         parser.add_argument('topics', action='append', required=True, 
@@ -79,6 +81,7 @@ class Subscribe(Resource):
             'id': subscriber_id,
             'first_name': args['first_name'],
             'last_name': args['last_name'],
+            'country': args['country'],
             'email': args['email'],
             'topics': args['topics']
         }

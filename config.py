@@ -13,9 +13,9 @@ class Config(object):
     SUBSCRIPTIONS = 'hermes_subscriptions'
     LOG = 'hermes_log'
 
-    SENDER = 'Public Health Surveillance Notifications <notifications@emro.info>'
+    SENDER = 'Notifications <notifications@emro.info>'
     CHARSET = 'UTF-8'
-    FROM = 'Meerkat'
+    FROM = 'Notifications'
 
     API_KEY = "test-hermes"
 

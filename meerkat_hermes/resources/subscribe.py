@@ -89,7 +89,7 @@ class Subscribe(Resource):
         if args['verified'] is not None: subscriber['verified'] = args['verfied']
         else: subscriber['verified'] = False
 
-		current_app.logger.warning( "Adding subscriber:\n" + str(subscriber) )
+        current_app.logger.warning( "Adding subscriber:\n" + str(subscriber) )
 
         response = self.subscribers.put_item( Item=subscriber )
         response['subscriber_id'] = subscriber_id

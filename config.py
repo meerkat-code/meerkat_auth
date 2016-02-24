@@ -15,7 +15,7 @@ class Config(object):
 
     SENDER = 'Notifications <notifications@emro.info>'
     CHARSET = 'UTF-8'
-    FROM = 'Notifications'
+    FROM = 'Meerkat'
 
     API_KEY = "test-hermes"
 

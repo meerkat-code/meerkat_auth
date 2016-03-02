@@ -40,6 +40,9 @@ class Publish(Resource):
             'sms-message' - The sms version of the message. Defaults to the same as 'message'
             'html-message'- The html version of the message. Defaults to the same as 'message'
             'subject'     - The e-mail subject. Defaults to "".
+            'from'        - The address from which to send the message. 
+                            Deafults to an emro address stored in the config.
+    
  
         Returns:
             The amazon SES response.
@@ -61,6 +64,8 @@ class Publish(Resource):
         parser.add_argument('from', required=False, type=str, 
                             help='The address from which to send the message')
         args = parser.parse_args()
+        
+        current_app.logger.warning( args['medium'] )
 
         #Check that the message hasn't already been sent.
         if util.id_valid( args['id'] ):

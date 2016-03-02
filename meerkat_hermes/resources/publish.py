@@ -143,6 +143,8 @@ class Publish(Resource):
                         temp['message']=sms_message
                         responses.append( temp )  
                         destinations.append( subscriber['sms'] )                             
+            
+            current_app.warning.logger( str(args['id']) )
 
             util.log_message( args['id'], {
                 'destination': destinations, 

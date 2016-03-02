@@ -71,13 +71,13 @@ class Publish(Resource):
         if util.id_valid( args['id'] ):
 
             #Set the default values for the non-required fields.
-            if not args['medium'] or args['medium'] is None: 
+            if not args['medium']: 
                 args['medium'] = ['email']
-            if not ['html-message'] or args['html-message'] is None:
+            if not args['html-message']:
                 args['html-message'] = args['message']
-            if not ['sms-message'] or args['sms-message'] is None:
+            if not args['sms-message']:
                 args['sms-message'] = args['message']
-            if not args['from'] or args['from'] is None: 
+            if not args['from']: 
                 args['from'] = current_app.config['SENDER']
     
             current_app.logger.warning( "After: " + args['medium'] )

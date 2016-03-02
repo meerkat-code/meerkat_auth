@@ -71,7 +71,7 @@ class Publish(Resource):
         if util.id_valid( args['id'] ):
 
             #Set the default values for the non-required fields.
-            if not ['medium']: 
+            if not args['medium']: 
                 args['medium'] = ['email']
             if not ['html-message']:
                 args['html-message'] = args['message']
@@ -80,6 +80,8 @@ class Publish(Resource):
             if not args['from']: 
                 args['from'] = current_app.config['SENDER']
     
+            current_app.logger.warning( args['medium'] )
+
             #Collect the subscriber IDs for all subscriptions to the given topics.
             subscribers = []
            

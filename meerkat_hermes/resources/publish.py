@@ -144,7 +144,7 @@ class Publish(Resource):
                         responses.append( temp )  
                         destinations.append( subscriber['sms'] )                             
             
-            current_app.warning.logger( str(args['id']) )
+            current_app.logger.warning( str(args['id']) )
 
             util.log_message( args['id'], {
                 'destination': destinations, 

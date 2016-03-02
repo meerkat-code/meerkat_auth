@@ -150,7 +150,7 @@ class Publish(Resource):
                 'destination': destinations, 
                 'medium': args['medium'], 
                 'time': util.get_date(),
-                'message': ""
+                'message': "Published to: " + str(args['topics'])
             })
 
             return Response( json.dumps( responses ), 

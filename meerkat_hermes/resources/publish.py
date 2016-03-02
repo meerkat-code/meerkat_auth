@@ -65,7 +65,7 @@ class Publish(Resource):
                             help='The address from which to send the message')
         args = parser.parse_args()
         
-        current_app.logger.warning( args['medium'] )
+        current_app.logger.warning( "Before defaults set: " + args['medium'] )
 
         #Check that the message hasn't already been sent.
         if util.id_valid( args['id'] ):
@@ -80,7 +80,7 @@ class Publish(Resource):
             if not args['from'] or args['from'] is None: 
                 args['from'] = current_app.config['SENDER']
     
-            current_app.logger.warning( args['medium'] )
+            current_app.logger.warning( "After: " + args['medium'] )
 
             #Collect the subscriber IDs for all subscriptions to the given topics.
             subscribers = []

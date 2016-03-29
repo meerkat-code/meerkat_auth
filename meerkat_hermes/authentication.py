@@ -20,7 +20,8 @@ def require_api_key(f):
         if( key == app.config["API_KEY"] or app.config["API_KEY"] == "" ):
             return f(*args, **kwargs)
         else:
-            app.logger.warning("Unauthorized address trying to use API: {}".format(request.remote_addr))
+            app.logger.warning("Unauthorized address trying to use API: {}".format(request.remote_addr) + 
+                               "\nwith api key: " + key)
             abort(401)
     
     return decorated

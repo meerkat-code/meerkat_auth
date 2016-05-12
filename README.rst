@@ -11,4 +11,4 @@ Meerkat Hermes
             ;, ,     \
 
 
-Meerkat Heremes is the messaging module for the meerkat helath surveillance project. It provides means for distributing alert notifications, reports and other automatically generated messages.  
+The messaging module for the project, providing the means to distribute alert notifications, reports and other automatically generated messages.  

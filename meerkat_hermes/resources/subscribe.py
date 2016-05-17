@@ -28,7 +28,7 @@ class Subscribe(Resource):
         Get a subscriber's info from the database. 
 
         Args:
-             subscriber_id - The ID for the desired subscriber. 
+             subscriber_id (str): The ID for the desired subscriber. 
         Returns:
              The amazon dynamodb response.
         """
@@ -38,7 +38,6 @@ class Subscribe(Resource):
                 'id':subscriber_id
             }
         )
-        current_app.logger.warning( 'Response from dynamodb: ' + str(response) )
         return Response( json.dumps( response ), 
                          status=response['ResponseMetadata']['HTTPStatusCode'],
                          mimetype='application/json' )
@@ -47,16 +46,18 @@ class Subscribe(Resource):
         """
         Add a new subscriber. Parse the given arguments to check it is a valid subscriber.
         Assign the subscriber a uuid in hex that is used to identify the subscriber when
-        wishing to delete it.
+        wishing to delete it.  Does not use the subscriber_id argument.
 
-        PUT Args:
-            'first_name'* - The subscriber's first name (String)
-            'last_name'* - The subscriber's last name (String)
-            'email'* - The subscriber's email address (String)
-			'country'* - The country that the subscriber has signed up to (String)
-            'sms' - The subscribers phone number for sms (String)
-            'topics' - The ID's for the topics to which the subscriber wishes to subscribe ([String])
-            'verified' - Are their contact details verified? Defaults to False. (Bool)
+        Arguments are passed in the request data.
+
+        Args:
+            first_name (str): Required. The subscriber's first name.\n
+            last_name (str): Required. The subscriber's last name.\n
+            email (str): Required. The subscriber's email address.\n
+            country (str): Required. The country that the subscriber has signed up to.\n
+            sms (str): The subscribers phone number for sms.\n
+            topics ([str]): Required. The ID's for the topics to which the subscriber wishes to subscribe.\n
+            verified (bool): Are their contact details verified? Defaults to False. 
 
         Returns:
             The amazon dynamodb response, with the assigned subscriber_id added.
@@ -73,8 +74,6 @@ class Subscribe(Resource):
         parser.add_argument('topics', action='append', required=True, 
                             type=str, help='List of topic IDs the subscriber wishes to subscribe to')
 
-        current_app.logger.warning( "Subcribe PUT called" )
-
         args = parser.parse_args()
         subscriber_id = uuid.uuid4().hex
         subscriber = {
@@ -86,10 +85,8 @@ class Subscribe(Resource):
             'topics': args['topics']
         }
         if args['sms'] is not None: subscriber['sms'] = args['sms']
-        if args['verified'] is not None: subscriber['verified'] = args['verfied']
+        if args['verified'] is not None: subscriber['verified'] = args['verified']
         else: subscriber['verified'] = False
-
-        current_app.logger.warning( "Adding subscriber:\n" + str(subscriber) )
 
         response = self.subscribers.put_item( Item=subscriber )
         response['subscriber_id'] = subscriber_id
@@ -107,7 +104,7 @@ class Subscribe(Resource):
         Delete a subscriber from the database.
 
         Args:
-             subscriber_id
+             subscriber_id (str): The ID for the subscriber to be deleted. 
         Returns:
              The amazon dynamodb response.
         """

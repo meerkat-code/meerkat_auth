@@ -18,9 +18,11 @@ class Sms(Resource):
         Send an sms message with Nexmo. 
         First parse the given arguments to check it is a valid sms.
 
-        PUT args:
-            'sms'* - The destination phone number (String)
-            'message'* - The sms message (String)
+        Arguments are passed in the request data.
+
+        Args:
+            sms (str): The destination phone number.\n
+            message (str): The sms message.
 
         Returns:
             The Nexmo response.
@@ -37,12 +39,15 @@ class Sms(Resource):
             args['message']
         )
 
-        util.log_message( 'G'+uuid.uuid4().hex, {
-            'destination':args['sms'], 
+        #Log the message
+        message_id = 'G'+uuid.uuid4().hex
+        util.log_message( message_id, {
+            'destination':[args['sms']], 
             'medium':['sms'], 
             'time':util.get_date(),
             'message':args['message']
         })
+        response['log_id'] = message_id
             
         return Response( json.dumps( response ), 
                          status=200,

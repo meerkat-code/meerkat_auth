@@ -27,9 +27,11 @@ class Verify(Resource):
         Puts a new verify code into the verify attribute. This can then be checked using the 
         post method and provides a generic means of verifying contact details for any communication medium. 
 
-        Put args:
-             subscriber_id - The ID for the subscriber who has been verified.
-             code - The new code to be stored with the subscriber
+        Arguments are passed in the request data.
+
+        Args:
+             subscriber_id (str): Required. The ID for the subscriber who has been verified.
+             code (str): Required. The new code to be stored with the subscriber
         Returns:
              The amazon dynamodb response.
         """
@@ -60,10 +62,12 @@ class Verify(Resource):
         """
         Given a verify code, this method returns a boolean saying whether the given code matches
         the stored code. 
-   
+
+        Arguments are passed in the request data.
+
         Post args:
-             subscriber_id - The ID for the subscriber who has been verified.
-             code - The code to be checked. 
+             subscriber_id (str): Required. The ID for the subscriber who has been verified.
+             code (str): Required. The code to be checked. 
         Returns:
              The amazon dynamodb response.
         """
@@ -104,7 +108,7 @@ class Verify(Resource):
         Creates the subscriptions and sets the subscriber's "verified" attribute to True. 
 
         Args:
-             subscriber_id - The ID for the subscriber who has been verified. 
+             subscriber_id (str): The ID for the subscriber who has been verified. 
 
         Returns:
              The amazon dynamodb response.

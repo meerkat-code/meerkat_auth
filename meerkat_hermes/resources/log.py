@@ -24,7 +24,7 @@ class Log(Resource):
         Get message log records from the database. 
 
         Args:
-             log_id - The id of the desired message log. 
+             log_id (str): The id of the desired message log. 
 
         Returns:
              The amazon dynamodb response.
@@ -36,17 +36,22 @@ class Log(Resource):
             }
         )
         if 'Item' in response:
-            return Response( data=jsonify(response), status=200, mimetype="application/json" ) 
+            return Response( json.dumps( response ), 
+                             status=200, 
+                             mimetype="application/json" ) 
         else:
             message =  {"message":"400 Bad Request: log_id doesn't exist"}
-            return Response( data=jsonify(message), status=400, mimetype="application/json" ) 
+            return Response( json.dumps( message ), 
+                             status=200, 
+                             mimetype="application/json" )
 
     def delete(self, log_id):
         """
         Delete a log record from the database.
 
         Args:
-             log_id for the record to be deleted.
+             log_id (str): for the record to be deleted.
+
         Returns:
              The amazon dynamodb response.
         """
@@ -55,8 +60,8 @@ class Log(Resource):
             Key={
                 'id':log_id
             }
-        )    
-        
-        return Response( data=jsonify( log_response ), 
-                         status=response['responseMetaData']['HTTPStatusCode'],
+        )            
+
+        return Response( json.dumps( log_response ), 
+                         status=log_response['ResponseMetadata']['HTTPStatusCode'],
                          mimetype='application/json' )

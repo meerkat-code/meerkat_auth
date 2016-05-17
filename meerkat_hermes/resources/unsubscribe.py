@@ -18,11 +18,10 @@ class Unsubscribe(Resource):
         Returns a page that allows the user to confirm they wish to delete their subscriptions
 
         Args:
-             subscriber_id
+             subscriber_id (str): The ID for the subscriber to be unsubscribed.
         Returns:
              The amazon dynamodb response.
         """
-        current_app.logger.warning( "Unsubscriber called")
 
         html = ( "<html><head><title>Unsubscribe Confirmation</title></head>"
                  "<body><H2>Unsubscribe Confirmation</H2>" 
@@ -39,7 +38,7 @@ class Unsubscribe(Resource):
         Actually performs the deletion. 
         
         Args:
-             subscriber_id
+             subscriber_id (str): The ID for the subscriber to be unsubscribed.
         Returns:
              The amazon dynamodb response.
         """

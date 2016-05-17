@@ -24,28 +24,27 @@ class Publish(Resource):
 
     def put(self):
         """
-        Publish a method to a given topic set. 
-        First parse the given arguments to check it is a valid email.
-        !!!Remember that whilst still in AWS "Sandbox" we can only send to verified emails.
+        Publish a message to a given topic set. All subscribers with subscriptions to any of those
+        topics are to receive the message. First parse the given arguments to check it is a valid email.
 
-        PUT args:
+        Arguments are passed in the request data.
 
-            'id'*         - If another message with the same ID has been logged, this one won't send.
-                            Returns a 400 Bad Request error if this is the case.
-            'message'*    - The message.
-            'topics'*     - The topics the message fits into (determines destination address/es).
-                            Accepts array of multiple topics.
-            'medium'      - The medium by which to publish the message (email, sms, etc...)
-                            Defaults to email. Accepts array of multiple mediums.
-            'sms-message' - The sms version of the message. Defaults to the same as 'message'
-            'html-message'- The html version of the message. Defaults to the same as 'message'
-            'subject'     - The e-mail subject. Defaults to "".
-            'from'        - The address from which to send the message. 
-                            Deafults to an emro address stored in the config.
+        Args:
+            id (str): Required. If another message with the same ID has been logged, this one won't send.
+                      Returns a 400 Bad Request error if this is the case.\n
+            message (str): Required. The message.\n
+            topics ([str]): Required. The topics the message fits into (determines destination address/es).
+                            Accepts array of multiple topics.\n
+            medium ([str]): The medium by which to publish the message ('email', 'sms', etc...)
+                            Defaults to email. Accepts array of multiple mediums.\n
+            sms-message (str): The sms version of the message. Defaults to the same as 'message'\n
+            html-message (str): The html version of the message. Defaults to the same as 'message'\n
+            subject (str): The e-mail subject. Defaults to "".\n
+            from (str): The address from which to send the message. \n
+                        Deafults to an emro address stored in the config.
     
- 
         Returns:
-            The amazon SES response.
+            An array of amazon SES and nexmo responses for each message sent.
         """
 
         #Define an argument parser for creating a valid email message.
@@ -64,8 +63,6 @@ class Publish(Resource):
         parser.add_argument('from', required=False, type=str, 
                             help='The address from which to send the message')
         args = parser.parse_args()
-        
-        current_app.logger.warning( "Before defaults set: " + str(args['medium']) )
 
         #Check that the message hasn't already been sent.
         if util.id_valid( args['id'] ):
@@ -79,8 +76,6 @@ class Publish(Resource):
                 args['sms-message'] = args['message']
             if not args['from']: 
                 args['from'] = current_app.config['SENDER']
-    
-            current_app.logger.warning( "After: " + str(args['medium']) )
 
             #Collect the subscriber IDs for all subscriptions to the given topics.
             subscribers = []
@@ -104,7 +99,8 @@ class Publish(Resource):
                 #Get subscriber's details.        
                 subscriber = self.subscribers.get_item(
                     Key={ 'id':subscriber_id }
-                )['Item']
+                )
+                subscriber = subscriber['Item']
     
                 #Create some variables to hold the mailmerged messages.
                 message = args['message']
@@ -140,17 +136,16 @@ class Publish(Resource):
                             sms_message
                         )
                         temp['type'] = 'sms'
-                        temp['message']=sms_message
+                        temp['message'] = sms_message
                         responses.append( temp )  
                         destinations.append( subscriber['sms'] )                             
-            
-            current_app.logger.warning( str(args['id']) )
 
             util.log_message( args['id'], {
                 'destination': destinations, 
                 'medium': args['medium'], 
                 'time': util.get_date(),
-                'message': "Published to: " + str(args['topics'])
+                'message': args['message'],
+                'topics': 'Published to: ' + str(args['topics'])
             })
 
             return Response( json.dumps( responses ), 
@@ -160,7 +155,7 @@ class Publish(Resource):
 
         else:
             #If the message Id already exists, return with a 400 bad request response.
-            message = {"message":"400 Bad Request: id already exists"}
+            message = {"message":"400 Bad Request: id " + args['id'] + " already exists"}
             return Response( json.dumps( message ), 
                              status=400,
                              mimetype='application/json' )

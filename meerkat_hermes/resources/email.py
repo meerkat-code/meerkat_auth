@@ -25,19 +25,19 @@ class Email(Resource):
         First parse the given arguments to check it is a valid email.
         !!!Remember that whilst still in AWS "Sandbox" we can only send to verified emails.
 
-        PUT args:
-            'subject'* - The e-mail subject (String)
-            'message'* - The e-mail message (String)
-            'email' - The destination address/es for the e-mail (String)
-            'subscriber_id' - The destination subscriber/s for the e-mail (String)
-            'html' - The html version of the message, will default to the same as 'message' (String)
-            'from' - The sender's address. Defaults to the config value SENDER. (String)
+        Arguments are passed in the request data.
+
+        Args:
+            subject (str): Required. The e-mail subject.\n
+            message (str): Required. The e-mail message.\n
+            email (str): The destination address/es for the e-mail.\n
+            subscriber_id (str): The destination subscriber/s for the e-mail.\n
+            html (str): The html version of the message, will default to the same as 'message'.\n
+            from (str): The sender's address. Defaults to the config value SENDER.
 
         Returns:
             The amazon SES response.
         """
-
-        current_app.logger.warning('Called email resource')
 
         #Define an argument parser for creating a valid email message.
         parser = reqparse.RequestParser()
@@ -52,8 +52,6 @@ class Email(Resource):
         parser.add_argument('from', required=False, type=str, 
                             help='The address from which to send the message')
         args = parser.parse_args()
-
-        current_app.logger.warning( 'Args are: ' + str(args) )
 
         #If no email is given, look at the subscriber ids and find their emails. 
         if args['email'] is None:
@@ -84,7 +82,6 @@ class Email(Resource):
             sender=args['from']
         )
 
-        current_app.logger.warning('Sent email: ' + str(response) )
         message_id = 'G'+uuid.uuid4().hex
 
         util.log_message( message_id, {

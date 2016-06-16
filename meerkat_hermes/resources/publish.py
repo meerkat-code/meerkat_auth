@@ -46,7 +46,6 @@ class Publish(Resource):
         Returns:
             An array of amazon SES and nexmo responses for each message sent.
         """
-
         #Define an argument parser for creating a valid email message.
         parser = reqparse.RequestParser()
         parser.add_argument('id', required=True, type=str, help='The message Id - must be unique.')
@@ -79,13 +78,14 @@ class Publish(Resource):
 
             #Collect the subscriber IDs for all subscriptions to the given topics.
             subscribers = []
-           
+
             for topic in args['topics']:
                 query_response = self.subscriptions.query(
                     IndexName='topicID-index',
                     KeyConditionExpression=Key('topicID').eq(topic)
                 )
                 for item in query_response['Items']:
+                    
                     subscribers.append( item['subscriberID'] )
             
             #Record details about the sent messages.
@@ -94,51 +94,67 @@ class Publish(Resource):
             s = []
 
             #Send the messages to each subscriber.     
-            for subscriber_id in subscribers:    
-
+            for subscriber_id in subscribers:      
                 #Get subscriber's details.        
                 subscriber = self.subscribers.get_item(
                     Key={ 'id':subscriber_id }
                 )
-                subscriber = subscriber['Item']
-    
-                #Create some variables to hold the mailmerged messages.
-                message = args['message']
-                sms_message = args['sms-message']
-                html_message = args['html-message']
 
-                #Enable mail merging on subscriber attributes.
-                message = util.replace_keywords( message, subscriber )
-                if args['sms-message']: 
-                    sms_message = util.replace_keywords( sms_message, subscriber )
-                if args['html-message']:
-                    html_message = util.replace_keywords( html_message, subscriber )
+                #Occasionally subscriptions get left in the database without a subscriber.
+                #This can happen when someone mannually edits the database.
+                #If so, no subscriber will be returned above, so we delete subscriber properly.
+                if( subscriber['ResponseMetadata']['HTTPStatusCode'] == 200 
+                    and 'Item' not in subscriber ):  
 
-                #Assemble and send the messages for each medium.
-                for medium in args['medium']: 
-                    
-                    if medium == 'email':
-                        temp = util.send_email(
-                            [subscriber['email']],
-                            args['subject'],
-                            message,
-                            html_message,
-                            sender=args['from']
-                        )
-                        temp['type'] = 'email'
-                        temp['message']=message
-                        responses.append(temp)
-                        destinations.append( subscriber['email'] )  
+                    util.delete_subscriber( subscriber_id )
+                    message ={
+                        "message":"500 Internal Server Error: subscriber id " + subscriber_id + 
+                                  " doesn't exist. The subscriber has been deleted properly."
+                    }
+                    current_app.logger.warning( message["message"] );
+                    responses.append( message )
 
-                    elif medium == 'sms' and 'sms' in subscriber:
-                        temp = util.send_sms(
-                            subscriber['sms'],
-                            sms_message
-                        )
-                        temp['type'] = 'sms'
-                        temp['message'] = sms_message
-                        responses.append( temp )  
-                        destinations.append( subscriber['sms'] )                             
+                else:
+
+                    subscriber = subscriber['Item']   
+
+                    #Create some variables to hold the mailmerged messages.
+                    message = args['message']
+                    sms_message = args['sms-message']
+                    html_message = args['html-message']
+
+                    #Enable mail merging on subscriber attributes.
+                    message = util.replace_keywords( message, subscriber )
+                    if args['sms-message']: 
+                        sms_message = util.replace_keywords( sms_message, subscriber )
+                    if args['html-message']:
+                        html_message = util.replace_keywords( html_message, subscriber )
+
+                    #Assemble and send the messages for each medium.
+                    for medium in args['medium']: 
+                        
+                        if medium == 'email':
+                            temp = util.send_email(
+                                [subscriber['email']],
+                                args['subject'],
+                                message,
+                                html_message,
+                                sender=args['from']
+                            )
+                            temp['type'] = 'email'
+                            temp['message']=message
+                            responses.append(temp)
+                            destinations.append( subscriber['email'] )  
+
+                        elif medium == 'sms' and 'sms' in subscriber:
+                            temp = util.send_sms(
+                                subscriber['sms'],
+                                sms_message
+                            )
+                            temp['type'] = 'sms'
+                            temp['message'] = sms_message
+                            responses.append( temp )  
+                            destinations.append( subscriber['sms'] )                             
 
             util.log_message( args['id'], {
                 'destination': destinations, 
@@ -151,7 +167,7 @@ class Publish(Resource):
             return Response( json.dumps( responses ), 
                              status=200,
                              mimetype='application/json' )
-            
+          
 
         else:
             #If the message Id already exists, return with a 400 bad request response.

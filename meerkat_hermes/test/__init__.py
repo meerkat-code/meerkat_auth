@@ -78,7 +78,7 @@ class MeerkatHermesTestCase(unittest.TestCase):
         deletedObjects['subscribers'] = len(query_response['Items'])
        
         #Get rid of any undeleted subscriptions
-        for topic in self.subscriber['topics']:
+        for topic in (self.subscriber['topics'] + ["Test4"]) :
             query_response = self.subscriptions.query(
                 IndexName='topicID-index',
                 KeyConditionExpression=Key('topicID').eq(topic)
@@ -444,6 +444,24 @@ class MeerkatHermesTestCase(unittest.TestCase):
         #No messages should be sent
         #Check that no messages have been sent and that the sms response has not been called.  
         self.assertEquals( len(put_response), 0 )  
+        self.assertFalse( mock_sms_response.called )
+
+        #Add a subscription without a subscriber, to check that the faulty data is properly handled.
+        self.subscriptions.put_item(
+            Item={
+              "subscriberID": "TESTID",
+              "subscriptionID": "TESTSUBSCRIPTION",
+              "topicID":"Test4"
+            }
+        )
+        message['id'] = "testID1b"
+        message_ids.append( message['id'] )
+        put_response = self.app.put( '/publish', data=message )
+        put_response = json.loads( put_response.data.decode('UTF-8') )  
+        print( "Put response: " + str(put_response) )
+
+        #One response informing us that the subscriber TESTID is deleted.
+        self.assertEquals( len(put_response), 1 )  
         self.assertFalse( mock_sms_response.called )
 
         #Publish the test message to topic Test3.

@@ -38,7 +38,9 @@ api.add_resource(Unsubscribe, "/unsubscribe/<string:subscriber_id>")
 @app.route('/')
 @require_api_key
 def hello_world():
-    """Display something at /.  This method just loads the database and displays the creation date."""
+    """Display something at /.  
+       This method loads the dynamodb database and displays it's creation date.
+    """
     db = boto3.resource('dynamodb')
     table = db.Table('hermes_subscribers')
     return table.creation_date_time.strftime('%d/%m/%Y')

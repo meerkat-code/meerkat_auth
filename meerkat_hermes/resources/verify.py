@@ -69,7 +69,8 @@ class Verify(Resource):
              subscriber_id (str): Required. The ID for the subscriber who has been verified.
              code (str): Required. The code to be checked. 
         Returns:
-             The amazon dynamodb response.
+             A json blob with one boolean attribute "matched" saying whether the codes have matched.
+             e.g. {"matched": true} 
         """
 
         #Define an argument parser for creating a valid email message.
@@ -111,7 +112,8 @@ class Verify(Resource):
              subscriber_id (str): The ID for the subscriber who has been verified. 
 
         Returns:
-             The amazon dynamodb response.
+             A json object with attribute "message" informing whether the verificaiton
+             was successful e.g. {"message":"Subscriber verified"}
         """
 
         #Check subscriberID doesn't exist in subscriptions already

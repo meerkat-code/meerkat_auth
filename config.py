@@ -9,15 +9,9 @@ class Config(object):
     DEBUG = False
     TESTING = False
 
-    SUBSCRIBERS = 'hermes_subscribers'
-    SUBSCRIPTIONS = 'hermes_subscriptions'
-    LOG = 'hermes_log'
-
-    SENDER = 'Notifications <notifications@emro.info>'
-    CHARSET = 'UTF-8'
-    FROM = 'Meerkat'
-
-    API_KEY = "test-hermes"
+    USERS = 'auth_users'
+    ROLES = 'auth_roles'
+    TOKEN_LIFE = 3600 #Max length of a sign in session in seconds.
 
 class Production(Config):
     DEBUG = True
@@ -30,3 +24,5 @@ class Development(Config):
 class Testing(Config):
     DEBUG = False
     TESTING = True
+    USERS = 'test_auth_users'
+    ROLES = 'test_auth_roles'

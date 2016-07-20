@@ -1,6 +1,6 @@
-==============
-Meerkat Hermes 
-==============
+======================
+Meerkat Authentication 
+======================
 ::
 
               ,'''''-._
@@ -11,4 +11,8 @@ Meerkat Hermes
             ;, ,     \
 
 
-The messaging module for the project, providing the means to distribute alert notifications, reports and other automatically generated messages.  
+The authentication module, providing a single sign on service to all meerkat components. 
+
+Note that python package cryptography, used for signing the JWTs, requires the following linux packages to be installed:
+
+```sudo apt-get install build-essential libssl-dev libffi-dev python-dev```

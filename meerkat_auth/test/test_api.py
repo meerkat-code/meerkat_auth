@@ -132,6 +132,18 @@ class MeerkatAuthAPITestCase(unittest.TestCase):
         headers = {
             'Authorization': 'Bearer ' + token
         }
+
         #Make a request with the jwt token in the header.
         response = self.app.get( '/user', headers=headers)
+        user_out = json.loads( response.data.decode('UTF-8') )
+        user_in = User.from_db('testUser1').to_dict()     
+        
+        #Assert that the user returned equals the user put into the database.
+        for key in user_in:
+            matched = user_in[key] == user_out[key] 
+            if not matched:
+                logging.warning( "Key '" + key + "' not matched." )           
+            self.assertTrue( matched )
+
+
         

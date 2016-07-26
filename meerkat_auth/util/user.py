@@ -1,7 +1,8 @@
 from datetime import datetime
 from role import Role
 from passlib.hash import pbkdf2_sha256
-import meerkat_auth, uuid, logging, boto3, jwt, re
+from flask import jsonify
+import meerkat_auth, uuid, logging, boto3, jwt, re 
 
 
 
@@ -71,6 +72,24 @@ class User:
     def __hash__(self):
         """Override to define the hash of User objects."""
         return hash(username)
+
+    def to_dict(self):
+        """Returns the current object state as a python dict."""
+        return {    
+            'username': self.username,
+            'email': self.email,
+            'password': self.password,
+            'countries': self.countries,
+            'roles': self.roles,
+            'state': self.state,
+            'creation': self.creation,
+            'updated': self.updated,
+            'data': self.data
+        }
+
+    def to_json(self):
+        """Returns the current object state as a json string."""
+        return jsonify( self.to_dict() )
 
     def to_db(self):
         """
@@ -238,7 +257,7 @@ class User:
                 r['password'],
                 r['countries'],
                 r['roles'],
-                state=['state'],
+                state=r['state'],
                 updated=r['updated'],
                 creation=r['creation'],
                 data = r['data']

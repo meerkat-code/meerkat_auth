@@ -1,5 +1,6 @@
 from flask import abort, request, current_app
 from functools import wraps
+from jwt import InvalidTokenError
 import jwt, meerkat_auth, inspect
 
 def check_access(access, countries, acc):

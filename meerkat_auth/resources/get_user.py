@@ -22,9 +22,15 @@ class GetUser(Resource):
             A json object detailing the user associated with the given JWT. 
             
         """
-
-        current_app.logger.warning(payload)
         
+        try: 
+            return User.from_db(payload['usr']).to_json()
 
-
-        
+        #If we fail to get the user from the database return a 500 http error.
+        except Exception as e:
+            current_app.logger.info( repr(e) )
+            return Response( 
+                json.dumps( {'message':str(e)} ), 
+                status=500, 
+                mimetype='application/json'  
+            )

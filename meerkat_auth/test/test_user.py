@@ -21,12 +21,12 @@ class MeerkatAuthUserTestCase(unittest.TestCase):
 
         #The database should have the following objects already in it.
         roles = [
-            Role( 'demo', 'public', 'Public description.', [] ),
-            Role( 'demo', 'private', 'Private description.', ['public'] ),
-            Role( 'demo', 'shared', 'Shared description.', ['public'] ),
-            Role( 'demo', 'manager', 'Shared description.', ['private', 'shared'] ),
-            Role( 'jordan', 'public', 'Public description.', [] ),
-            Role( 'jordan', 'private', 'Private description.', ['public'] )
+            Role( 'demo', 'registered', 'Registered description.', [] ),
+            Role( 'demo', 'personal', 'Personal description.', ['registered'] ),
+            Role( 'demo', 'shared', 'Shared description.', ['registered'] ),
+            Role( 'demo', 'manager', 'Shared description.', ['personal', 'shared'] ),
+            Role( 'jordan', 'registered', 'Registered description.', [] ),
+            Role( 'jordan', 'personal', 'Personal description.', ['registered'] )
         ]
 
         #Update the objects in case something else has spuriously has changed/deleted them.
@@ -47,7 +47,7 @@ class MeerkatAuthUserTestCase(unittest.TestCase):
             ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
              'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
             ['demo', 'jordan'],
-            ['manager', 'private'],
+            ['manager', 'personal'],
             data={
                 'name':'Testy McTestface'
             },
@@ -83,7 +83,7 @@ class MeerkatAuthUserTestCase(unittest.TestCase):
             ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
              'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
             ['demo', 'jordan'],
-            ['manager', 'private'],
+            ['manager', 'personal'],
             data={
                 'name':'Testy McTestface'
             }
@@ -92,8 +92,8 @@ class MeerkatAuthUserTestCase(unittest.TestCase):
 
         #Check that the expected access has been returned.
         print( access )
-        demo_expected = ['manager','private','shared','public']
-        jordan_expected = ['private','public']
+        demo_expected = ['manager','personal','shared','registered']
+        jordan_expected = ['personal','registered']
         self.assertEquals( len(access), 2 ) 
         self.assertTrue( 'jordan' in access )
         self.assertTrue( 'demo' in access )
@@ -101,10 +101,10 @@ class MeerkatAuthUserTestCase(unittest.TestCase):
         self.assertTrue( set(jordan_expected) == set(access['jordan']) )
 
         #Check that get_access breaks appropriately if the roles are wrong.
-        demo_public = Role.from_db( 'demo','public' )
-        print(Role.delete( 'demo', 'public' ))
+        demo_registered = Role.from_db( 'demo','registered' )
+        print(Role.delete( 'demo', 'registered' ))
         self.assertRaises( InvalidRoleException, lambda: user.get_access() )
-        demo_public.to_db()
+        demo_registered.to_db()
         
     def test_get_jwt(self):
         """Tests the get_jwt() method of User objects."""
@@ -116,7 +116,7 @@ class MeerkatAuthUserTestCase(unittest.TestCase):
             ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
              'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
             ['demo', 'jordan'],
-            ['manager', 'private'],
+            ['manager', 'personal'],
             data={
                 'name':'Testy McTestface'
             }
@@ -136,8 +136,8 @@ class MeerkatAuthUserTestCase(unittest.TestCase):
         print( type(decoded) )
         expected = {
             u'acc': {
-                u'demo': [u'manager', u'public', u'private', u'shared'], 
-                u'jordan': [u'public', u'private']
+                u'demo': [u'manager', u'registered', u'personal', u'shared'], 
+                u'jordan': [u'registered', u'personal']
             }, 
             u'data': {u'name': u'Testy McTestface'}, 
             u'usr': u'testUser', 
@@ -166,7 +166,7 @@ class MeerkatAuthUserTestCase(unittest.TestCase):
                 'test@test.org.uk',
                 'password',
                 ['demo', 'jordan'],
-                ['manager', 'private']
+                ['manager', 'personal']
             )
         except InvalidCredentialException as e:
             self.fail( repr(e) ) 
@@ -181,7 +181,7 @@ class MeerkatAuthUserTestCase(unittest.TestCase):
                 'testtest.org.uk',
                 'password',
                 ['demo', 'jordan'],
-                ['manager', 'private']
+                ['manager', 'personal']
             )
         )         
         self.assertRaises( 
@@ -191,7 +191,7 @@ class MeerkatAuthUserTestCase(unittest.TestCase):
                 'test@test.org.uk',
                 'password',
                 ['demo', 'jordan'],
-                ['superroot', 'private']        
+                ['superroot', 'personal']        
             )
         ) 
         self.assertRaises( 
@@ -201,7 +201,7 @@ class MeerkatAuthUserTestCase(unittest.TestCase):
                 'test@test.org.uk',
                 'password',
                 ['neverland', 'jordan'],
-                ['manager', 'private']
+                ['manager', 'personal']
             )
         ) 
         
@@ -213,7 +213,7 @@ class MeerkatAuthUserTestCase(unittest.TestCase):
             ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
              'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
             ['demo', 'jordan'],
-            ['manager', 'private'],
+            ['manager', 'personal'],
             data={
                 'name':'Testy McTestface'
             },
@@ -228,7 +228,7 @@ class MeerkatAuthUserTestCase(unittest.TestCase):
                 'test@test.org.uk',
                 'password',
                 ['demo', 'jordan'],
-                ['superroot', 'private']
+                ['superroot', 'personal']
             )
         ) 
         
@@ -268,7 +268,7 @@ class MeerkatAuthUserTestCase(unittest.TestCase):
             ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
              'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'), #Hash of 'password'
             ['demo', 'jordan'],
-            ['manager', 'private'],
+            ['manager', 'personal'],
             data={
                 'name':'Testy McTestface'
             },
@@ -303,7 +303,7 @@ class MeerkatAuthUserTestCase(unittest.TestCase):
                 'test@test.org.uk',
                 'test_password',
                 ['demo', 'jordan'],
-                ['manager', 'private']
+                ['manager', 'personal']
             )
             print( repr(user1) ) 
 
@@ -332,7 +332,7 @@ class MeerkatAuthUserTestCase(unittest.TestCase):
                 'test@test.org.uk',
                 'test_password',
                 ['demo', 'jordan'],
-                ['manager', 'private']
+                ['manager', 'personal']
             ) 
         ) 
 

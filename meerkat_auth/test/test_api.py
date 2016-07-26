@@ -20,12 +20,12 @@ class MeerkatAuthAPITestCase(unittest.TestCase):
 
         #The database should have the following objects already in it.
         roles = [
-            Role( 'demo', 'public', 'Public description.', [] ),
-            Role( 'demo', 'private', 'Private description.', ['public'] ),
-            Role( 'demo', 'shared', 'Shared description.', ['public'] ),
-            Role( 'demo', 'manager', 'Shared description.', ['private', 'shared'] ),
-            Role( 'jordan', 'public', 'Public description.', [] ),
-            Role( 'jordan', 'private', 'Private description.', ['public'] )
+            Role( 'demo', 'registered', 'Registered description.', [] ),
+            Role( 'demo', 'personal', 'Personal description.', ['registered'] ),
+            Role( 'demo', 'shared', 'Shared description.', ['registered'] ),
+            Role( 'demo', 'manager', 'Shared description.', ['personal', 'shared'] ),
+            Role( 'jordan', 'registered', 'Registered description.', [] ),
+            Role( 'jordan', 'personal', 'Personal description.', ['registered'] )
         ]
 
         #Update the objects in case something else has spuriously has changed/deleted them.
@@ -39,7 +39,7 @@ class MeerkatAuthAPITestCase(unittest.TestCase):
                 'test1@test.org.uk',
                 User.hash_password('password1'),
                 ['demo', 'jordan'],
-                ['manager', 'private'],
+                ['manager', 'personal'],
                 data={
                     'name':'Testy McTestface'
                 }
@@ -49,7 +49,7 @@ class MeerkatAuthAPITestCase(unittest.TestCase):
                 'test2@test.org.uk',
                 User.hash_password('password2'),
                 ['demo'],
-                ['private'],
+                ['personal'],
                 data={
                     'name':'Tester McTestFace'
                 }
@@ -76,7 +76,7 @@ class MeerkatAuthAPITestCase(unittest.TestCase):
         #Decode the jwt and check it is structured as expected.
         payload = jwt.decode(
             post_json['jwt'], 
-            meerkat_auth.app.config['PUBLIC'], 
+            meerkat_auth.app.config['registered'], 
             algorithms=[meerkat_auth.app.config['ALGORITHM']]
         )
         print( payload )
@@ -89,8 +89,8 @@ class MeerkatAuthAPITestCase(unittest.TestCase):
         self.assertTrue( payload['exp'] <= max_exp )
         self.assertEquals( payload['usr'], u'testUser1' )
         expected = {
-            u'demo': [u'manager', u'public', u'private', u'shared'], 
-            u'jordan': [u'public', u'private']
+            u'demo': [u'manager', u'registered', u'personal', u'shared'], 
+            u'jordan': [u'registered', u'personal']
         }
         self.assertEquals( payload['acc'], expected )
 
@@ -112,8 +112,8 @@ class MeerkatAuthAPITestCase(unittest.TestCase):
         self.assertTrue( post_json.get( 'message', False ) )
 
         #Check that a InvalidRoleException is handled correctly.
-        role=Role.from_db('demo','private')
-        Role.delete('demo','private')
+        role=Role.from_db('demo','personal')
+        Role.delete('demo','personal')
         post_data = {'username':'testUser2', 'password':'password2'}
         post_response = self.app.post( '/login', data=post_data )
         print( post_response )

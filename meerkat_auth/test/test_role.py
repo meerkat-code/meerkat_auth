@@ -51,9 +51,9 @@ class MeerkatAuthRoleTestCase(unittest.TestCase):
         """Test the Role class private method all_access_objs()."""
         #The database should have the following objects already in it.
         roles = {
-            'public': Role( 'demo', 'public', 'Public description.', [] ),
-            'private': Role( 'demo', 'private', 'Private description.', ['public'] ),
-            'shared': Role( 'demo', 'shared', 'Shared description.', ['public'] ),
+            'registered': Role( 'demo', 'registered', 'Registered description.', [] ),
+            'private': Role( 'demo', 'private', 'Private description.', ['registered'] ),
+            'shared': Role( 'demo', 'shared', 'Shared description.', ['registered'] ),
             'manager': Role( 'demo', 'manager', 'Shared description.', ['private', 'shared'] )
         }
         #Update the objects in case something has changed them.
@@ -65,7 +65,7 @@ class MeerkatAuthRoleTestCase(unittest.TestCase):
         #Check the correct list is returned
         print( "Manager parents: " + str( parents ) )
         self.assertEqual( len(parents), 4 )
-        self.assertIn( 'public', parents )
+        self.assertIn( 'registered', parents )
         self.assertIn( 'private', parents )
         self.assertIn( 'shared', parents )
         self.assertIn( 'manager', parents )
@@ -73,28 +73,28 @@ class MeerkatAuthRoleTestCase(unittest.TestCase):
         #Get all the private parents.
         parents = roles['private'].all_access()
         #Check the correct list is returned
-        print( "Private parents: " + str( parents ) )
+        print( "private parents: " + str( parents ) )
         self.assertEqual( len(parents), 2 )
-        self.assertIn( 'public', parents )
+        self.assertIn( 'registered', parents )
         self.assertIn( 'private', parents )
 
-        #Get all the public parents.
-        parents = roles['public'].all_access()
+        #Get all the registered parents.
+        parents = roles['registered'].all_access()
         #Check the correct list is returned
-        print( "Public parents: " + str( parents ) )
+        print( "Registered parents: " + str( parents ) )
         self.assertEqual( len(parents), 1 )
-        self.assertIn( 'public', parents )
+        self.assertIn( 'registered', parents )
 
     def test_validate(self):
         """Test the Role validate functions."""
         #The database should have the following objects already in it.
         roles = {
-            'public': 
-                Role( 'demo', 'public', 'Public description.', [] ),
+            'registered': 
+                Role( 'demo', 'registered', 'Registered description.', [] ),
             'private': 
-                Role( 'demo', 'private', 'Private description.', ['public'] ),
+                Role( 'demo', 'private', 'Private description.', ['registered'] ),
             'shared': 
-                Role( 'demo', 'shared', 'Shared description.', ['public'] ),
+                Role( 'demo', 'shared', 'Shared description.', ['registered'] ),
             'manager': 
                 Role( 'demo', 'manager', 'Shared description.', ['private', 'shared'] )
         }

@@ -8,8 +8,8 @@ from meerkat_auth.require_jwt import require_jwt
 class GetUser(Resource):
     """This class returns a User object for a given JWT."""
 
-    @require_jwt(['public'])
-    def get(self):
+    @require_jwt(['registered'])
+    def get(self, payload):
         """
         Return a user object in JSON for a given JWT. 
 
@@ -23,7 +23,8 @@ class GetUser(Resource):
             
         """
 
-        current_app.logger.warning("GET CALLED")
+        current_app.logger.warning(payload)
+        
 
 
         

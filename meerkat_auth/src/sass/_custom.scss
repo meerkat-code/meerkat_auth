@@ -1,0 +1,120 @@
+body{
+	padding: 50px 0px 0px;
+	color: $textGrey;
+    background: $lightGrey;
+}
+
+.breaker{
+	height: 30px;
+}
+
+.row{
+	margin-left: 0px;
+	margin-right: 0px;
+}
+
+.page-content {
+    min-height: 85vh;
+    padding: 10px 0;
+}
+
+
+
+// NAVBAR FORMATING
+.navbar{
+
+	background-color: $blue;
+	margin-bottom: 0;
+	border: none;
+
+	.navbar-flag {
+		float: left;
+		margin-right: 10px;
+		height: 22px;
+		margin: 0px 10px 0px -10px;
+		border-radius: 3px;
+		border: 1px solid #01719F;
+	}
+
+    .navbar-header{
+        color: #FFF;
+    }
+	.navbar-nav{
+
+		a,
+		a:focus,
+		a:hover{
+			background-color:$blue;
+			color: white;
+		}
+
+		.active a,
+		.active a:focus{
+			background-color:$highlight;
+		}
+	}
+
+	#menu-collapse{
+		float: right;
+	}
+
+	.navbar-brand span{
+		float: left;
+		max-height: 40px;
+		margin-right: 10px;
+	}
+
+	.navbar-toggle{
+		border: #FFF 2px solid;
+		.icon-bar{
+			background: #FFF;
+		}
+	}
+}
+
+//Footer formating
+footer{
+	background: $darkGrey;
+	color: $lightGrey;
+	padding: 20px;
+	min-height: 10vh;
+}
+
+.footer__label{
+	text-align: right;
+}
+
+.footer__title{
+	font-size: 16px;
+}
+
+//Langauge selector
+
+.lang-sel{
+  float:left;
+  margin: 15px -10px 15px 10px;
+}
+
+.lang{
+  color: white;
+  border: white solid 1px;
+  border-radius: 3px;
+  padding: 3px;
+}
+
+.lang:hover{
+  background: $highlight;
+  color: white;
+  text-decoration: none;
+  border: 1px solid $highlight;
+}
+
+@media screen and (max-width: 751px){
+  .lang-sel{
+    margin: 0px 0px 15px;
+    text-align: center;
+    float: none;
+  }
+
+}
+

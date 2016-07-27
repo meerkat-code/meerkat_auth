@@ -62,3 +62,27 @@ target/
 #My secret config settings
 secret.cfg
 deploy.sh
+
+# Translations
+*.mo
+
+# Mr Developer
+.mr.developer.cfg
+.project
+.pydevproject
+
+meerkat_auth/static
+bower_components
+node_modules
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*~
+
+

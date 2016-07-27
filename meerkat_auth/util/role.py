@@ -1,6 +1,5 @@
 from datetime import datetime
-import meerkat_auth
-import uuid, logging, boto3
+import meerkat_auth, uuid, logging, boto3
 
 class Role:
     """

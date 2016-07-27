@@ -145,5 +145,6 @@ class MeerkatAuthAPITestCase(unittest.TestCase):
                 logging.warning( "Key '" + key + "' not matched." )           
             self.assertTrue( matched )
 
+    #TODO: Properly test the require_jwt decorator and check_access functions.
 
         

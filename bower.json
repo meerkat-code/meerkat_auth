@@ -1,0 +1,29 @@
+{
+  "name": "meerkat_auth",
+  "version": "0.0.0",
+  "homepage": "https://github.com/meerkat-code/meerkat_auth",
+  "authors": [
+    "Jonathan Berry <jonathan.s.berry@gmail.com>"
+  ],
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": "~2.2.4",
+    "bootstrap-sass": "~3.3.5",
+    "fontawesome": "~4.3.0",
+    "jed": "~1.1.0",
+    "moment": "~2.14.1"
+  },
+  "overrides": {
+    "jed": {
+      "main": "jed.js"
+    }
+  }
+}

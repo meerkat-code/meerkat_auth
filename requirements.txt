@@ -9,4 +9,6 @@ boto3>=1.2.2
 PyJWT>=1.4.1
 passlib>=1.6.5
 cryptography>=1.4
+flask-babel>=0.10
+babel>=2.3.4
 

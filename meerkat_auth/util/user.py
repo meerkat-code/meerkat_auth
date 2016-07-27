@@ -1,10 +1,8 @@
 from datetime import datetime
-from role import Role
+from meerkat_auth.util.role import Role
 from passlib.hash import pbkdf2_sha256
 from flask import jsonify
 import meerkat_auth, uuid, logging, boto3, jwt, re 
-
-
 
 class User:
     """

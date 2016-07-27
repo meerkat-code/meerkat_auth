@@ -13,6 +13,9 @@ class Config(object):
     ROLES = 'auth_roles'
     TOKEN_LIFE = 3600 #Max length of a sign in session in seconds.
 
+    DEFAULT_LANGUAGE = "en"
+    SUPPORTED_LANGUAGES = ["en", "fr"]
+
 class Production(Config):
     DEBUG = True
     TESTING = False

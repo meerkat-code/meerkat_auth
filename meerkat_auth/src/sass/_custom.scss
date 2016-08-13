@@ -297,4 +297,23 @@ body.blue{
 }
 
 
+.user-editor .top-part{
+    border-bottom: 1px solid #ddd; 
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+}
 
+.user-editor .submit-form{
+    padding: 10px 15px;
+    color: #FFF;
+    background: $blue;
+    font-size: 16px;
+    font-weight: bold;
+    margin: 20px 40px 30px;
+    width: 200px;
+}
+
+.user-editor .submit-form:active,
+.user-editor .submit-form:focus{
+    background: $highlight;
+}

@@ -66,32 +66,36 @@ function drawUserEditor(username){
 
         var html = "<form id='user-editor' class='user-editor'>";
         
-        html += "<div class='row'><div class='col-xs-12 col-sm-6 col-md-4'>";
+        html += "<div class='row top-part'><div class='col-xs-12 col-sm-6 col-md-4'>";
 
         html += "<div class='input-group row'>" + 
                 "<label class='username  col-xs-12 col-md-6 col-lg-5'>Username:</label>" + 
                 "<input type='text' class='username col-xs-12 col-md-6 col-lg-7' name='username' value='" + 
-                data.username + "'/></div>";
+                data.username + "' id='username' oninput='checkValidUsername()' /></div>";
 
         html += "<div class='input-group row'>" +
-                "<label class='email col-xs-12 col-md-6 col-lg-5'>Email:</label>" + 
-                "<input type='text' class='email col-xs-12 col-md-6 col-lg-7' name='email' value='" + 
+                "<label class='email  col-xs-12 col-md-6 col-lg-5'>Email:</label>" + 
+                "<input id='email' type='text' class='email col-xs-12 col-md-6 col-lg-7' " +
+                "oninput='checkEqual(\"email\", \"email2\")' name='email' value='" + 
                 data.email + "'/></div>";
 
         html += "<div class='input-group row'>" + 
                 "<label class='email2 col-xs-12 col-md-6 col-lg-5'>Retype Email:</label>" + 
-                "<input type='text' class='email2 col-xs-12 col-md-6 col-lg-7' name='email2' value='" + 
+                "<input  id='email2' type='text' oninput='checkEqual(\"email\", \"email2\")' " +
+                "class='email2 col-xs-12 col-md-6 col-lg-7' value='" + 
                 data.email + "'/></div>";
 
         html += "<div class='input-group row'>" + 
                 "<label class='password col-xs-12 col-md-6 col-lg-5'>Password:</label>" + 
-                "<input type='password' class='password col-xs-12 col-md-6 col-lg-7'" +
-                " name='password' value=''/></div>";
+                "<input id='password' oninput='checkEqual(\"password\", \"password2\")' " + 
+                "type='password' class='password col-xs-12 col-md-6 col-lg-7' " +
+                "name='password' value=''/></div>";
 
         html += "<div class='input-group row'>" + 
                 "<label class='password2 col-xs-12 col-md-6 col-lg-5'>Retype Password:</label>" + 
-                "<input type='password' class='password2 col-xs-12 col-md-6 col-lg-7'"+
-                " name='password2' value=''/></div>";
+                "<input id='password2' oninput='checkEqual(\"password\", \"password2\")' " +
+                "type='password' class='password2 col-xs-12 col-md-6 col-lg-7' "+
+                "value=''/></div>";
 
         html += "<div class='input-group row'>" + 
                 "<label class='creation col-xs-12 col-md-6 col-lg-5'>Creation time:</label>" + 
@@ -198,7 +202,7 @@ function drawUserEditor(username){
 
                 if( element.status != "uneditable" ){
                     optionsHTML += "<option dataKey='" + dataKeys[x] + "' dataValue='" + element.val + "' ";
-                    if( element.status == "undeletable" ) optionsHTML += "disabled";
+                    if( element.status == "undeletable" ) optionsHTML += "disabled datastatus='undeletable' ";
                     optionsHTML += ">" + dataKeys[x] + " | " + element.val + "</option>";
                 }
             }
@@ -210,8 +214,17 @@ function drawUserEditor(username){
         html += "<button class='btn btn-sm pull-right delete-data' type='button'>" +
                 "Delete Data</button>";
 
-        html += "</div></div>"; //End of input group and end of final part.
+        html += "</div></div></div>"; //End of input group and end of final part and end of row.
 
+        html += "<input type='hidden' class='original_username' name='original_username' value='" +
+                data.username + "' />";
+
+        html += "<div class='form-messages col-xs-12 col-sm-6'> </div>";
+
+        html += "<button type='button' class='col-xs-12 col-sm-6 btn btn-large submit-form pull-right'>"+
+                "Submit Changes</button>";
+
+        html += "</form>";
         //DRAW THE FORM
         $('.user-editor').html( html );
 
@@ -352,7 +365,36 @@ function drawUserEditor(username){
                 
             }
             
-        });        
+        });       
+
+        //FORM SUBMISSION
+        $('.user-editor .submit-form').click(function(){
+
+            //Assemble complete json object.
+            var data = {};
+            var form = $('.user-editor');
+            var formArray = form.serializeArray();
+
+            for( var z in formArray ){
+                var element = formArray[z];
+                data[element.name] = element.value;
+            }
+
+            $.extend( data, extractAccess() );
+            $.extend( data, extractData() );
+            console.log( data );
+
+            //Post json to server.
+            $.ajax({
+                url: '/en/users/update_user/' + data.original_username,
+                type: 'post',
+                success: function (data) {
+                    alert(data);
+                },
+                contentType: 'application/json;charset=UTF-8',
+                data: JSON.stringify(data, null, '\t')
+            });
+        });
 
     });
 
@@ -365,9 +407,73 @@ function cleanArray( array ){
     else if( first === undefined ) return cleanArray( array );
     else return [first].concat( cleanArray( array ) );
 } 
-    
+
+//Captitalise the first letter of each word.    
 function toTitleCase(str){
     return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
 }
 
+//Check that two form fields are equal
+function checkEqual( id1, id2 ) {
+
+    var email1 = document.getElementById(id1);
+    var email2 = document.getElementById(id2);
+
+    if ( email2.value != email1.value ) {
+        email2.setCustomValidity(" {{ _('Fields must be Matching.') }} ");
+        return false;
+    } else {
+        //Input is valid -- reset the error message
+        email2.setCustomValidity('');
+        return true;
+    }
+}
+
+//Check that the usernam field is valid.
+function checkValidUsername(){
+    
+    var original = $('.user-editor input.original_username').val();
+    var current = $('.user-editor input.username').val();
+    var element = document.getElementById('username');
+
+    if( current != original ){
+        $.getJSON( '/en/users/check_username/' + current, function( data ){
+            if( !data.valid ){
+                element.setCustomValidity( "Invalid username.  Username already exists." );
+            }else{
+                element.setCustomValidity( "" );
+            }   
+        });
+    }
+}
+
+
+function extractAccess(){
+
+    var countries = [];
+    var roles = [];
+
+    $('select.access-levels option').each( function(){
+        countries.push( $(this).attr('country') );
+        roles.push( $(this).attr('role') );
+    });
+
+    return {
+        'countries':countries,
+        'roles':roles
+    };
+}
+
+function extractData(){
+
+    var data = {};
+
+    $('select.data-elements option').each( function(){
+        obj = { "val": $(this).attr('datavalue') };
+        if( $(this).attr('datastatus') ) obj.status = $(this).attr('datastatus');
+        data[$(this).attr('datakey')] = obj;
+    });
+
+    return {'data':data};
+}
 

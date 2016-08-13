@@ -183,15 +183,19 @@ class User:
                     self.username, 
                     'Username must match a username in the database.'
                 )
+
         #Check that the password is a hash.
+        logging.warning( self.password )
         if not pbkdf2_sha256.identify( self.password ):
             raise InvalidCredentialException( 
                 'password', 
                 self.password,
                 'Password must be hashed according to the specified hashing policy.'
             )
+
         #Raises an InvalidRoleException if role, or ancestor role doesn't exist.
         User.validate_roles( self.countries, self.roles )
+
         #Raises an InvalidCredentialException if the email is not valid.
         if not User.EMAIL_REGEX.match(self.email):
             raise InvalidCredentialException( 'email', self.email )
@@ -383,7 +387,7 @@ class User:
         return pbkdf2_sha256.encrypt(password)
     
     @staticmethod
-    def new_user( username, email, unhashed_pass, countries, roles ):
+    def new_user( username, email, unhashed_pass, countries, roles, data={} ):
         """
         Utility function to help create new user objects. 
         Validates and prepares the data given, creates a new user writes the user to the
@@ -415,6 +419,54 @@ class User:
 
         #Create the user, write it to db and return the object.
         user = User( username, email, hashed_pass, countries, roles, state="new" )
+        user.to_db()
+        return user
+
+    @staticmethod
+    def update_user( username, email, unhashed_pass, countries, roles, data={} ):
+        """
+        Utility function to help update user objects. 
+        Validates and prepares the data given, loads the user from db, edits the users 
+        data and writes the user to the db before returning the final user to the caller. 
+        Preparation includes the hashing of the new password.
+
+        Args:
+            username (str) Must be unique in the database.
+            email (str) Must be a valid email address.
+            unhashed_pass (str) The unhashed password.
+            countries ([str]) A list of countries the account has access to.
+            roles ([str]) A corresponding list of access roles for each country
+                with the same index in the countries argument.
+
+        Returns:
+            The user object if it has been successfully validated.
+    
+        Raises:
+            InvalidCredentialException if the username or password isn't valid.
+            InvalidRoleException if a role doesn't exist or doesn't have a valid
+                ancestor list.
+        """
+        
+        #Hash the password with a random salt size of 16 bytes and 29000 rounds.
+        hashed_pass = User.hash_password( unhashed_pass )
+        
+
+        #Create the user, write it to db and return the object.
+        user = User.from_db( username )
+        user.username = username
+        user.email = email
+        user.password = hashed_pass
+        user.countries = countries 
+        user.roles = roles
+        user.updated = datetime.now().isoformat()
+        if( data ):
+            user.data = data
+
+        logging.warning( user.password )
+        #Validate the details
+        user.validate()
+        
+        #Update and return
         user.to_db()
         return user
 

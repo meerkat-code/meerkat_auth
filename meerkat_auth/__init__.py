@@ -3,7 +3,7 @@ meerkat_hermers.py
 
 Root Flask app for the Meerkat Hermes messaging module.
 """
-from flask import Flask, redirect, g 
+from flask import Flask, redirect, g, render_template 
 from flask.json import JSONEncoder
 from flask_restful import Api, reqparse
 from flask.ext.babel import Babel, gettext, ngettext, get_translations, get_locale, support
@@ -52,12 +52,12 @@ app.register_blueprint(roles, url_prefix='/<language>/roles')
 
 @app.route("/")
 def root():
-    return redirect("/" + app.config["DEFAULT_LANGUAGE"])
+    return redirect("/" + app.config["DEFAULT_LANGUAGE"] + "/")
 
 #display something at /
-@app.route('/')
-def hello_world():
-    """Display something at /.  
-       This method loads a dynamodb table and displays its creation date.
-    """
-    return "Meerkat_Auth"
+@app.route('/<language>/')
+def index(language):
+    """Display something at /."""
+    g.language = language
+    app.logger.warning(g.language)
+    return render_template('login.html')

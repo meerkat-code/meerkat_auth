@@ -255,10 +255,10 @@ class User:
                 r['password'],
                 r['countries'],
                 r['roles'],
-                state=r['state'],
-                updated=r['updated'],
-                creation=r['creation'],
-                data = r['data']
+                state=r.get('state', 'undefined'),
+                updated=r.get('updated', 'undefined'),
+                creation=r.get('creation', 'undefined'),
+                data = r.get('data', {})
             )
             logging.info( 'Returning user:\n' + repr(user) )
             return user
@@ -417,7 +417,72 @@ class User:
         user = User( username, email, hashed_pass, countries, roles, state="new" )
         user.to_db()
         return user
-        
+
+    @staticmethod
+    def get_all(countries, attributes):
+        """
+        Fetches from the database the requested attributes for all users that belong
+        to the specified country. If country or attributes equate to false then
+        all possible options for that argument will be used.
+    
+        Args:
+            country ([str]) A list of countries for which we want user accounts.  This is an OR
+                list - i.e. any account attached to ANY of the countries in the list is retruned.
+            attributes ([str]) A list of user account attribute names that we want to download.
+
+        Returns:
+            A python dictionary storing user accounts by username.
+        """
+        #Set things up.
+        logging.info('Loading users for country ' + str(countries) + ' from database.')
+        table = boto3.resource('dynamodb').Table(meerkat_auth.app.config['USERS'])
+        users = {}   
+ 
+        #Allow any value for attributes and countries that equates to false.
+        if not attributes:
+            attributes = []
+        if not countries:
+            countries = []
+
+        #If a single value is specified, but not as a list, turn it into a list.
+        if not isinstance(countries, list):
+            countries = [countries]
+        if not isinstance(attributes, list):
+            attributes = [attributes]
+  
+        #Add username to attributes if not already included, as return dict is indexed by them.
+        if attributes and 'username' not in attributes:
+            attributes.append('username')
+
+        #Assemble scan arguments programatically, by building a dictionary.
+        kwargs = {}
+
+        #Include AttributesToGet if any are specified (by not including them we get them all).
+        if attributes:
+            kwargs["AttributesToGet"] = attributes
+
+        if not countries:
+            #If no country is specified, get all users and return as dict indexed by username.
+            for user in table.scan(**kwargs).get("Items", []):
+                users[user["username"]] = user 
+            return users
+
+        else:
+            #Load data separately for each country because Scan can't perform OR on CONTAINS
+            for country in countries:
+
+                kwargs["ScanFilter"]={
+                    'countries': {
+                        'AttributeValueList':[country], 
+                        'ComparisonOperator':'CONTAINS'
+                    }
+                } 
+
+                #Get and combine the users together in a no-duplications dict indexed by username.
+                for user in table.scan(**kwargs).get("Items", []):
+                    users[user["username"]] = user 
+               
+            return users
 
 class InvalidCredentialException( Exception ):
     """

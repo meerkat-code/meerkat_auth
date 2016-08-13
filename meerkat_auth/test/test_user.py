@@ -32,8 +32,6 @@ class MeerkatAuthUserTestCase(unittest.TestCase):
         #Update the objects in case something else has spuriously has changed/deleted them.
         for role in roles:
             role.to_db()
-        
-        logging.warning(meerkat_auth.app.config['SECRET'])
 
     def tearDown(self):
         """Tear down after testing."""
@@ -336,4 +334,63 @@ class MeerkatAuthUserTestCase(unittest.TestCase):
             ) 
         ) 
 
+    def test_get_all(self):
+        """Test the staticmethod get_all()."""
+        #Create the test users.
+        #Create a test user and write to db.
+        user1 = User(
+            'testUser1', 
+            'test1@test.org.uk',
+            ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+             'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'), #Hash of 'password'
+            ['demo', 'jordan'],
+            ['manager', 'personal'],
+            data={
+                'name':'Testy McTestface'
+            },
+            state='live'
+        )    
+        user1.to_db()
+
+        user2 = User(
+            'testUser2', 
+            'test2@test.org.uk',
+            ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+             'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'), #Hash of 'password'
+            ['demo'],
+            ['personal'],
+            data={
+                'name':'Tester Testy'
+            },
+            state='live'
+        )    
+        user2.to_db()
+
+        #Request just users with jordan accounts and check correct data is returned
+        response = User.get_all('jordan',['email','roles'])
+        expected = {
+            user1.username: {
+                'username': user1.username, 
+                'roles': user1.roles, 
+                'email': user1.email
+            }
+        }
+        self.assertEqual( response, expected )
         
+        #Request a different attribute set of users with demo or jordan accounts.
+        response = User.get_all(['jordan', 'demo'],'email')
+        expected = {
+            user2.username: { 'email': user2.email, 'username': user2.username }, 
+            user1.username: { 'email': user1.email, 'username': user1.username }
+        }
+        self.assertEqual( response, expected )
+
+        #Request all users and all attributes.
+        response = User.get_all([], None)
+        expected = {
+            user1.username: user1.to_dict(),
+            user2.username: user2.to_dict()
+        }
+        self.assertEqual( response, expected )
+
+

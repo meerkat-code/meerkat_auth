@@ -15,10 +15,43 @@ body{
 
 .page-content {
     min-height: 85vh;
-    padding: 10px 0;
 }
 
+.chartBox{
+	padding: 0px;
+}
 
+.chartBox__heading{
+	border-bottom: 1px solid #D7D7D7;
+	color: #666;
+	font-family: inherit;
+	font-weight: 500;
+	line-height: 1.1em;
+	font-size: 18px;
+	padding: 7px 10px 4px;
+	display: table;
+	width: 100%;
+}
+
+.chartBox__content{
+	display: block;
+	padding: 10px 10px;
+    min-height: 260px
+}
+
+.chartBox__type-selector{
+	display: table-cell;
+	vertical-align: middle;
+	font-size: 14px;
+}
+
+.box {
+    background: #FFF;
+    border-radius: 5px;
+    border: solid 1px #E2E2E2;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
 
 // NAVBAR FORMATING
 .navbar{
@@ -72,6 +105,17 @@ body{
 	}
 }
 
+.tab-title{ 
+	display: inline-block;
+	font-size: 24px;
+	line-height: 42px;
+	padding: 0 15px;
+}
+
+.top-bar{
+    margin-bottom: 10px;
+}
+
 //Footer formating
 footer{
 	background: $darkGrey;
@@ -117,4 +161,140 @@ footer{
   }
 
 }
+
+//Login page
+
+body.blue{
+  background: $blue;
+  padding: 0;
+}
+
+.login-title{
+  color: white;
+  font-size: 40px; 
+  margin: 40px 0 0 40px;
+}
+
+.login-box-holder{
+    width: 250px;
+    margin: 15vh auto 0;
+}
+
+.login{ 
+
+    label{
+        display: block;
+        padding-left: 20px;
+    }
+
+    input.text{
+        display: block;
+        background: $lightGrey;
+        color: $textGrey;
+        padding: 10px;
+        border-radius: 5px;
+        width: 100%;
+        border: 1px solid #ddd;
+    }
+
+    .form-group{
+        margin-bottom: 20px;
+        width: 100%;
+        display: block;
+    }
+
+    .submit{
+        background: $highlight;
+        color: #FFF;
+        padding: 10px 20px;
+        border-radius: 5px;
+        border: none;
+        font-size: 18px;
+        margin: 20px 0 10px;
+    }
+
+    .chartBox__heading{
+        padding: 7px 5px 4px 10px;
+    }
+
+    .lang-sel{ 
+        margin: 0px;  
+    }
+
+    .lang{
+        position: relative;
+        top: -3px;
+        right: -2px;
+        background: $blue;
+        color: #FFF;
+        font-size: 14px;
+        border: 1px solid $blue;
+    }
+
+    .lang:hover{
+      background: $highlight;
+      color: white;
+      text-decoration: none;
+      border: 1px solid $highlight;
+    }
+}
+
+.bootstrap-table .table.table-no-bordered > thead > tr > th, 
+.bootstrap-table .table.table-no-bordered > tbody > tr > td{
+    border-right: none;
+    border-left: none;
+}
+
+.table > caption + thead > tr:first-child > th,
+.table > colgroup + thead > tr:first-child > th,
+.table > thead:first-child > tr:first-child > th{
+    background: $lightGrey;
+    border-top: 1px solid #ddd;
+    border-radius: 0px;
+}
+
+.input-group{
+    width: 100%;
+    margin-bottom: 5px;
+    input, select{
+        padding: 3px 5px;
+    }
+    label{
+        padding-left: 0px;
+    }
+
+    @media screen and (min-width: 1083px){
+        text-align: right;
+    }
+
+    label.access,
+    label.data{
+        text-align: left;
+        margin-top: 5px;
+    }
+}
+
+.form-section {
+    position: relative;
+    border: #ddd solid 1px;
+    padding: 0px 10px 10px;
+    top: 10px;
+    border-radius: 3px;
+    margin-bottom: 10px;
+}
+
+.section-title {
+    font-weight: bold;
+    position: relative;
+    top: -10px;
+    background: white;
+    display: inline-block;
+    padding: 0px 10px;
+}
+
+.user-editor button{
+    margin-top: 10px;
+}
+
+
 

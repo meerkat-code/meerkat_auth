@@ -67,7 +67,7 @@ gulp.task('js', function() {
 
 
 // SASS/CSS TASKS
-gulp.task('sass', function() {
+gulp.task('sass', ['rename-css-to-scss'], function() {
   return gulp.src('meerkat_auth/src/sass/main.scss')
     .pipe(gulpif(
       production,
@@ -81,8 +81,9 @@ gulp.task('sass', function() {
 });
 
 // Hacky hacky hack to get mapbox.css as scss for SASS to compile it...
-gulp.task('mapbox-rename-css-to-scss', function() {
-  return gulp.src([])
+gulp.task('rename-css-to-scss', function() {
+  return gulp.src(mainBowerFiles())
+    .pipe(filter('*.css'))
     .pipe(rename(function(path) {
       path.extname = ".scss"
     }))

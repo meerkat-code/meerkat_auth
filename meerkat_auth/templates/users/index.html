@@ -1,10 +1,54 @@
 {% extends 'base.html' %}
 {% block body %}
-USER MANAGER
+<div class="top-bar row">
+	<div class="tab-title less-padding-col">
+		{{_('User Manager') }}
+	</div>
+    <div class="search-bar">
+    </div>
+</div>
+<div class="row">
+	<div class="col-xs-12 less-padding-col">
+		<div class="box chartBox">
+			<div class="chartBox__heading">
+				{{ _('User Details') }}
+			</div>
+			<div class="chartBox__content" >
+			    <div class="intro">					
+				</div>
+				<div class="user-editor">
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="breaker"></div>
+<div class="row">
+	<div class="col-xs-12 less-padding-col">
+		<div class="box chartBox">
+			<div class="chartBox__heading">
+				{{ _('Users') }}
+			</div>
+			<div class="chartBox__content" >
+			    <div class="intro">					
+				</div>
+				<div id='user-table' class="user-table">
+                    <table></table>
+                </div>
+			</div>
+		</div>
+	</div>
+</div>
+
 {% endblock %}
 {% block pageJS %}
 <script>
+var users = {{users|safe}};
+var user = {{user|safe}};
+
+console.log(users);
 $('.navbar-nav li').removeClass('active');
 $('.navbar-nav__users').addClass('active');
+drawUserTable();
 </script>
 {% endblock %}

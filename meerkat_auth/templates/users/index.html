@@ -32,6 +32,7 @@
 			<div class="chartBox__content" >
 			    <div class="intro">					
 				</div>
+                <div class='table-toolbar'></div>
 				<div id='user-table' class="user-table">
                     <table></table>
                 </div>
@@ -50,5 +51,6 @@ console.log(users);
 $('.navbar-nav li').removeClass('active');
 $('.navbar-nav__users').addClass('active');
 drawUserTable();
+drawUserEditor("");
 </script>
 {% endblock %}

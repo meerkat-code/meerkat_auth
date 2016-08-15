@@ -45,40 +45,83 @@ def check_username(username):
     return jsonify( {'valid':not User.check_username(username)} )
 
 @users.route('/update_user/<username>', methods=['POST'])
-def update_user(username):
+@users.route('/update_user/', methods=['POST'])
+def update_user(username='new'):
 
     current_app.logger.warning( username )
     current_app.logger.warning( request.json )
     
+    #Load the form's data.
     data = request.json
 
-    try: 
-        if username == data["username"]:
-            user = User.update_user(
-                data["username"],
-                data["email"],
-                data["password"],
-                data["countries"],
-                data["roles"],
-                data = data["data"]
-            )
-        else:
-            user = User.new_user( 
-                data["username"], 
-                data["email"], 
-                data["password"], 
-                data["countries"], 
-                data["roles"],
-                data = data["data"] 
-            )
-           
-            User.delete( username )
+    #Form password field defaults to empty, only update password if something is entered.
+    #Original password hash is stored in form hidden input to avoid having to reload user here.
+    if data["password"]:
+        data["password"] = User.hash_password(data["password"])
+    else:
+        data["password"] = data["original_password"]
 
-    except (InvalidCredentialException, InvalidRoleException) as e:
-        return repr(e)
+    
 
+    #Create a user object represented by the form input.
+    user = User(
+        data["username"],
+        data["email"],
+        data["password"],
+        data["countries"],
+        data["roles"],
+        state = data["state"],
+        updated = datetime.datetime.now().isoformat(),
+        creation = data["creation"],
+        data = data["data"]
+    )   
+
+
+    #If username has changed, then we are creating a new record for the purposes of validation.
+    #...because validation will say "username already exists" unless user state is "new".
+    if username != data["username"]:
+        user.state = "new"
+
+    #Validate the new user object.     
+    try:
+        user.validate()
+    except (InvalidRoleException, InvalidCredentialException) as e:
+        return str(e)
+    except Exception as e:
+        return str(e)
+        raise
+
+    #If username has changed, then we are creating a new db record so delete the old one.
+    #Reset state once validation complete, so changing username doesn't wipe the user's state.
+    if username != data["username"]:
+        user.state = data["state"]
+        User.delete( username )
+
+    current_app.logger.warning( user.data )
+
+    #If succesfully validated, write the changes to the database.
+    user.to_db()
     return "Successfully Updated"
 
+@users.route('/delete_users', methods=['POST'])
+def delete_users():
+
+    current_app.logger.warning( request.json )
+    
+    #Load the list of users to be deleted.
+    users = request.json
+    
+    #Try to delete users
+    try:
+        for username in users:
+            User.delete(username)
+    except Exception as e:
+        return ("Unfortunately there was an error:\n " + str(e) + 
+                "\nContact the administrator if the problem persists.")
+
+    return "Users succesfully deleted."
+
+    
 
 @users.route('/')
 def index():
@@ -86,8 +129,8 @@ def index():
     #For testing/development purposes insert a payload here:
     payload = {
         u'acc': {
-            u'demo': [u'manager', u'registered', u'personal', u'shared'], 
-            u'jordan': [u'registered', u'personal']
+            u'demo': [u'manager', u'private', u'shared'], 
+            u'jordan': [ u'cd', u'personal']
         }, 
         u'data': {u'name': u'Testy McTestface'}, 
         u'usr': u'testUser',   

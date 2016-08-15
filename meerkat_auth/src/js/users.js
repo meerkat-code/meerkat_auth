@@ -1,7 +1,7 @@
 function drawUserTable(){
     //Get all users from the database.
     $.getJSON( '/en/users/get_users', function(data){
-
+       
         //Display the data in a bootstrap table
         var columns = [{
                 'field': 'state',
@@ -54,6 +54,51 @@ function drawUserTable(){
             drawUserEditor($element.username);
         });
 
+        //Add extra toolbar buttons
+        var buttons = "<div class='btn-group  pull-right table-custom-toolbar'>" + 
+            "<button class='btn highlight delete-users' type='button'>" +
+            "<span class='glyphicon glyphicon-trash'/></button>" +
+            "<button class='btn blue new-user' type='button'>" +
+            "<span class='glyphicon glyphicon-plus'/></button>" +
+            "</div>";
+
+        $('.fixed-table-toolbar').append(buttons);
+
+        $('button.new-user').click( function(){
+            drawUserEditor("");
+        });
+
+        $('button.delete-users').click( function(){
+            console.log( "Deleting users..." );
+            var selected = $('#user-table table').bootstrapTable('getSelections');
+            var usernames = [];
+            var confirmString = "Are you sure you want to delete the following users?\n";
+            for( var user in selected ){
+                usernames.push( selected[user].username );
+                confirmString = confirmString + selected[user].username + ", ";
+            }
+            
+            if( confirm(confirmString.slice(0, -2)) ){
+                //Post json to server.
+                $.ajax({
+                    url: '/en/users/delete_users',
+                    type: 'post',
+                    success: function (data) {
+                        alert(data);
+                        $('#user-table').html("");
+                        drawUserTable();
+                    },
+                    error: function (data) {
+                        alert( "There has been a server error. Please contact administrator and try again later." );
+                        $('.user-editor .submit-form').text( buttonText );
+                    },
+                    contentType: 'application/json;charset=UTF-8',
+                    data: JSON.stringify(usernames, null, '\t')
+                });
+                drawUserEditor("");
+            }
+        });
+
     });
 
 }
@@ -99,12 +144,12 @@ function drawUserEditor(username){
 
         html += "<div class='input-group row'>" + 
                 "<label class='creation col-xs-12 col-md-6 col-lg-5'>Creation time:</label>" + 
-                "<input type='text' disabled class='creation col-xs-12 col-md-6 col-lg-7' value='" + 
-                data.creation + "'/></div>";
+                "<input type='text' readonly class='creation col-xs-12 col-md-6 col-lg-7' value='" + 
+                data.creation + "' name='creation' /></div>";
 
         html += "<div class='input-group row'>" + 
                 "<label class='updated col-xs-12 col-md-6 col-lg-5'>Last update:</label>" + 
-                "<input type='text' disabled class='updated col-xs-12 col-md-6 col-lg-7' value='" + 
+                "<input type='text' readonly class='updated col-xs-12 col-md-6 col-lg-7' value='" + 
                 data.updated + "'/></div>";
 
         html += "</div>";
@@ -132,12 +177,18 @@ function drawUserEditor(username){
                 "<label class='role col-xs-12 col-md-6 col-lg-5'>Access Role:</label>" + 
                 "<select class='role col-xs-12 col-md-6 col-lg-7'>";
 
-        var roles = user.acc[countries[0]];
-        for( var j in roles){
-            role = roles[j];
-            html += "<option value='" + role + "' ";
-            if( j === 0 ) html += "selected";
-            html+= ">" + toTitleCase( role ) + "</option>";
+        function drawAvailableRoles(country){
+            console.log(country);
+            var roles = user.acc[country];
+            console.log( roles );
+            var optionsHTML = "";
+            for( var j in roles){
+                role = roles[j];
+                optionsHTML += "<option value='" + role + "' ";
+                if( j === 0 ) optionsHTML += "selected";
+                optionsHTML += ">" + toTitleCase( role ) + "</option>";
+            }
+            $('select.role').html( optionsHTML );
         }
                                     
         html += "</select></div>";
@@ -162,7 +213,7 @@ function drawUserEditor(username){
                 if( countries.indexOf( country ) == -1 ) optionsHTML += "disabled";
                 optionsHTML += ">" + toTitleCase( country ) + " | " + toTitleCase( role ) + "</option>";
             }
-            return optionsHTML;
+            $('select.access-levels').html( optionsHTML );
         }
 
         html += "</select>";
@@ -206,7 +257,7 @@ function drawUserEditor(username){
                     optionsHTML += ">" + dataKeys[x] + " | " + element.val + "</option>";
                 }
             }
-            return optionsHTML;
+            $('select.data-elements').html( optionsHTML );
         }
 
         html += "</select>";
@@ -219,12 +270,22 @@ function drawUserEditor(username){
         html += "<input type='hidden' class='original_username' name='original_username' value='" +
                 data.username + "' />";
 
+        html += "<input type='hidden' class='original_password' name='original_password' value='" + 
+                data.password + "' />";
+
+        state = data.state !== "" ? data.state : "new";
+
+        html += "<input type='hidden' class='state' name='state' value='" + state + "' />";
+
         html += "<div class='form-messages col-xs-12 col-sm-6'> </div>";
 
+        buttonText = username === "" ? "Create User" : "Submit Changes";
+
         html += "<button type='button' class='col-xs-12 col-sm-6 btn btn-large submit-form pull-right'>"+
-                "Submit Changes</button>";
+                buttonText + "</button>";
 
         html += "</form>";
+
         //DRAW THE FORM
         $('.user-editor').html( html );
 
@@ -238,7 +299,7 @@ function drawUserEditor(username){
         //Update the data elements shown in the multi-select box.
         function updateData(){
             //Re draw the data
-            $('select.data-elements').html( drawDataOptions() );
+            drawDataOptions();
 
             //Fill in data element values when clicking on a data element in select box.
             $('.data-elements option').click( function(e){
@@ -313,13 +374,12 @@ function drawUserEditor(username){
         //HANDLE ACCESS LEVELS
 
         drawAccessOptions();
-
-        //Update the access elements shown in the multi-select box.
-        function updateAccess(){
-            $('select.access-levels').html( drawAccessOptions() );
-        }
-
-        updateAccess();
+        drawAvailableRoles($('select.country').val());
+        
+        $('select.country').change(function(){
+            drawAvailableRoles($('select.country').val());
+        });
+        
 
         //Add the new access element when clicking on the add access value.
         $('button.add-access').click( function(){
@@ -328,7 +388,7 @@ function drawUserEditor(username){
             if( country && role ){
                 data.countries.push( country );
                 data.roles.push( role );
-                updateAccess();
+                drawAccessOptions();
             }
         });   
 
@@ -360,7 +420,7 @@ function drawUserEditor(username){
                     }
                     data.countries = cleanArray( data.countries );
                     data.roles = cleanArray( data.roles );
-                    updateAccess();
+                    drawAccessOptions();
                 }
                 
             }
@@ -369,6 +429,8 @@ function drawUserEditor(username){
 
         //FORM SUBMISSION
         $('.user-editor .submit-form').click(function(){
+
+            $('.user-editor .submit-form').html("Working <div class='loading'></div>" );
 
             //Assemble complete json object.
             var data = {};
@@ -390,6 +452,12 @@ function drawUserEditor(username){
                 type: 'post',
                 success: function (data) {
                     alert(data);
+                    drawUserEditor("");
+                    drawUserTable();
+                },
+                error: function (data) {
+                    alert( "There has been a server error. Please contact administrator and try again later." );
+                    $('.user-editor .submit-form').text( buttonText );
                 },
                 contentType: 'application/json;charset=UTF-8',
                 data: JSON.stringify(data, null, '\t')

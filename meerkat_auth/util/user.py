@@ -2,7 +2,7 @@ from datetime import datetime
 from meerkat_auth.util.role import Role
 from passlib.hash import pbkdf2_sha256
 from flask import jsonify
-import meerkat_auth, uuid, logging, boto3, jwt, re 
+import meerkat_auth, uuid, logging, boto3, jwt, re, json
 
 class User:
     """
@@ -103,6 +103,12 @@ class User:
         #Write to DB.
         logging.info( "Validated. Writing object to database." )
         users = boto3.resource('dynamodb').Table(meerkat_auth.app.config['USERS'])
+
+        #If new user, set the state as live now it is going into the db and add the creation timestamp.
+        if self.state == "new":
+            self.creation = datetime.now().isoformat()
+            self.state = "live" 
+        logging.warning(self.to_dict())
         response = users.update_item(
             Key={
                 'username':self.username
@@ -115,15 +121,12 @@ class User:
                 'state':{ 'Value':self.state, 'Action':'PUT' },
                 'creation':{ 'Value':self.creation, 'Action':'PUT' },
                 'updated':{ 'Value':self.updated, 'Action':'PUT' },
-                'data':{ 'Value':self.data, 'Action':'PUT' }
+                'data':{ 'Value':json.dumps(self.data), 'Action':'PUT' }
             }
         )
         logging.info( "Response from database:\n" + str(response) )
 
-        #If this is a new user who has never been written to the db before
-        if self.state == "new":
-            self.state = "live"
-        
+
         
         return response
 
@@ -264,6 +267,10 @@ class User:
                 creation=r.get('creation', 'undefined'),
                 data = r.get('data', {})
             )
+
+            #We want NO NEW USERS in the database.  Do 2nd clean up here.
+            user.state = "live" if user.state == "new" else user.state
+
             logging.info( 'Returning user:\n' + repr(user) )
             return user
     
@@ -550,7 +557,9 @@ class InvalidCredentialException( Exception ):
 
     def __str__(self):
         """Readable string to print, not including the invalid value."""
-        return "Invalid credential supplied. Please check and try again."
+        return "Invalid credential supplied. Please check the {} and try again.".format(
+            self.credential
+        )
 
     def __repr__(self):
         """String referencing both the invalid credential and the its invalid value."""

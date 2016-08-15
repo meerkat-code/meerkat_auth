@@ -253,6 +253,10 @@ body.blue{
     border-radius: 0px;
 }
 
+.user-table table tr {
+    cursor: pointer;
+}
+
 .input-group{
     width: 100%;
     margin-bottom: 5px;
@@ -292,28 +296,54 @@ body.blue{
     padding: 0px 10px;
 }
 
-.user-editor button{
-    margin-top: 10px;
+.user-editor{ 
+    button{
+        margin-top: 10px;
+    }
+
+    .top-part{
+        border-bottom: 1px solid #ddd; 
+        padding-bottom: 10px;
+        margin-bottom: 10px;
+    }
+
+    .submit-form{
+        padding: 10px 15px;
+        color: #FFF;
+        background: $blue;
+        font-size: 16px;
+        font-weight: bold;
+        margin: 20px 40px 30px;
+        width: 200px;
+    }
+
+    .submit-form:active{
+        background: $highlight;
+    }
 }
 
-
-.user-editor .top-part{
-    border-bottom: 1px solid #ddd; 
-    padding-bottom: 10px;
-    margin-bottom: 10px;
+.loading{
+    background: url('/static/img/loading.gif');
+    background-repeat: no-repeat;
+    background-size: cover;
+    display: inline-block;
+    width: 20px;
+    height: 20px;
 }
 
-.user-editor .submit-form{
-    padding: 10px 15px;
-    color: #FFF;
+.table-custom-toolbar{
+    margin: 10px;
+    color: white;
+
+    .btn:hover, .btn:focus,{
+        color: white;
+    }
+}
+
+.blue{
     background: $blue;
-    font-size: 16px;
-    font-weight: bold;
-    margin: 20px 40px 30px;
-    width: 200px;
 }
 
-.user-editor .submit-form:active,
-.user-editor .submit-form:focus{
+.highlight{
     background: $highlight;
 }

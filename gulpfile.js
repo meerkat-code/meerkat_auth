@@ -106,9 +106,9 @@ gulp.task('fonts', function() {
 });
 
 // IMG TASKS
-gulp.task('img', function() {
+gulp.task('img',['gif'], function() {
   return gulp.src([
-    'meerkat_auth/src/img/**/*.{gif,jpg,png,svg}'
+    'meerkat_auth/src/img/**/*.{jpg,png,svg}'
   ])
     .pipe(imagemin({
       optimizationLevel: 3,
@@ -128,6 +128,12 @@ gulp.task('img', function() {
       ]
     }))
     .pipe(gulp.dest('meerkat_auth/static/img/'));
+});
+
+gulp.task('gif', function(){
+  return gulp.src([
+    'meerkat_auth/src/img/**/*.gif'
+  ]).pipe(gulp.dest('meerkat_auth/static/img/'));
 });
 
 //LANGUAGE TASKS

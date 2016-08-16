@@ -108,7 +108,9 @@ class User:
         if self.state == "new":
             self.creation = datetime.now().isoformat()
             self.state = "live" 
-        logging.warning(self.to_dict())
+
+        logging.warning("Data type: " + str(type(self.data) ) )
+
         response = users.update_item(
             Key={
                 'username':self.username
@@ -121,7 +123,7 @@ class User:
                 'state':{ 'Value':self.state, 'Action':'PUT' },
                 'creation':{ 'Value':self.creation, 'Action':'PUT' },
                 'updated':{ 'Value':self.updated, 'Action':'PUT' },
-                'data':{ 'Value':json.dumps(self.data), 'Action':'PUT' }
+                'data':{ 'Value':self.data, 'Action':'PUT' }
             }
         )
         logging.info( "Response from database:\n" + str(response) )
@@ -188,7 +190,6 @@ class User:
                 )
 
         #Check that the password is a hash.
-        logging.warning( self.password )
         if not pbkdf2_sha256.identify( self.password ):
             raise InvalidCredentialException( 
                 'password', 
@@ -469,7 +470,6 @@ class User:
         if( data ):
             user.data = data
 
-        logging.warning( user.password )
         #Validate the details
         user.validate()
         
@@ -494,8 +494,7 @@ class User:
         """
         #Set things up.
         logging.info('Loading users for country ' + str(countries) + ' from database.')
-        table = boto3.resource('dynamodb').Table(meerkat_auth.app.config['USERS'])
-        users = {}   
+        table = boto3.resource('dynamodb').Table(meerkat_auth.app.config['USERS']) 
  
         #Allow any value for attributes and countries that equates to false.
         if not attributes:
@@ -521,12 +520,11 @@ class User:
             kwargs["AttributesToGet"] = attributes
 
         if not countries:
-            #If no country is specified, get all users and return as dict indexed by username.
-            for user in table.scan(**kwargs).get("Items", []):
-                users[user["username"]] = user 
-            return users
+            #If no country is specified, get all users and return as list.
+            return table.scan(**kwargs).get("Items", [])
 
         else:
+            users = {}
             #Load data separately for each country because Scan can't perform OR on CONTAINS
             for country in countries:
 
@@ -540,8 +538,9 @@ class User:
                 #Get and combine the users together in a no-duplications dict indexed by username.
                 for user in table.scan(**kwargs).get("Items", []):
                     users[user["username"]] = user 
-               
-            return users
+                
+            #Convert the dict to a list by getting values.
+            return list(users.values())
 
 class InvalidCredentialException( Exception ):
     """

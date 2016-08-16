@@ -18,8 +18,8 @@ def create_user():
 @users.route('/get_users')
 def get_users():
     countries = []
-    attributes = ["email", "roles", "creation", "data", "countries"]
-    return jsonify( User.get_all( countries, attributes ) )
+    attributes = ["email", "roles", "username", "countries", "creation", "data"]
+    return jsonify( {'rows': User.get_all( countries, attributes )} )
 
 @users.route('/get_user/')
 @users.route('/get_user/<username>')
@@ -61,7 +61,8 @@ def update_user(username='new'):
     else:
         data["password"] = data["original_password"]
 
-    
+    current_app.logger.warning( type(data["data"]) )
+    current_app.logger.warning( data["data"] )
 
     #Create a user object represented by the form input.
     user = User(

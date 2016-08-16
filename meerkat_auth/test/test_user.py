@@ -368,29 +368,38 @@ class MeerkatAuthUserTestCase(unittest.TestCase):
 
         #Request just users with jordan accounts and check correct data is returned
         response = User.get_all('jordan',['email','roles'])
-        expected = {
-            user1.username: {
-                'username': user1.username, 
-                'roles': user1.roles, 
-                'email': user1.email
-            }
-        }
+        expected = [{
+            'username': user1.username, 
+            'roles': user1.roles, 
+            'email': user1.email
+        }]
+        
         self.assertEqual( response, expected )
         
         #Request a different attribute set of users with demo or jordan accounts.
         response = User.get_all(['jordan', 'demo'],'email')
-        expected = {
-            user2.username: { 'email': user2.email, 'username': user2.username }, 
-            user1.username: { 'email': user1.email, 'username': user1.username }
-        }
-        self.assertEqual( response, expected )
+        
+        #We don't know what order the responses will be returned in.
+        for item in response:
+            if item['username'] == user1.username:
+                self.assertEqual( item['email'], user1.email )
+            elif item['username'] == user2.username:
+                self.assertEqual( item['email'], user2.email )
+            else:
+                self.assertTrue( False )
 
         #Request all users and all attributes.
         response = User.get_all([], None)
-        expected = {
-            user1.username: user1.to_dict(),
-            user2.username: user2.to_dict()
-        }
-        self.assertEqual( response, expected )
+
+        #We don't know what order the responses will be returned in.
+        for item in response:
+            #'data' remains a json string, so for comparison with to_dict() load as a dict.
+            item['data'] = json.loads( item['data'] )
+            if item['username'] == user1.username:
+                self.assertEqual( item, user1.to_dict() )                
+            elif item['username'] == user2.username:
+                self.assertEqual( item, user2.to_dict() )     
+            else:
+                self.assertTrue( False )
 
 

@@ -56,7 +56,7 @@ $('input.submit').click( function(){
         url: '/auth/login',
         type: 'post',
         success: function (data) {
-            alert(data);
+            window.location.replace("/"+language+"/users/");
         },
         error: function (data) {
             if( data.hasOwnProperty( 'message' ) ){

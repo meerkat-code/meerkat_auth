@@ -7,6 +7,7 @@ from flask import Blueprint, render_template, current_app, request, Response, js
 import json, datetime
 from meerkat_auth.user import User, InvalidCredentialException
 from meerkat_auth.role import Role, InvalidRoleException
+from meerkat_auth.require_jwt import require_jwt
 
 users = Blueprint('users', __name__, url_prefix="/<language>")
 
@@ -125,18 +126,8 @@ def delete_users():
     
 
 @users.route('/')
-def index():
-
-    #For testing/development purposes insert a payload here:
-    payload = {
-        u'acc': {
-            u'demo': [u'manager', u'private', u'shared'], 
-            u'jordan': [ u'cd', u'personal']
-        }, 
-        u'data': {u'name': u'Testy McTestface'}, 
-        u'usr': u'testUser',   
-        u'email': u'test@test.org.uk'
-    }
+@require_jwt(['manager'])
+def index(payload):
 
     return render_template( 
         'users/index.html', 

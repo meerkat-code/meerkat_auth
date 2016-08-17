@@ -1,6 +1,7 @@
-from flask import abort, request, current_app
+from flask import abort, request, current_app, make_response, jsonify
 from functools import wraps
 from jwt import InvalidTokenError
+from flask.ext.babel import gettext
 import jwt, meerkat_auth, inspect
 
 def check_access(access, countries, acc):
@@ -84,7 +85,13 @@ def require_jwt(access, countries=[""] ):
         def decorated(*args, **kwargs):
 
             #Extract the token from the cookies
+            token = ""
             token = request.cookies.get(meerkat_auth.app.config['COOKIE_NAME'])
+
+            #If no token is found in the cookies.
+            if not token:
+                abort( 401, gettext(u"You have not authenticated yet. "
+                                     "Please login before veiwing this page." ) )
 
             try:
                 #Decode the jwt and check it is structured as expected.
@@ -107,16 +114,12 @@ def require_jwt(access, countries=[""] ):
                 #Token is invalid if it doesn't have the required accesss levels.
                 else:
                     raise InvalidTokenError(
-                        message="Token doesn't have required access levels for this page."
+                        gettext(u"User doesn't have required access levels for this page.")
                     )
 
             #Return 401 if the jwt isn't valid.   
             except InvalidTokenError as e:
-                return Response( 
-                    json.dumps( {'message':str(e)} ), 
-                    status=401, 
-                    mimetype='application/json'  
-                )
+                abort( 401, str(e) ) 
                 
         return decorated
 

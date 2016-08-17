@@ -39,12 +39,15 @@ def login():
     #Load the form's data.
     args = request.json
 
-    #Try to authenticate the user and get the JWT
+    #Try to authenticate the user and set JWT in a cookie
     try:
         user = User.authenticate( args['username'], args['password'] )
         exp = calendar.timegm( time.gmtime() ) + meerkat_auth.app.config['TOKEN_LIFE']
         response = make_response( jsonify( {'message':'successful'} ) ) 
-        response.set_cookie( meerkat_auth.app.config['COOKIE_NAME'], value=user.get_jwt(exp) )
+        response.set_cookie( 
+            meerkat_auth.app.config['COOKIE_NAME'], 
+            value=user.get_jwt(exp)
+        )
         return response
     
     #If we get a failed credential exception return a 401 http error.
@@ -86,3 +89,5 @@ def get_user():
             status=500, 
             mimetype='application/json'  
         )
+
+

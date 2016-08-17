@@ -5,7 +5,6 @@ Root Flask app for the Meerkat Hermes messaging module.
 """
 from flask import Flask, redirect, g, render_template 
 from flask.json import JSONEncoder
-from flask_restful import Api, reqparse
 from flask.ext.babel import Babel, gettext, ngettext, get_translations, get_locale, support
 import boto3
 
@@ -18,7 +17,6 @@ from meerkat_auth.views.auth import auth
 app = Flask(__name__)
 app.config.from_object('config.Production')
 app.config.from_envvar('MEERKAT_AUTH_SETTINGS')
-api=Api(app)
 babel = Babel(app)
 
 # Internationalisation for the backend
@@ -56,3 +54,20 @@ def index(language):
     g.language = language
     app.logger.warning(g.language)
     return render_template('login.html')
+
+#Handle errors
+@app.errorhandler(401)
+@app.errorhandler(403)
+@app.errorhandler(404)
+@app.errorhandler(410)
+@app.errorhandler(418)
+@app.errorhandler(500)
+@app.errorhandler(501)
+@app.errorhandler(502)
+def error500(error):
+    """Serves page for generic error.
+    
+       Args:
+           error (int): The error code given by the error handler.
+    """
+    return render_template('error.html', error=error,  )

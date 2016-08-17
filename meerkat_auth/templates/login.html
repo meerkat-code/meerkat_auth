@@ -34,7 +34,7 @@
                         <label>{{_('Password')}}</label>
                         <input type="password" class="text" name="password" />
                     </div>
-                    <input type="submit" value="Login" class="submit pull-right" />
+                    <input type="button" value="Login" class="submit pull-right" />
 				</form>
 			</div>
 		</div>
@@ -43,4 +43,32 @@
 </body>
 </html>
 {% include 'js.html' %}
-{% block pageJS %}{% endblock %}
+{% block pageJS %}
+<script>
+$('input.submit').click( function(){
+    var formArray = {
+        'username': $('input[name=username]').val(),
+        'password': $('input[name=password]').val()
+    }
+    console.log( formArray );
+    //Post json to server.
+    $.ajax({
+        url: '/auth/login',
+        type: 'post',
+        success: function (data) {
+            alert(data);
+        },
+        error: function (data) {
+            if( data.hasOwnProperty( 'message' ) ){
+                alert( data.message );
+            }else{
+                alert( i18n.gettext("There has been a server error. " + 
+                                    "Please contact administrator and try again later.") );
+            }
+        },
+        contentType: 'application/json;charset=UTF-8',
+        data: JSON.stringify(formArray, null, '\t')
+    });
+});
+</script>
+{% endblock %}

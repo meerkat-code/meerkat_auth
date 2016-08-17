@@ -5,8 +5,8 @@ A Flask Blueprint module for the user manager page.
 """
 from flask import Blueprint, render_template, current_app, request, Response, jsonify
 import json, datetime
-from meerkat_auth.util.user import User, InvalidCredentialException
-from meerkat_auth.util.role import Role, InvalidRoleException
+from meerkat_auth.user import User, InvalidCredentialException
+from meerkat_auth.role import Role, InvalidRoleException
 
 users = Blueprint('users', __name__, url_prefix="/<language>")
 

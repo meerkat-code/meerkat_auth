@@ -44,7 +44,7 @@ def check_access(access, countries, acc):
 
         #...Else if the country specified by the decorator is "" (the wildcard)...
         elif country == "":
-            #...Look through all countries in the specified in the jwt...
+            #...Look through all countries specified in the jwt...
             for c in acc:
                 #...if any access level in jwt matches a level in the decorator...
                 if access[i] in acc[c]:
@@ -54,7 +54,7 @@ def check_access(access, countries, acc):
 
     return authorised
 
-def require_jwt(access, countries=[""]):
+def require_jwt(access, countries=[""] ):
     """
     Returns decorator to require valid JWT for authentication .
     
@@ -83,9 +83,8 @@ def require_jwt(access, countries=[""]):
         @wraps(f)
         def decorated(*args, **kwargs):
 
-            #Extract the token from the headers
-            auth_prefix = "Bearer "
-            token = request.headers.get('authorization')[len(auth_prefix):]
+            #Extract the token from the cookies
+            token = request.cookies.get(meerkat_auth.app.config['COOKIE_NAME'])
 
             try:
                 #Decode the jwt and check it is structured as expected.
@@ -98,7 +97,7 @@ def require_jwt(access, countries=[""]):
                 #Check that the jwt has required access.
                 if check_access(access, countries, payload['acc'] ):
                     
-                    #If the function specifies an argument entitled 'user'...
+                    #If the function specifies an argument entitled 'payload'...
                     if 'payload' in inspect.getargspec(f).args:
                         #...add the user object to the args.
                         kwargs['payload'] = payload

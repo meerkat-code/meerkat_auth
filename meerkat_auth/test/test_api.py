@@ -8,6 +8,8 @@ import json, meerkat_auth, unittest, jwt, calendar, time, logging, jwt
 from datetime import datetime
 from meerkat_auth.util.user import User, InvalidCredentialException
 from meerkat_auth.util.role import Role, InvalidRoleException
+from unittest.mock import MagicMock
+from unittest import mock
 
 class MeerkatAuthAPITestCase(unittest.TestCase):
 
@@ -62,16 +64,19 @@ class MeerkatAuthAPITestCase(unittest.TestCase):
         """Tear down after testing."""
         User.delete('testUser')
 
-    def test_login(self):
+    @mock.patch('flask.response.set_cookie')
+    def test_login(self, mock_patch):
         """Test the login resource."""
 
         #Post some data to the login function and check successful behaviour
         post_data = {'username':'testUser1', 'password':'password1'}
         post_response = self.app.post( '/login', data=post_data )
         post_json = json.loads( post_response.data.decode('UTF-8') )
-        print( post_response )
+        print( dir(post_response) )
         print( post_json )
-        self.assertTrue( post_json.get( 'jwt', False ) )
+        self.assertEqual( post_json.get( 'message', '' ), 'successful' )
+        self.assertTrue( request_mock.called )
+        print( request_mock.call_args )
         
         #Decode the jwt and check it is structured as expected.
         payload = jwt.decode(
@@ -136,7 +141,7 @@ class MeerkatAuthAPITestCase(unittest.TestCase):
         #Make a request with the jwt token in the header.
         response = self.app.get( '/user', headers=headers)
         user_out = json.loads( response.data.decode('UTF-8') )
-        user_in = User.from_db('testUser1').to_dict()     
+        user_in = User.from_db('testUser1').to_dict()    
         
         #Assert that the user returned equals the user put into the database.
         for key in user_in:

@@ -1,155 +1,174 @@
+/**:drawUserTable()
+
+    A function that draws the table of users for the user manager.  
+    It does this using bootstrap-table, a third party dependancy, collecting data
+    from the /users/get_users resource.
+*/
 function drawUserTable(){
-    //Get all users from the database.
-    //$.getJSON( '/en/users/get_users', function(data){
-       
-        //Display the data in a bootstrap table
-        var columns = [{
-                'field': 'state',
-                'checkbox': true,
-                'align': 'center',
-                'valign': 'middle'
-            },{
-                'field': "username",
-                'title': i18n.gettext('Username'),
-                'align': "left",
-                'class': "header",
-                'sortable': true,
-                'width': "25%"
-            },{
-                'field': "email",
-                'title': i18n.gettext('Email'),
-                'align': "left",
-                'class': "header",
-                'sortable': true,
-                'width': "25%"
-            },{
-                'field': "access",
-                'title': i18n.gettext('Access'),
-                'align': "left",
-                'class': "header",
-                'sortable': false,
-                'width': "25%"
-            },{
-                'field': "creation",
-                'title': i18n.gettext('Account Creation'),
-                'align': "left",
-                'class': "header",
-                'sortable': false,
-                'visible': true,
-                'width': "25%"
-            },{
-                'field': "data",
-                'title': i18n.gettext('Data'),
-                'align': "left",
-                'class': "header",
-                'sortable': false,
-                'visible': false,
-                'searchable': true,
-                'width': "25%"
-            }         
-        ];
+ 
+    //Define the table structure
+    var columns = [{
+            'field': 'state',
+            'checkbox': true,
+            'align': 'center',
+            'valign': 'middle'
+        },{
+            'field': "username",
+            'title': i18n.gettext('Username'),
+            'align': "left",
+            'class': "header",
+            'sortable': true,
+            'width': "25%"
+        },{
+            'field': "email",
+            'title': i18n.gettext('Email'),
+            'align': "left",
+            'class': "header",
+            'sortable': true,
+            'width': "25%"
+        },{
+            'field': "access",
+            'title': i18n.gettext('Access'),
+            'align': "left",
+            'class': "header",
+            'sortable': false,
+            'width': "25%"
+        },{
+            'field': "creation",
+            'title': i18n.gettext('Account Creation'),
+            'align': "left",
+            'class': "header",
+            'sortable': false,
+            'visible': true,
+            'width': "25%"
+        },{
+            'field': "data",
+            'title': i18n.gettext('Data'),
+            'align': "left",
+            'class': "header",
+            'sortable': false,
+            'visible': false,
+            'searchable': true,
+            'width': "25%"
+        }         
+    ];
 
-        function prepData(res){
-            for( var a in res.rows ){
-                //Format the access to make it more visually appearing
-                access = "";
-                var row = res.rows[a];
-                for( var b in row.countries ){
-                    access += caps(row.countries[b]) + "-" + caps(row.roles[b]) + " | ";
-                }
-                row.access = access.slice(0, -3);
-
-                //Format the data to make it searchable
-                data = "";
-                if( typeof(row.data) != "object" ){
-                    console.error("Bad user data - not an object.");
-                    row.data = {};
-                } 
-                var keys = Object.keys( row.data );
-                for(var c in keys){
-                    var element = row.data[keys[c]];
-                    data += caps(keys[c]) + ": " + caps( element.val ) + " | ";
-                }
-                row.data = data.slice(0,-3);
+    //A function that prepares the data for displaying in the table.
+    function prepData(res){
+        for( var a in res.rows ){
+            //Format the access to make it more visually appearing
+            access = "";
+            var row = res.rows[a];
+            for( var b in row.countries ){
+                access += caps(row.countries[b]) + "-" + caps(row.roles[b]) + " | ";
             }
-            return res.rows;
+            row.access = access.slice(0, -3);
+
+            //Format the user data to make it searchable (but not visible)
+            data = "";
+            if( typeof(row.data) != "object" ){
+                console.error("Bad user data - not an object.");
+                row.data = {};
+            } 
+            var keys = Object.keys( row.data );
+            for(var c in keys){
+                var element = row.data[keys[c]];
+                data += caps(keys[c]) + ": " + caps( element.val ) + " | ";
+            }
+            row.data = data.slice(0,-3);
+
+            //TODO: Format the creation time stamp to make it more readable.
         }
-        
-        table = $('#user-table table').bootstrapTable({
-            columns: columns,
-            classes: 'table table-no-bordered table-hover',
-            pagination: true,
-            pageSize: 20,
-            search: true,
-            url:'/en/users/get_users',
-            responseHandler: prepData,
-            showRefresh: true
-        });
+        return res.rows;
+    }
+    
+    //Creat the bootstrap table.
+    table = $('#user-table table').bootstrapTable({
+        columns: columns,
+        classes: 'table table-no-bordered table-hover',
+        pagination: true,
+        pageSize: 20,
+        search: true,
+        url:'/en/users/get_users',
+        responseHandler: prepData,
+        showRefresh: true
+    });
 
-        //Insert data into editor when clicking upon a row.
-        $('#user-table table').on('click-row.bs.table', function (row, $element, field) {
-            drawUserEditor($element.username);
-        });
+    //Insert data into editor when clicking upon a row.
+    $('#user-table table').on('click-row.bs.table', function (row, $element, field) {
+        drawUserEditor($element.username);
+    });
 
-        //Add extra toolbar buttons
-        var buttons = "<div class='btn-group  pull-right table-custom-toolbar'>" + 
-            "<button class='btn highlight delete-users' type='button'>" +
-            "<span class='glyphicon glyphicon-trash'/></button>" +
-            "<button class='btn blue new-user' type='button'>" +
-            "<span class='glyphicon glyphicon-plus'/></button>" +
-            "</div>";
+    //Add extra toolbar buttons
+    var buttons = "<div class='btn-group  pull-right table-custom-toolbar'>" + 
+        "<button class='btn highlight delete-users' type='button'>" +
+        "<span class='glyphicon glyphicon-trash'/></button>" +
+        "<button class='btn blue new-user' type='button'>" +
+        "<span class='glyphicon glyphicon-plus'/></button>" +
+        "</div>";
+    $('.fixed-table-toolbar').append(buttons);
 
-        $('.fixed-table-toolbar').append(buttons);
+    //Enable the new user button.
+    $('button.new-user').click( function(){
+        drawUserEditor("");
+    });
 
-        $('button.new-user').click( function(){
-            drawUserEditor("");
-        });
+    //Enable the delete user button.
+    $('button.delete-users').click( function(){
 
-        $('button.delete-users').click( function(){
-          
-            var selected = $('#user-table table').bootstrapTable('getSelections');
-            var usernames = [];
-            var confirmString = i18n.gettext("Are you sure you want to delete the following users?") + 
-                "\n";
-            for( var user in selected ){
-                usernames.push( selected[user].username );
-                confirmString = confirmString + selected[user].username + ", ";
+        //First of all extract the usernames of the users to be deleted.
+        var selected = $('#user-table table').bootstrapTable('getSelections');
+        var usernames = [];
+        var confirmString = i18n.gettext("Are you sure you want to delete the following users?") + 
+            "\n";
+        for( var user in selected ){
+            usernames.push( selected[user].username );
+            confirmString = confirmString + selected[user].username + ", ";
+        }
+
+        //If there are no usernames, just ignore.
+        if( usernames.length > 0 ){
+            //Check with the user before doing the deletion.
+            if( confirm(confirmString.slice(0, -2)) ){
+                //Do the deletion by posting json to server.
+                $.ajax({
+                    url: '/en/users/delete_users',
+                    type: 'post',
+                    success: function (data) {
+                        alert(data);
+                        $('#user-table table').bootstrapTable('refresh');
+                        drawUserEditor("");
+                    },
+                    error: function (data) {
+                        alert( i18n.gettext( "There has been a server error. " +
+                               "Please contact administrator and try again later." ) );
+                        $('.user-editor .submit-form').text( buttonText );
+                    },
+                    contentType: 'application/json;charset=UTF-8',
+                    data: JSON.stringify(usernames, null, '\t')
+                }); 
             }
-            if( usernames.length > 0 ){
-                if( confirm(confirmString.slice(0, -2)) ){
-                    //Post json to server.
-                    $.ajax({
-                        url: '/en/users/delete_users',
-                        type: 'post',
-                        success: function (data) {
-                            alert(data);
-                            $('#user-table table').bootstrapTable('refresh');
-                        },
-                        error: function (data) {
-                            alert( i18n.gettext( "There has been a server error. " +
-                                   "Please contact administrator and try again later." ) );
-                            $('.user-editor .submit-form').text( buttonText );
-                        },
-                        contentType: 'application/json;charset=UTF-8',
-                        data: JSON.stringify(usernames, null, '\t')
-                    });
-                    drawUserEditor("");
-                }
-            }
-        });
-
-    //});
-
+        }
+    });
 }
 
+/**:drawUserEditor()
+
+    A function that draws the form for editing/adding a user.  It assembles the html
+    and binds all the vent handlers to validate the form and ensure it works properly.
+    
+    :param string username:
+        The username of the user who's details we want to auto fill into the form. 
+*/
 function drawUserEditor(username){
     
     $.getJSON( '/en/users/get_user/' + username, function(data){
 
-        console.log( data );
-
         var html = "<form id='user-editor' class='user-editor'>";
         
+        //Creating the inputs for editing core details.
+        //---------------------------------------------
+
         html += "<div class='row top-part'><div class='col-xs-12 col-sm-6 col-md-4'>";
 
         html += "<div class='input-group row'>" + 
@@ -201,6 +220,8 @@ function drawUserEditor(username){
         html += "</div>";
 
         //Now create the access editor.
+        //-----------------------------
+
         html += "<div class='col-xs-12 col-sm-6 col-md-4'>";
 
         html += "<div class='form-section clearfix'> <div class='section-title'> " + 
@@ -275,6 +296,8 @@ function drawUserEditor(username){
         html += "</div></div>"; //End of input group and end of middle part.
 
         //Now create the data editor.
+        //---------------------------
+
         html += "<div class='col-xs-12 col-sm-6 col-md-4'>";
 
         html += "<div class='form-section clearfix'> <div class='section-title'>" + 
@@ -390,7 +413,14 @@ function drawUserEditor(username){
                     data.data[key].val = val;
                 }else{
                     data.data[key] = { "val": val };
-                }
+             /**:drawUserEditor()
+
+    A function that draws the form for editing/adding a user.  It assembles the html
+    and binds all the vent handlers to validate the form and ensure it works properly.
+    
+    :param string username:
+        The username of the user who's details we want to auto fill into the form. 
+*/   }
                 resetData();
                 updateData();
             }
@@ -528,7 +558,21 @@ function drawUserEditor(username){
 
 }
 
-//Reindexes an array with undefined values in it. 
+
+/**:cleanArray(array)
+
+    Recursively cleans an array that contains undefined elements.  When deleting
+    elements from a javascript array, it doesn't actually re-index the array, it 
+    leaves indexed "undefined"s e.g. ["1", undefined, "2", "3"]. This method
+    recursively removes undefined values and re-indexes the array so that the above
+    array would become ["1", "2", "3"]. 
+    
+    :param array array:
+        The array to be cleaned. 
+
+    :returns array:
+        The cleaned array.
+*/ 
 function cleanArray( array ){
     first = array.shift();
     if( array.length === 0 ) return first === undefined ? [] : [first];
@@ -536,14 +580,30 @@ function cleanArray( array ){
     else return [first].concat( cleanArray( array ) );
 } 
 
-//Captitalise the first letter of each word.    
+/**:caps(str)
+    Capitalise the first letter of each word.
+*/ 
 function caps(str){
     return str.replace(/\w\S*/g, function(txt){
         return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
     });
 }
 
-//Check that two form fields are equal
+/**:checkEqual(id1,id2)
+
+    Check that two form field input values are equal.  The form fields are specified by
+    the DOM ID tag.  Use for checking the retype of the email and password fields.  This
+    method uses HTML5 form validation for the fields.
+
+    :param string id1:
+        The id tag of the first element.
+    :param string id2:
+        The id tag of the second element.
+
+    :returns boolean:
+        True if they are equal, false if they are not.
+
+*/   
 function checkEqual( id1, id2 ) {
 
     var email1 = document.getElementById(id1);
@@ -559,7 +619,16 @@ function checkEqual( id1, id2 ) {
     }
 }
 
-//Check that the usernamE field is valid.
+
+/**:checkValidUsername()
+
+    Check that the username field in the form is valid, i.e. not already used by
+    another account in the database.  The username field is identified by its
+    DOM ID tag of "username". This method handles HTML5 form validation for the field.
+
+    :returns boolean:
+        True if valid, false if not.
+*/  
 function checkValidUsername(){
     
     var original = $('.user-editor input.original_username').val();
@@ -572,14 +641,23 @@ function checkValidUsername(){
                 element.setCustomValidity( 
                     i18n.gettext("Invalid username.  Username already exists." )
                 );
+                return false;
             }else{
                 element.setCustomValidity( "" );
+                return true;
             }   
         });
     }
 }
 
+/**:extractAccess()
 
+    A utility function that takes the multi select 'access-levels' form field 
+    and structures its contents into a data object that can be posted to the server.
+
+    :returns object:
+        An object containing two arrays: 'countries' and 'roles'.
+*/  
 function extractAccess(){
 
     var countries = [];
@@ -596,6 +674,14 @@ function extractAccess(){
     };
 }
 
+/**:extractData()
+
+    A utility function that takes the multi select 'data-elements' form field 
+    and structures its contents into a data object that can be posted to the server.
+
+    :returns object:
+        An object containg data elements structured as the server requires.
+*/  
 function extractData(){
 
     var data = {};

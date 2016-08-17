@@ -8,9 +8,11 @@ from flask.json import JSONEncoder
 from flask_restful import Api, reqparse
 from flask.ext.babel import Babel, gettext, ngettext, get_translations, get_locale, support
 import boto3
+
+#Import the Blueprints
 from meerkat_auth.views.users import users
 from meerkat_auth.views.roles import roles
-
+from meerkat_auth.views.auth import auth
 
 # Create the Flask app
 app = Flask(__name__)
@@ -18,15 +20,6 @@ app.config.from_object('config.Production')
 app.config.from_envvar('MEERKAT_AUTH_SETTINGS')
 api=Api(app)
 babel = Babel(app)
-
-# Import the API resources
-# Import them after creating the app, because they depend upon the app.
-from meerkat_auth.resources.login import Login
-from meerkat_auth.resources.get_user import GetUser
-
-# Add the API  resources.
-api.add_resource(Login, "/login")
-api.add_resource(GetUser, "/user")
 
 # Internationalisation for the backend
 @babel.localeselector
@@ -49,15 +42,17 @@ def add_language_code(endpoint, values):
 # Register the Blueprint modules for the backend
 app.register_blueprint(users, url_prefix='/<language>/users')
 app.register_blueprint(roles, url_prefix='/<language>/roles')
-
-@app.route("/")
-def root():
-    return redirect("/" + app.config["DEFAULT_LANGUAGE"] + "/")
+app.register_blueprint(auth, url_prefix='/auth')
 
 #display something at /
+@app.route("/")
+def root():
+    """Display something at /."""
+    return redirect("/" + app.config["DEFAULT_LANGUAGE"] + "/")
+
 @app.route('/<language>/')
 def index(language):
-    """Display something at /."""
+    """Display something at /<language>/."""
     g.language = language
     app.logger.warning(g.language)
     return render_template('login.html')

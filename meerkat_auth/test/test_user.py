@@ -6,8 +6,8 @@ Unit tests for the utility class User in Meerkat Auth.
 """
 import json, meerkat_auth, unittest, jwt, calendar, time, logging
 from datetime import datetime
-from meerkat_auth.util.user import User, InvalidCredentialException
-from meerkat_auth.util.role import Role, InvalidRoleException
+from meerkat_auth.user import User, InvalidCredentialException
+from meerkat_auth.role import Role, InvalidRoleException
 
 class MeerkatAuthUserTestCase(unittest.TestCase):
 

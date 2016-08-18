@@ -4,9 +4,9 @@ Meerkat Auth Tests
 
 Unit tests for the utility class role in Meerkat Auth.
 """
-import json, unittest, meerkat_auth
+import json, unittest, meerkat_auth, logging, boto3
 from datetime import datetime
-from meerkat_auth.util.role import Role, InvalidRoleException
+from meerkat_auth.role import Role, InvalidRoleException
 
 class MeerkatAuthRoleTestCase(unittest.TestCase):
 
@@ -15,10 +15,41 @@ class MeerkatAuthRoleTestCase(unittest.TestCase):
         meerkat_auth.app.config['TESTING'] = True
         meerkat_auth.app.config['USERS'] = 'test_auth_users'
         meerkat_auth.app.config['ROLES'] = 'test_auth_roles'
+
+        #Put some roles into the test db.
+        roles = [ 
+            Role( 'demo', 'registered', 'Registered description.', [] ),
+            Role( 'demo', 'personal', 'Private description.', ['registered'] ),
+            Role( 'demo', 'shared', 'Shared description.', ['registered'] ),
+            Role( 'demo', 'manager', 'Shared description.', ['personal', 'shared'] ),
+            Role( 'jordan', 'registered', 'Registered description.', [] ), 
+            Role( 'jordan', 'personal', 'Private description.', ['registered'] )
+        ]
+        for role in roles:
+            role.to_db()
+
+        #Store the roles indexed in a helpful manner for reference in the tests.
+        self.demo_roles = {}
+        self.jordan_roles = {}
+        for role in roles:
+            if role.country == 'demo':
+                self.demo_roles[role.role] = role
+            elif role.country == 'jordan':
+                self.jordan_roles = role  
         
     def tearDown(self):
         """Tear down after testing."""
-        pass
+        #Delete the roles in the database after finishing the tests.
+        table = boto3.resource('dynamodb').Table(meerkat_auth.app.config['ROLES'])
+        response = table.scan()
+        with table.batch_writer() as batch:
+            for role in response.get('Items', []):
+                batch.delete_item(
+                    Key={
+                        'country': role['country'],
+                        'role': role['role']
+                    }
+                ) 
 
     def test_io(self):
         """Test the Role class' database writing/reading/deleting functions."""
@@ -28,7 +59,7 @@ class MeerkatAuthRoleTestCase(unittest.TestCase):
             'demo', 
             'testRole',
             'Test role description.',
-            ['private']
+            ['personal']
         )
         print( 'role1:\n' + repr(role1) )
 
@@ -49,16 +80,8 @@ class MeerkatAuthRoleTestCase(unittest.TestCase):
 
     def test_all_parents(self):
         """Test the Role class private method all_access_objs()."""
-        #The database should have the following objects already in it.
-        roles = {
-            'registered': Role( 'demo', 'registered', 'Registered description.', [] ),
-            'private': Role( 'demo', 'private', 'Private description.', ['registered'] ),
-            'shared': Role( 'demo', 'shared', 'Shared description.', ['registered'] ),
-            'manager': Role( 'demo', 'manager', 'Shared description.', ['private', 'shared'] )
-        }
-        #Update the objects in case something has changed them.
-        for role in roles:
-            roles[role].to_db()
+
+        roles = self.demo_roles
 
         #Get all the manager parents.
         parents = roles['manager'].all_access()
@@ -66,17 +89,17 @@ class MeerkatAuthRoleTestCase(unittest.TestCase):
         print( "Manager parents: " + str( parents ) )
         self.assertEqual( len(parents), 4 )
         self.assertIn( 'registered', parents )
-        self.assertIn( 'private', parents )
+        self.assertIn( 'personal', parents )
         self.assertIn( 'shared', parents )
         self.assertIn( 'manager', parents )
 
         #Get all the private parents.
-        parents = roles['private'].all_access()
+        parents = roles['personal'].all_access()
         #Check the correct list is returned
         print( "private parents: " + str( parents ) )
         self.assertEqual( len(parents), 2 )
         self.assertIn( 'registered', parents )
-        self.assertIn( 'private', parents )
+        self.assertIn( 'personal', parents )
 
         #Get all the registered parents.
         parents = roles['registered'].all_access()
@@ -87,21 +110,9 @@ class MeerkatAuthRoleTestCase(unittest.TestCase):
 
     def test_validate(self):
         """Test the Role validate functions."""
-        #The database should have the following objects already in it.
-        roles = {
-            'registered': 
-                Role( 'demo', 'registered', 'Registered description.', [] ),
-            'private': 
-                Role( 'demo', 'private', 'Private description.', ['registered'] ),
-            'shared': 
-                Role( 'demo', 'shared', 'Shared description.', ['registered'] ),
-            'manager': 
-                Role( 'demo', 'manager', 'Shared description.', ['private', 'shared'] )
-        }
-        #Update the objects in case something has changed them.
-        for role in roles:
-            roles[role].to_db()        
-        
+    
+        roles = self.demo_roles
+    
         #Check that a valid role passes the validate check.
         try:        
             Role.validate_role( 'demo', 'manager' )
@@ -118,4 +129,22 @@ class MeerkatAuthRoleTestCase(unittest.TestCase):
             InvalidRoleException, lambda: roles['manager'].validate()
         )
 
+    def test_get_all(self):
+        """Test the staticmethod get_all()."""
 
+        #Request just roles from demo.
+        response = Role.get_all('demo')        
+        self.assertEqual( len(response), 4 )
+
+        #Request just roles from jordan.
+        response = Role.get_all(['jordan'])        
+        self.assertEqual( len(response), 2 )
+
+        #Request all roles.
+        response = Role.get_all(None)        
+        self.assertEqual( len(response), 6 )
+
+        #Request all roles.
+        response = Role.get_all(['demo','jordan'])        
+        self.assertEqual( len(response), 6 )
+        

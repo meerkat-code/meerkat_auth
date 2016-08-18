@@ -96,7 +96,7 @@ def require_jwt(access, countries=[""] ):
             try:
                 #Decode the jwt and check it is structured as expected.
                 payload = jwt.decode(
-                    token, 
+                    token,
                     meerkat_auth.app.config['PUBLIC'], 
                     algorithms=[meerkat_auth.app.config['ALGORITHM']]
                 )

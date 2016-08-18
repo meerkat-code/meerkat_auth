@@ -5,7 +5,7 @@ A Flask Blueprint module for the authentication api calls.
 """
 import calendar, time, meerkat_auth, json
 from flask_restful import Resource, reqparse
-from flask import Blueprint, Response, current_app, jsonify, make_response, request
+from flask import Blueprint, Response, current_app, jsonify, make_response, request, redirect
 from meerkat_auth.user import User, InvalidCredentialException
 from meerkat_auth.role import InvalidRoleException
 from meerkat_auth.require_jwt import require_jwt
@@ -91,3 +91,22 @@ def get_user():
         )
 
 
+@auth.route('/logout')
+def logout():
+    """
+    Logs a user out. This involves delete the current jwt stored in a cookie and 
+    redirecting to the specified page.  We delete a cookie by changing it's
+    expiration date to immediately. Set the page to be redirected to using url
+    params, eg. /logout?url=https://www.google.com
+
+    Get Args:
+        url (str) The url of the page to redirect to after logging out.
+
+    Returns:
+        A redirect response object that also sets the cookie's expiration time to 0.
+    """
+    url = request.args.get('url', '/')
+    response = make_response( redirect(url) )
+    response.set_cookie( meerkat_auth.app.config["COOKIE_NAME"], value="", expires=0 )
+    return response
+    

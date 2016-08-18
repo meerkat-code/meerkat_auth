@@ -197,6 +197,49 @@ class Role:
         #Raises an InvalidRoleException if it finds a parent not in the DB.
         parents = obj.all_access_objs()
         
+    
+
+    @staticmethod
+    def get_all(countries):
+        """
+        Fetches from the database the requested all roles that belong to the specified country. 
+        If country equates to false then all country roles will be returned.
+    
+        Args:
+            countries ([str]) A list of countries for which we want the roles.  
+        Returns:
+            A list where each element is a python dictionary detailing a single role.
+        """
+
+        #Set things up.
+        logging.info('Loading roles for country ' + str(countries) + ' from database.')
+        table = boto3.resource('dynamodb').Table(meerkat_auth.app.config['ROLES']) 
+ 
+        #Allow any value for countries that equates to false.
+        if not countries:
+            countries = []
+
+        #If a single value is specified, but not as a list, turn it into a list.
+        if not isinstance(countries, list):
+            countries = [countries]
+
+        if not countries:
+            #If no country is specified, get all roles and return as list.
+            return table.scan({}).get("Items", [])
+
+        else:
+            roles = []
+            #Load data separately for each country because can't query for OR.
+            for country in countries:
+                roles = roles + table.query( 
+                    KeyConditions={
+                        'country':{
+                            'AttributeValueList':[country], 
+                            'ComparisonOperator':'EQ'
+                        }
+                    }
+                ).get("Items", [])
+            return roles
         
 
 class InvalidRoleException( Exception ):

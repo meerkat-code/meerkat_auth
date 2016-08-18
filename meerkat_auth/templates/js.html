@@ -6,6 +6,7 @@
 <script src="{{ url_for('static', filename='js/locale/fr.js') }}"></script>
 <script src="{{ url_for('static', filename='js/bootstrap-table.js') }}"></script>
 <script src="{{ url_for('static', filename='js/jsoneditor.js') }}"></script>
+<script src="{{ url_for('static', filename='js/vis.js') }}"></script>
 <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 <script>
   //Draw the langauge selector.
@@ -13,9 +14,8 @@
   var currentLang = "{{ g.get('language', None)|safe }}";
   var index = languages.indexOf( currentLang );
   var nextLang = index == languages.length-1 ? languages[0] : languages[index+1];
-
   var nextLangHref = window.location.href.replace( '/' + currentLang + '/', '/' + nextLang + '/' );
-  console.log( nextLangHref )
+
   $('.lang-sel').html( "<a class='lang " + currentLang + "' href='" + nextLangHref + "'>" +
                        nextLang.toUpperCase() + "</a>" );
   $(".lang-sel").attr( 'title', '{{_("Choose a language")}}' ); //Translatable tool tip.

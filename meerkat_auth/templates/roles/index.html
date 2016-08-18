@@ -1,10 +1,31 @@
 {% extends 'base.html' %}
 {% block body %}
-ROLE MANAGER
+
+<div class="top-bar row">
+	<div class="tab-title less-padding-col">
+		{{_('Access Levels') }}
+	</div>
+    <div class="search-bar">
+    </div>
+</div>
+<div class="row">
+	<div class="col-xs-12 less-padding-col">
+		<div class="box chartBox">
+			<div class="chartBox__heading">
+				{{ _('Access Network') }}
+			</div>
+			<div class="chartBox__content" >
+				<div id='role-vis' class="col-xs-8"></div>
+			</div>
+		</div>
+	</div>
+</div>
+
 {% endblock %}
 {% block pageJS %}
 <script>
 $('.navbar-nav li').removeClass('active');
 $('.navbar-nav__roles').addClass('active');
+drawVis('jordan');
 </script>
 {% endblock %}

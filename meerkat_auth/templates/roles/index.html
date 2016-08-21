@@ -16,6 +16,7 @@
 			</div>
 			<div class="chartBox__content" >
 				<div id='role-vis' class="col-xs-8"></div>
+                <div class='access-network-form col-xs-4'></div>
 			</div>
 		</div>
 	</div>
@@ -24,8 +25,9 @@
 {% endblock %}
 {% block pageJS %}
 <script>
+var user = {{user|safe}};
 $('.navbar-nav li').removeClass('active');
 $('.navbar-nav__roles').addClass('active');
-drawVis('jordan');
+drawVisForm();
 </script>
 {% endblock %}

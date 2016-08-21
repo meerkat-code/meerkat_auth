@@ -14,7 +14,6 @@ function drawVis(country){
             roles.push({
                 id: i,
                 label: data[i].role,
-                level: data[i].ranking
             });
             lookup[data[i].role] = i;
         }
@@ -47,14 +46,16 @@ function drawVis(country){
         var container = document.getElementById('role-vis');
         var graph = { nodes: nodes, edges: edges };
         var options = {
+            physics:false,
             layout:{
                 hierarchical:{
                     enabled: true,
                     direction: 'UD',
-                    //parentCentralization: true,
+                    parentCentralization: true,
                     sortMethod: 'directed',
-                    nodeSpacing: 50,
-                    levelSeparation: 50
+                    nodeSpacing: 200,
+                    levelSeparation: 75,
+                    treeSpacing: 200
                     
                 }
             }
@@ -63,5 +64,37 @@ function drawVis(country){
 
     });
 }
+
+function drawVisForm(){
+
+    var html = "<form id='access-network-form'>";
+
+    html += "<div class='input-group row'>";
+    html += "<label class='country-select'>" + i18n.gettext( "Country:" ) + "</label>" +
+            "<select id='country-select' class='country-select'>";
+    
+    var countries = Object.keys(user.acc);
+
+    for( var i in countries){
+        country = countries[i];
+        html += "<option value='" + country + "' ";
+        if( i === 0 ) html += "selected";
+        html += ">" + caps( country ) + "</option>";
+    }
+
+    html += "</select></div>";
+    
+    html += "</form>";
+
+    $('.access-network-form').html( html );
+
+    drawVis( $('#country-select').val() );
+
+    $('#country-select').change(function(){
+        drawVis( $('#country-select').val() );
+    });
+    
+}
+
 
 

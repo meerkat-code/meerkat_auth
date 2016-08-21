@@ -131,6 +131,5 @@ def index(payload):
 
     return render_template( 
         'users/index.html', 
-        users = json.loads(get_users().data.decode('UTF-8')),
         user = payload 
     )

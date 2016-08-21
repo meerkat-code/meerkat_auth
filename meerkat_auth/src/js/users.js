@@ -248,19 +248,42 @@ function drawUserEditor(username){
                 "<select class='role col-xs-12 col-md-6 col-lg-7'>";
 
         function drawAvailableRoles(country){
-            console.log(country);
             var roles = user.acc[country];
-            console.log( roles );
             var optionsHTML = "";
             for( var j in roles){
                 role = roles[j];
                 optionsHTML += "<option value='" + role + "' ";
                 if( j === 0 ) optionsHTML += "selected";
-                optionsHTML += ">" + caps( role ) + "</option>";
+                optionsHTML +=  ">" + caps( role ) + "</option>";
             }
             $('select.role').html( optionsHTML );
+            createTooltips();
         }
-                                    
+
+        //Add tooltips that tell the user what access each role inherits.
+        function createTooltips(){
+            $('select.role option').each( function(){
+                console.log( this );
+                var country = $('select.country').val();
+                var role = $(this).attr('value');
+                var element = $(this);
+                console.log( "Country: " + country + " Role: " + role );
+                $.getJSON( '/en/roles/get_all_access/' + country +'/' + role, function(data){
+                    var tooltip = "";
+                    console.log( element );
+                    if( data.access.length > 1 ){
+                        tooltip = i18n.gettext("Complete access from: ");
+                        tooltip += data.access.map(caps).join(', ') + ".";
+                    }else{
+                        tooltip += i18n.gettext("Does not inherit any access.");
+                    }
+                    console.log( tooltip );
+                    element.attr('title', tooltip);
+                    
+                });
+            });
+        }
+                    
         html += "</select></div>";
 
         html += "<button class='btn btn-sm pull-right add-access' type='button'>" +
@@ -276,9 +299,7 @@ function drawUserEditor(username){
         //Factorise this bit out so that we can redraw the options once access has been updated.
         function drawAccessOptions(){
             var optionsHTML = "";
-            console.log( data.countries );
             for( var k in data.countries ){
-                console.log( k );
                 country = data.countries[k];
                 role = data.roles[k];
                 optionsHTML += "<option country='" + country + "' role='" + role + "' value='" + k + "' " ;
@@ -367,6 +388,7 @@ function drawUserEditor(username){
         //DRAW THE FORM
         $('.user-editor').html( html );
 
+
         //Add dynamic links across the form
         //---------------------------------
         
@@ -413,14 +435,7 @@ function drawUserEditor(username){
                     data.data[key].val = val;
                 }else{
                     data.data[key] = { "val": val };
-             /**:drawUserEditor()
-
-    A function that draws the form for editing/adding a user.  It assembles the html
-    and binds all the vent handlers to validate the form and ensure it works properly.
-    
-    :param string username:
-        The username of the user who's details we want to auto fill into the form. 
-*/   }
+                }
                 resetData();
                 updateData();
             }
@@ -465,7 +480,6 @@ function drawUserEditor(username){
         $('select.country').change(function(){
             drawAvailableRoles($('select.country').val());
         });
-        
 
         //Add the new access element when clicking on the add access value.
         $('button.add-access').click( function(){
@@ -532,7 +546,6 @@ function drawUserEditor(username){
 
             $.extend( data, extractAccess() );
             $.extend( data, extractData() );
-            console.log( data );
 
             //Post json to server.
             $.ajax({

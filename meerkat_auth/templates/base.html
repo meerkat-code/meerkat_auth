@@ -33,10 +33,10 @@
       <div class="collapse navbar-collapse" id="menu-collapse" >
         {% block menu %}
         <ul class="nav navbar-nav">
-          <li class="navbar-nav__users"><a href="/{{g.get('language')}}/users/" >{{ _('Users') }}</a></li>
-          <li class="navbar-nav__roles"><a href="/{{g.get('language')}}/roles/" >{{ _('Access') }}</a></li>
+          <li class="navbar-nav__users"><a href="{{root}}/{{g.get('language')}}/users/" >{{ _('Users') }}</a></li>
+          <li class="navbar-nav__roles"><a href="{{root}}/{{g.get('language')}}/roles/" >{{ _('Access') }}</a></li>
           <li class="navbar-nav__logout">
-            <a href="/auth/logout" > {{ _('Log out') }} </a>
+            <a href="{{root}}/api/logout" > {{ _('Log out') }} </a>
           </li>
         </ul>
         {% endblock %}

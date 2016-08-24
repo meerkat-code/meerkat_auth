@@ -27,5 +27,5 @@ def index(payload):
     return render_template(
         'roles/index.html',
         user = payload,    
-        root = current_appp.config["ROOT_URL"]
+        root = current_app.config["ROOT_URL"]
     )

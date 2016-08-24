@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2016-08-16 12:23+0100\n"
+"POT-Creation-Date: 2016-08-24 11:09+0100\n"
 "PO-Revision-Date: 2016-07-27 15:52+0100\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr\n"
@@ -18,133 +18,149 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.3.4\n"
 
-#: meerkat_auth/src/js/users.js:13 meerkat_auth/templates/login.html:30
+#: meerkat_auth/require_jwt.py:93
+msgid "You have not authenticated yet. Please login before veiwing this page."
+msgstr ""
+
+#: meerkat_auth/require_jwt.py:117
+msgid "User doesn't have required access levels for this page."
+msgstr ""
+
+#: meerkat_auth/src/js/roles.js:73 meerkat_auth/src/js/users.js:232
+msgid "Country:"
+msgstr ""
+
+#: meerkat_auth/src/js/users.js:17 meerkat_auth/templates/login.html:30
 msgid "Username"
 msgstr ""
 
-#: meerkat_auth/src/js/users.js:20
+#: meerkat_auth/src/js/users.js:24
 msgid "Email"
 msgstr ""
 
-#: meerkat_auth/src/js/users.js:27
+#: meerkat_auth/src/js/users.js:31 meerkat_auth/templates/base.html:37
 msgid "Access"
 msgstr ""
 
-#: meerkat_auth/src/js/users.js:34
+#: meerkat_auth/src/js/users.js:38
 msgid "Account Creation"
 msgstr ""
 
-#: meerkat_auth/src/js/users.js:42
+#: meerkat_auth/src/js/users.js:46
 msgid "Data"
 msgstr ""
 
-#: meerkat_auth/src/js/users.js:112
+#: meerkat_auth/src/js/users.js:122
 msgid "Are you sure you want to delete the following users?"
 msgstr ""
 
-#: meerkat_auth/src/js/users.js:129 meerkat_auth/src/js/users.js:517
+#: meerkat_auth/src/js/users.js:143 meerkat_auth/src/js/users.js:560
 msgid ""
 "There has been a server error. Please contact administrator and try again"
 " later."
 msgstr ""
 
-#: meerkat_auth/src/js/users.js:156
+#: meerkat_auth/src/js/users.js:175
 msgid "Username:"
 msgstr ""
 
-#: meerkat_auth/src/js/users.js:163
+#: meerkat_auth/src/js/users.js:182
 msgid "Email:"
 msgstr ""
 
-#: meerkat_auth/src/js/users.js:170
+#: meerkat_auth/src/js/users.js:189
 msgid "Retype Email:"
 msgstr ""
 
-#: meerkat_auth/src/js/users.js:177
+#: meerkat_auth/src/js/users.js:196
 msgid "Password:"
 msgstr ""
 
-#: meerkat_auth/src/js/users.js:184
+#: meerkat_auth/src/js/users.js:203
 msgid "Retype Password:"
 msgstr ""
 
-#: meerkat_auth/src/js/users.js:191
+#: meerkat_auth/src/js/users.js:210
 msgid "Creation time:"
 msgstr ""
 
-#: meerkat_auth/src/js/users.js:197
+#: meerkat_auth/src/js/users.js:216
 msgid "Last update:"
 msgstr ""
 
-#: meerkat_auth/src/js/users.js:207
+#: meerkat_auth/src/js/users.js:228
 msgid "Add New Access"
 msgstr ""
 
-#: meerkat_auth/src/js/users.js:211
-msgid "Country:"
-msgstr ""
-
-#: meerkat_auth/src/js/users.js:226
+#: meerkat_auth/src/js/users.js:247
 msgid "Access Role:"
 msgstr ""
 
-#: meerkat_auth/src/js/users.js:246
+#: meerkat_auth/src/js/users.js:275
+msgid "Complete access from: "
+msgstr ""
+
+#: meerkat_auth/src/js/users.js:278
+msgid "Does not inherit any access."
+msgstr ""
+
+#: meerkat_auth/src/js/users.js:290
 msgid "Add Access"
 msgstr ""
 
-#: meerkat_auth/src/js/users.js:251
+#: meerkat_auth/src/js/users.js:295
 msgid "Select Current Access:"
 msgstr ""
 
-#: meerkat_auth/src/js/users.js:273
+#: meerkat_auth/src/js/users.js:315
 msgid "Delete Access"
 msgstr ""
 
-#: meerkat_auth/src/js/users.js:281 meerkat_auth/src/js/users.js:365
+#: meerkat_auth/src/js/users.js:325 meerkat_auth/src/js/users.js:410
 msgid "Edit Data"
 msgstr ""
 
-#: meerkat_auth/src/js/users.js:289
+#: meerkat_auth/src/js/users.js:333
 msgid "Data Value:"
 msgstr ""
 
-#: meerkat_auth/src/js/users.js:293 meerkat_auth/src/js/users.js:376
+#: meerkat_auth/src/js/users.js:337 meerkat_auth/src/js/users.js:421
 msgid "Add Data"
 msgstr ""
 
-#: meerkat_auth/src/js/users.js:298
+#: meerkat_auth/src/js/users.js:342
 msgid "Select Current Data:"
 msgstr ""
 
-#: meerkat_auth/src/js/users.js:321
+#: meerkat_auth/src/js/users.js:365
 msgid "Delete Data"
 msgstr ""
 
-#: meerkat_auth/src/js/users.js:337
+#: meerkat_auth/src/js/users.js:381
 msgid "Create User"
 msgstr ""
 
-#: meerkat_auth/src/js/users.js:337
+#: meerkat_auth/src/js/users.js:381
 msgid "Submit Changes"
 msgstr ""
 
-#: meerkat_auth/src/js/users.js:412
+#: meerkat_auth/src/js/users.js:457
 msgid "Are you sure you want to delete this data?"
 msgstr ""
 
-#: meerkat_auth/src/js/users.js:464
+#: meerkat_auth/src/js/users.js:508
 msgid "Are you sure you want to delete this access?"
 msgstr ""
 
-#: meerkat_auth/src/js/users.js:490
+#: meerkat_auth/src/js/users.js:534
 msgid "Working"
 msgstr ""
 
-#: meerkat_auth/src/js/users.js:553
+#: meerkat_auth/src/js/users.js:626
 msgid "Fields must be Matching."
 msgstr ""
 
-#: meerkat_auth/src/js/users.js:573
+#: meerkat_auth/src/js/users.js:655
 msgid "Invalid username.  Username already exists."
 msgstr ""
 
@@ -162,7 +178,7 @@ msgstr "Basculer la Navigation"
 msgid "Authentication and User Management"
 msgstr "Authentification et Gestion des Utilisateurs"
 
-#: meerkat_auth/templates/base.html:28 meerkat_auth/templates/base.html:72
+#: meerkat_auth/templates/base.html:28 meerkat_auth/templates/base.html:75
 #: meerkat_auth/templates/login.html:16
 msgid "Meerkat Public Health Surveillance"
 msgstr "Meerkat Surveillance de la Santé Publique"
@@ -172,9 +188,9 @@ msgstr "Meerkat Surveillance de la Santé Publique"
 msgid "Users"
 msgstr "Utilisateurs"
 
-#: meerkat_auth/templates/base.html:37
-msgid "Roles"
-msgstr "Accès"
+#: meerkat_auth/templates/base.html:39
+msgid "Log out"
+msgstr ""
 
 #: meerkat_auth/templates/js.html:21
 msgid "Choose a language"
@@ -188,6 +204,14 @@ msgstr ""
 msgid "Password"
 msgstr ""
 
+#: meerkat_auth/templates/roles/index.html:6
+msgid "Access Levels"
+msgstr ""
+
+#: meerkat_auth/templates/roles/index.html:15
+msgid "Access Network"
+msgstr ""
+
 #: meerkat_auth/templates/users/index.html:5
 msgid "User Manager"
 msgstr ""
@@ -195,4 +219,7 @@ msgstr ""
 #: meerkat_auth/templates/users/index.html:14
 msgid "User Details"
 msgstr ""
+
+#~ msgid "Roles"
+#~ msgstr "Accès"
 

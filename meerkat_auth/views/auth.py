@@ -8,7 +8,7 @@ from flask_restful import Resource, reqparse
 from flask import Blueprint, Response, current_app, jsonify, make_response, request, redirect
 from meerkat_auth.user import User, InvalidCredentialException
 from meerkat_auth.role import InvalidRoleException
-from meerkat_auth.require_jwt import require_jwt
+from meerkat_auth.authorise import authorise
 
 auth = Blueprint('auth', __name__, url_prefix="/<language>")
 
@@ -45,7 +45,7 @@ def login():
         exp = calendar.timegm( time.gmtime() ) + meerkat_auth.app.config['TOKEN_LIFE']
         response = make_response( jsonify( {'message':'successful'} ) ) 
         response.set_cookie( 
-            meerkat_auth.app.config['COOKIE_NAME'], 
+            meerkat_auth.app.config['JWT_COOKIE_NAME'], 
             value=user.get_jwt(exp)
         )
         return response

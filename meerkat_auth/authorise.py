@@ -1,8 +1,14 @@
-from flask import abort, request, current_app, make_response, jsonify
+from flask import abort, request, make_response, jsonify
 from functools import wraps
 from jwt import InvalidTokenError
 from flask.ext.babel import gettext
-import jwt, meerkat_auth, inspect
+import jwt, inspect, logging, os
+
+#Need this module to be importable without the whole of meerkat_auth config.
+#Directly load the secret settings file from which to import required variables.
+#File must include JWT_COOKIE_NAME, JWT_ALGORITHM and JWT_PUBLIC_KEY variables.
+filename = os.environ.get( 'MEERKAT_AUTH_SETTINGS' )
+exec( compile(open(filename, "rb").read(), filename, 'exec') )
 
 def check_access(access, countries, acc):
     """
@@ -55,7 +61,7 @@ def check_access(access, countries, acc):
 
     return authorised
 
-def require_jwt(access, countries=[""] ):
+def authorise( access, countries=[""] ):
     """
     Returns decorator to require valid JWT for authentication .
     
@@ -86,7 +92,7 @@ def require_jwt(access, countries=[""] ):
 
             #Extract the token from the cookies
             token = ""
-            token = request.cookies.get(meerkat_auth.app.config['COOKIE_NAME'])
+            token = request.cookies.get(JWT_COOKIE_NAME)
 
             #If no token is found in the cookies.
             if not token:
@@ -97,8 +103,8 @@ def require_jwt(access, countries=[""] ):
                 #Decode the jwt and check it is structured as expected.
                 payload = jwt.decode(
                     token,
-                    meerkat_auth.app.config['PUBLIC'], 
-                    algorithms=[meerkat_auth.app.config['ALGORITHM']]
+                    JWT_PUBLIC_KEY, 
+                    algorithms=[JWT_ALGORITHM]
                 )
 
                 #Check that the jwt has required access.

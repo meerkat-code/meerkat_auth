@@ -184,8 +184,8 @@ class User:
             'email': self.email,
             'data': self.data
         }
-        secret = meerkat_auth.app.config['SECRET']
-        algorithm = meerkat_auth.app.config['ALGORITHM']
+        secret = meerkat_auth.app.config['JWT_SECRET_KEY']
+        algorithm = meerkat_auth.app.config['JWT_ALGORITHM']
         return jwt.encode(payload, secret, algorithm=algorithm)
 
     def validate(self):

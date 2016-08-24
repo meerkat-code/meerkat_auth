@@ -26,7 +26,6 @@ class Config(object):
     USERS = 'auth_users'
     ROLES = 'auth_roles'
     TOKEN_LIFE = 3600 #Max length of a sign in session in seconds.
-    COOKIE_NAME = 'jwt'
 
     DEFAULT_LANGUAGE = "en"
     SUPPORTED_LANGUAGES = ["en", "fr"]

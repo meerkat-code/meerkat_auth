@@ -7,7 +7,7 @@ from flask import Blueprint, render_template, current_app, request, Response, js
 import json, datetime
 from meerkat_auth.user import User, InvalidCredentialException
 from meerkat_auth.role import Role, InvalidRoleException
-from meerkat_auth.require_jwt import require_jwt
+from meerkat_auth.authorise import authorise
 
 users = Blueprint('users', __name__, url_prefix="/<language>")
 
@@ -122,6 +122,7 @@ def delete_users():
 
     
 @users.route('/')
+@authorise(['manager'])
 def index(payload):
     current_app.logger.warning( "flag: users" )
     return render_template( 

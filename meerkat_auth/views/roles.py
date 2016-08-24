@@ -7,7 +7,7 @@ from flask import Blueprint, render_template, current_app, jsonify
 import json
 from meerkat_auth.user import User, InvalidCredentialException
 from meerkat_auth.role import Role, InvalidRoleException
-from meerkat_auth.require_jwt import require_jwt
+from meerkat_auth.authorise import authorise
 
 roles = Blueprint('roles', __name__, url_prefix="/<language>")
 
@@ -22,7 +22,7 @@ def get_all_access( country=None, role=None ):
     return jsonify( {'access': access} )
 
 @roles.route('/')
-@require_jwt(['manager'])
+@authorise(['manager'])
 def index(payload):
     return render_template(
         'roles/index.html',

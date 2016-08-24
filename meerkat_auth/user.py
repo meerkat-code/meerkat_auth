@@ -12,6 +12,12 @@ class User:
 
     #The regular expression defining whether an email address is valid.
     EMAIL_REGEX = re.compile(r"[^@]+@[^@]+\.[^@]+")
+    #The database resource
+    DB = boto3.resource(
+        'dynamodb', 
+        endpoint_url=meerkat_auth.app.config['DB_URL'], 
+        region_name='eu-west-1'
+    )
     
     def __init__( self,
                   username, 
@@ -57,7 +63,22 @@ class User:
             countries,
             self.creation,
             updated
-        )                
+        )  
+         
+    def __str__(self):
+        """Override to create a better string representation of a User object."""
+        countries = ','.join(
+            '({}|{})'.format(*t) for t in zip(self.countries, self.roles)
+        )  
+        updated = "" if self.creation == self.updated else "|" + self.updated
+
+        return '<{}-{}({}) email:{} countries:[{}]>'.format(
+            self.__class__.__name__, 
+            self.username,
+            self.state,
+            self.email,
+            countries,
+        )       
     
     def __eq__(self, other):
         """Override to define equality of User objects."""
@@ -102,7 +123,7 @@ class User:
 
         #Write to DB.
         logging.info( "Validated. Writing object to database." )
-        users = boto3.resource('dynamodb').Table(meerkat_auth.app.config['USERS'])
+        users = User.DB.Table(meerkat_auth.app.config['USERS'])
 
         #If new user, set the state as live now it is going into the db and add the creation timestamp.
         if self.state == "new":
@@ -243,7 +264,7 @@ class User:
         """
         #Load data
         logging.info('Loading user ' + username + ' from database.')
-        users = boto3.resource('dynamodb').Table(meerkat_auth.app.config['USERS'])
+        users = User.DB.Table(meerkat_auth.app.config['USERS'])
         response = users.get_item( 
             Key={
                 'username': username
@@ -286,7 +307,7 @@ class User:
             The amazon dynamodb response.
         """
         logging.info( 'Deleting user ' + username )
-        users = boto3.resource('dynamodb').Table(meerkat_auth.app.config['USERS'])
+        users = User.DB.Table(meerkat_auth.app.config['USERS'])
         response = users.delete_item(
             Key={
                 'username':username
@@ -306,7 +327,7 @@ class User:
         Returns:
             bool True if in db, False if not in db.
         """
-        users = boto3.resource('dynamodb').Table(meerkat_auth.app.config['USERS'])
+        users = User.DB.Table(meerkat_auth.app.config['USERS'])
         response = users.get_item( 
             Key={ 'username': username },
             AttributesToGet=['username'],
@@ -494,7 +515,7 @@ class User:
         """
         #Set things up.
         logging.info('Loading users for country ' + str(countries) + ' from database.')
-        table = boto3.resource('dynamodb').Table(meerkat_auth.app.config['USERS']) 
+        table = User.DB.Table(meerkat_auth.app.config['USERS']) 
  
         #Allow any value for attributes and countries that equates to false.
         if not attributes:

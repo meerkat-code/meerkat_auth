@@ -53,10 +53,11 @@ $('input.submit').click( function(){
     console.log( formArray );
     //Post json to server.
     $.ajax({
-        url: '/auth/login',
+        url: '/auth/api/login',
         type: 'post',
         success: function (data) {
-            window.location.replace("/"+language+"/users/");
+            alert( data );
+            window.location.replace("/auth/"+language+"/users/");
         },
         error: function (data) {
             if( data.hasOwnProperty( 'message' ) ){

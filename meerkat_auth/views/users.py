@@ -48,9 +48,6 @@ def check_username(username):
 @users.route('/update_user/<username>', methods=['POST'])
 @users.route('/update_user/', methods=['POST'])
 def update_user(username='new'):
-
-    current_app.logger.warning( username )
-    current_app.logger.warning( request.json )
     
     #Load the form's data.
     data = request.json
@@ -124,11 +121,9 @@ def delete_users():
     return "Users succesfully deleted."
 
     
-
 @users.route('/')
-@require_jwt(['manager'])
 def index(payload):
-
+    current_app.logger.warning( "flag: users" )
     return render_template( 
         'users/index.html', 
         user = payload 

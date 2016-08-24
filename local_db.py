@@ -9,6 +9,21 @@ parser.add_argument('--list', help='List data from the local dynamodb developmen
 parser.add_argument('--clear', help='Clear the local dynamodb development database.', action='store_true')
 parser.add_argument('--populate', help='Populate the local dynamodb development database.', action='store_true')
 args = parser.parse_args()
+args_dict = vars(args)
+
+if all(arg == False for arg in args_dict.values()):
+    print( "Re-starting the dev database." )
+    for arg in args_dict:
+        args_dict[arg] = True
+
+if args.clear:
+    print('Cleaning the dev db.')
+    db = boto3.resource('dynamodb', endpoint_url='http://dynamodb:8000', region_name='eu_west')
+    response = db.Table(meerkat_auth.app.config['USERS']).delete()
+    print( response )
+    response = db.Table(meerkat_auth.app.config['ROLES']).delete()
+    print( response )
+    print('Cleaned the db.')
 
 if args.setup:
     print('Creating dev db')
@@ -60,7 +75,7 @@ if args.populate:
             'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
             ['demo'],
             ['registered'],
-            data={ 'name':{'value':'Testy McTestface'} },
+            data={ 'name':{'val':'Testy McTestface'} },
             state='new'
         ),
         User(
@@ -80,7 +95,7 @@ if args.populate:
             'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
             ['demo'],
             ['root'],
-            data={ 'name':{'value':'Supreme Omnipotent Overlord'} },
+            data={ 'name':{'val':'Supreme Omnipotent Overlord'} },
             state='new'
         )
     ]
@@ -111,12 +126,5 @@ if args.list:
     except Exception as e:
         print("Listing failed. Has database been setup?")
 
-if args.clear:
-    print('Cleaning the dev db.')
-    db = boto3.resource('dynamodb', endpoint_url='http://dynamodb:8000', region_name='eu_west')
-    response = db.Table(meerkat_auth.app.config['USERS']).delete()
-    print( response )
-    response = db.Table(meerkat_auth.app.config['ROLES']).delete()
-    print( response )
-    print('Cleaned the db.')
+
 

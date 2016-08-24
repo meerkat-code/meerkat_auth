@@ -27,10 +27,9 @@ def get_locale():
 @users.url_value_preprocessor
 @roles.url_value_preprocessor
 def pull_lang_code(endpoint, values):
-    lang = values.get('language', '' )
-    if not lang:
-        abort(502)
-    elif lang not in app.config["SUPPORTED_LANGUAGES"]:
+    if not values.get( "language", "" ):
+        values["language"] = g.language
+    if values["language"] not in app.config["SUPPORTED_LANGUAGES"]:
         abort(404, "Language not supported")
     else:
         g.language = values.pop('language')
@@ -56,7 +55,7 @@ def index(language):
     """Display something at /<language>/."""
     g.language = language
     app.logger.warning(g.language)
-    return render_template('login.html')
+    return render_template('login.html', root=app.config["ROOT_URL"])
 
 #Handle errors
 @app.errorhandler(401)

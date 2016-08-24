@@ -1,5 +1,5 @@
 function drawVis(country){
-    $.getJSON( '/en/roles/get_roles/'+country, function(data){
+    $.getJSON( root + '/en/roles/get_roles/'+country, function(data){
 
         data = data.roles;
         console.log( 'Drawing vis');

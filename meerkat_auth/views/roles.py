@@ -26,5 +26,6 @@ def get_all_access( country=None, role=None ):
 def index(payload):
     return render_template(
         'roles/index.html',
-         user = payload 
+        user = payload,    
+        root = current_appp.config["ROOT_URL"]
     )

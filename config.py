@@ -31,6 +31,7 @@ class Config(object):
     SUPPORTED_LANGUAGES = ["en", "fr"]
 
     DB_URL = from_env("DB_URL", "https://dynamodb.eu-west-1.amazonaws.com")
+    ROOT_URL = "/auth"
     
 
 class Production(Config):

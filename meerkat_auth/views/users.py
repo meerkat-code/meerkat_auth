@@ -11,7 +11,6 @@ from meerkat_auth.authorise import authorise
 
 users = Blueprint('users', __name__, url_prefix="/<language>")
 
-
 @users.route('/create_user', methods=['POST'])
 def create_user():
     return "stub"
@@ -20,7 +19,9 @@ def create_user():
 def get_users():
     countries = []
     attributes = ["email", "roles", "username", "countries", "creation", "data"]
-    return jsonify( {'rows': User.get_all( countries, attributes )} )
+    rows = User.get_all( countries, attributes )
+    current_app.logger.warning( rows )
+    return jsonify( {'rows': rows} )
 
 @users.route('/get_user/')
 @users.route('/get_user/<username>')
@@ -124,8 +125,8 @@ def delete_users():
 @users.route('/')
 @authorise(['manager'])
 def index(payload):
-    current_app.logger.warning( "flag: users" )
     return render_template( 
         'users/index.html', 
-        user = payload 
+        user = payload,
+        root = current_app.config["ROOT_URL"]
     )

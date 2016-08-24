@@ -9,6 +9,8 @@
 <script src="{{ url_for('static', filename='js/vis.js') }}"></script>
 <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 <script>
+  //Store the url root of the auth module.
+  var root = "{{root}}";
   //Draw the langauge selector.
   var languages = {{ config["SUPPORTED_LANGUAGES"]|tojson|safe }};
   var currentLang = "{{ g.get('language', None)|safe }}";

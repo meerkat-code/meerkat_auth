@@ -55,6 +55,8 @@ function drawUserTable(){
 
     //A function that prepares the data for displaying in the table.
     function prepData(res){
+        console.log( "Unprepped data" );
+        console.log( res.rows );
         for( var a in res.rows ){
             //Format the access to make it more visually appearing
             access = "";
@@ -73,15 +75,21 @@ function drawUserTable(){
             var keys = Object.keys( row.data );
             for(var c in keys){
                 var element = row.data[keys[c]];
-                data += caps(keys[c]) + ": " + caps( element.val ) + " | ";
+                var val = element.val || element.value || "";
+                data += caps(keys[c]) + ": " + caps( val ) + " | ";
             }
             row.data = data.slice(0,-3);
 
             //TODO: Format the creation time stamp to make it more readable.
         }
+        console.log( "Prepped data" );
+        console.log( res.rows );
         return res.rows;
     }
     
+    var tmp = root + '/en/users/get_users';
+    console.log( "tmp: " + tmp );
+
     //Creat the bootstrap table.
     table = $('#user-table table').bootstrapTable({
         columns: columns,
@@ -89,7 +97,7 @@ function drawUserTable(){
         pagination: true,
         pageSize: 20,
         search: true,
-        url:'/en/users/get_users',
+        url: tmp,
         responseHandler: prepData,
         showRefresh: true
     });
@@ -132,7 +140,7 @@ function drawUserTable(){
             if( confirm(confirmString.slice(0, -2)) ){
                 //Do the deletion by posting json to server.
                 $.ajax({
-                    url: '/en/users/delete_users',
+                    url: root + '/en/users/delete_users',
                     type: 'post',
                     success: function (data) {
                         alert(data);
@@ -162,7 +170,7 @@ function drawUserTable(){
 */
 function drawUserEditor(username){
     
-    $.getJSON( '/en/users/get_user/' + username, function(data){
+    $.getJSON( root + '/en/users/get_user/' + username, function(data){
 
         var html = "<form id='user-editor' class='user-editor'>";
         
@@ -268,7 +276,7 @@ function drawUserEditor(username){
                 var role = $(this).attr('value');
                 var element = $(this);
                 console.log( "Country: " + country + " Role: " + role );
-                $.getJSON( '/en/roles/get_all_access/' + country +'/' + role, function(data){
+                $.getJSON( root + '/en/roles/get_all_access/' + country +'/' + role, function(data){
                     var tooltip = "";
                     console.log( element );
                     if( data.access.length > 1 ){
@@ -351,9 +359,10 @@ function drawUserEditor(username){
                 var element = data.data[dataKeys[x]];
 
                 if( element.status != "uneditable" ){
-                    optionsHTML += "<option dataKey='" + dataKeys[x] + "' dataValue='" + element.val + "' ";
+                    var val = element.val || element.value || "" ;
+                    optionsHTML += "<option dataKey='" + dataKeys[x] + "' dataValue='" + val + "' ";
                     if( element.status == "undeletable" ) optionsHTML += "disabled datastatus='undeletable' ";
-                    optionsHTML += ">" + dataKeys[x] + " | " + element.val + "</option>";
+                    optionsHTML += ">" + dataKeys[x] + " | " + val + "</option>";
                 }
             }
             $('select.data-elements').html( optionsHTML );
@@ -549,7 +558,7 @@ function drawUserEditor(username){
 
             //Post json to server.
             $.ajax({
-                url: '/en/users/update_user/' + data.original_username,
+                url: root + '/en/users/update_user/' + data.original_username,
                 type: 'post',
                 success: function (data) {
                     alert(data);
@@ -649,7 +658,7 @@ function checkValidUsername(){
     var element = document.getElementById('username');
 
     if( current != original ){
-        $.getJSON( '/en/users/check_username/' + current, function( data ){
+        $.getJSON( root + '/en/users/check_username/' + current, function( data ){
             if( !data.valid ){
                 element.setCustomValidity( 
                     i18n.gettext("Invalid username.  Username already exists." )

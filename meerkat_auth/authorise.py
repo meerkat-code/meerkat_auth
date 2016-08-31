@@ -1,4 +1,4 @@
-from flask import abort, request, make_response, jsonify
+from flask import abort, request, make_response, jsonify, g
 from functools import wraps
 from jwt import InvalidTokenError
 from flask.ext.babel import gettext
@@ -61,10 +61,13 @@ def check_access(access, countries, acc):
 
     return authorised
 
-def authorise( access, countries=[""] ):
+
+def check_auth( access, countries=[""] ):
     """
-    Returns decorator to require valid JWT for authentication .
-    
+    A function that checks whether the user is authorised to continue with the current
+    request. It does this by verifying the jwt stored as a cookie. If the user isn't 
+    authorised the request is aborted with an Invalid Token Error.
+
     Args: 
         access ([str]) A list of role titles that have access to this function.
         countries ([str]) An optional list of countries for which each role
@@ -82,51 +85,68 @@ def authorise( access, countries=[""] ):
             E.g. require_jwt(['manager','shared'], countries=['jordan'])
             Would give access to managers and shared accounts only from Jordan.
 
+    """
+
+    #Extract the token from the cookies
+    token = ""
+    token = request.cookies.get(JWT_COOKIE_NAME)
+
+    #If no token is found in the cookies.
+    if not token:
+        abort( 401, gettext(u"You have not authenticated yet. "
+                             "Please login before veiwing this page." ) )
+
+    try:
+        #Decode the jwt and check it is structured as expected.
+        payload = jwt.decode(
+            token,
+            JWT_PUBLIC_KEY, 
+            algorithms=[JWT_ALGORITHM]
+        )
+
+        #Check that the jwt has required access.
+        if check_access(access, countries, payload['acc'] ):
+            
+            g.payload = payload
+
+        #Token is invalid if it doesn't have the required accesss levels.
+        else:
+            raise InvalidTokenError(
+                gettext(u"User doesn't have required access levels for this page.")
+            )
+
+    #Return 401 if the jwt isn't valid.   
+    except InvalidTokenError as e:
+        abort( 401, str(e) ) 
+    
+
+def authorise( access, countries=[""] ):
+    """
+    Returns decorator that wraps a route function with another function that
+    requires a valid jwt.
+
+    Args:
+        access ([str]) A list of role titles that have access to this function.
+        countries ([str]) An optional list of countries for which each role
+            title correspond to. access[0] corresponds to country[0] and so on...
+            If the length of countries is smaller than the length of access, then
+            the final element of countries is repeated to make the length match. 
+            Accepts wildcard value "" for any country.  Default value is [""], meaning
+            all specified access levels will be valid for any country if countires is
+            not specified.
+
     Returns:
-       function: The decorator or abort(401)
+        function: The decorator or abort(401)
     """
     def decorator(f):
 
         @wraps(f)
         def decorated(*args, **kwargs):
 
-            #Extract the token from the cookies
-            token = ""
-            token = request.cookies.get(JWT_COOKIE_NAME)
+            check_auth( access, countries )
+            return f(*args, **kwargs)
 
-            #If no token is found in the cookies.
-            if not token:
-                abort( 401, gettext(u"You have not authenticated yet. "
-                                     "Please login before veiwing this page." ) )
-
-            try:
-                #Decode the jwt and check it is structured as expected.
-                payload = jwt.decode(
-                    token,
-                    JWT_PUBLIC_KEY, 
-                    algorithms=[JWT_ALGORITHM]
-                )
-
-                #Check that the jwt has required access.
-                if check_access(access, countries, payload['acc'] ):
-                    
-                    #If the function specifies an argument entitled 'payload'...
-                    if 'payload' in inspect.getargspec(f).args:
-                        #...add the user object to the args.
-                        kwargs['payload'] = payload
-
-                    return f(*args, **kwargs)
-
-                #Token is invalid if it doesn't have the required accesss levels.
-                else:
-                    raise InvalidTokenError(
-                        gettext(u"User doesn't have required access levels for this page.")
-                    )
-
-            #Return 401 if the jwt isn't valid.   
-            except InvalidTokenError as e:
-                abort( 401, str(e) ) 
-                
         return decorated
 
     return decorator
+

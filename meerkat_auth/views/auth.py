@@ -10,7 +10,7 @@ from meerkat_auth.user import User, InvalidCredentialException
 from meerkat_auth.role import InvalidRoleException
 from meerkat_auth.authorise import authorise
 
-auth = Blueprint('auth', __name__, url_prefix="/<language>")
+auth = Blueprint('auth', __name__)
 
 @auth.route('/', methods=['POST'])
 @auth.route('/login', methods=['POST'])
@@ -107,6 +107,6 @@ def logout():
     """
     url = request.args.get('url', '/')
     response = make_response( redirect(url) )
-    response.set_cookie( meerkat_auth.app.config["COOKIE_NAME"], value="", expires=0 )
+    response.set_cookie( meerkat_auth.app.config["JWT_COOKIE_NAME"], value="", expires=0 )
     return response
     

@@ -61,6 +61,7 @@ function drawUserTable(){
             //Format the access to make it more visually appearing
             access = "";
             var row = res.rows[a];
+
             for( var b in row.countries ){
                 access += caps(row.countries[b]) + "-" + caps(row.roles[b]) + " | ";
             }
@@ -169,8 +170,11 @@ function drawUserTable(){
         The username of the user who's details we want to auto fill into the form. 
 */
 function drawUserEditor(username){
-    
+
     $.getJSON( root + '/en/users/get_user/' + username, function(data){
+
+        console.log( data );
+        console.log( user.acc );
 
         var html = "<form id='user-editor' class='user-editor'>";
         

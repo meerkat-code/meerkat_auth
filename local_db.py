@@ -61,7 +61,10 @@ if args.populate:
     #Add some data for development
     roles = [
         Role( 'demo', 'registered', 'A standard registered user', [] ),
-        Role( 'demo', 'manager', 'A manager with backend access.', ['registered'] ),
+        Role( 'demo', 'cd', 'Access to CD data.', ['registered'] ),
+        Role( 'demo', 'ncd', 'Access to NCD data.', ['registered'] ),
+        Role( 'demo', 'all', 'Access to both CD and NCD data.', ['cd','ncd']),
+        Role( 'demo', 'manager', 'A manager with backend access.', ['all'] ),
         Role( 'demo', 'root', 'Complete access', ['manager'] )
     ]
     for role in roles:

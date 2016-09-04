@@ -91,6 +91,8 @@ def check_auth( access, countries=[""] ):
     token = ""
     token = request.cookies.get(JWT_COOKIE_NAME)
 
+    logging.warning( "Request made with token: " + str(token) )
+
     #If no token is found in the cookies.
     if not token:
         abort( 401, gettext(u"You have not authenticated yet. "

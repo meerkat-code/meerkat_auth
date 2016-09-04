@@ -50,13 +50,11 @@ $('input.submit').click( function(){
         'username': $('input[name=username]').val(),
         'password': $('input[name=password]').val()
     }
-    console.log( formArray );
     //Post json to server.
     $.ajax({
         url: '{{root}}/api/login',
         type: 'post',
         success: function (data) {
-            alert( data );
             window.location.replace( "{{root}}/"+language+"/users/");
         },
         error: function (data) {

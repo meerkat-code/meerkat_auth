@@ -61,6 +61,15 @@ def check_access(access, countries, acc):
 
     return authorised
 
+def get_token():
+    #Extract the token from the cookies
+    token = request.cookies.get(JWT_COOKIE_NAME)
+
+    #Extract the token from the headers if it doesn't exist in the cookies.
+    if not token and request.headers.get('authorization'):
+        token = request.headers.get('authorization')[len(JWT_HEADER_PREFIX):]
+
+    return token if token else ""
 
 def check_auth( access, countries=[""] ):
     """
@@ -87,16 +96,25 @@ def check_auth( access, countries=[""] ):
 
     """
 
-    #Extract the token from the cookies
-    token = ""
-    token = request.cookies.get(JWT_COOKIE_NAME)
+    #Only translate error strings if Bable is up and running.
+    #For example, Bable runs in frontend but not API - both import this module.
+    not_authenticated = ( "You have not authenticated yet. "
+                          "Please login before viewing this page." )
+    incorrect_access = "User doesn't have required access levels for this page."
 
-    logging.warning( "Request made with token: " + str(token) )
-
-    #If no token is found in the cookies.
+    try:
+        not_authenticated = gettext( not_authenticated )
+        incorrect_access = gettext( incorrect_access )
+    except KeyError:
+        pass
+        
+    #Get the jwt.
+    token = get_token()
+    logging.warning( "Authorising with token: " + str(token))
+    #If no token is found return an "not authenticated" message
     if not token:
-        abort( 401, gettext(u"You have not authenticated yet. "
-                             "Please login before veiwing this page." ) )
+        logging.warning( "Aborting with 401" )
+        abort( 401, not_authenticated )
 
     try:
         #Decode the jwt and check it is structured as expected.
@@ -110,16 +128,15 @@ def check_auth( access, countries=[""] ):
         if check_access(access, countries, payload['acc'] ):
             
             g.payload = payload
+            return jwt
 
         #Token is invalid if it doesn't have the required accesss levels.
         else:
-            raise InvalidTokenError(
-                gettext(u"User doesn't have required access levels for this page.")
-            )
+            raise InvalidTokenError( incorrect_access )
 
-    #Return 401 if the jwt isn't valid.   
+    #Return 403 if logged in but the jwt isn't valid.   
     except InvalidTokenError as e:
-        abort( 401, str(e) ) 
+        abort( 403, str(e) ) 
     
 
 def authorise( access, countries=[""] ):

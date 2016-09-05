@@ -50,7 +50,6 @@ def get_all_access( country=None, role=None ):
     return jsonify( {'access': access} )
 
 @roles.route('/')
-@authorise(['manager'])
 def index():
     """Renders the page showing the viewer/editor for access roles."""
     return render_template(

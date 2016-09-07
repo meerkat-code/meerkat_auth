@@ -59,8 +59,8 @@ def index(language):
 
 @app.route('/favicon.ico')
 def favicon():
-    app.logger.warning("Faviocn requested")
-    abort(401)
+    app.logger.warning("Favicon requested")
+    abort(404)
 
 #Handle errors
 @app.errorhandler(401)

@@ -57,6 +57,11 @@ def index(language):
     app.logger.warning(g.language)
     return render_template('login.html', root=app.config["ROOT_URL"])
 
+@app.route('/favicon.ico/')
+def favicon():
+    app.logger.warning("Faviocn requested")
+    abort(401)
+
 #Handle errors
 @app.errorhandler(401)
 @app.errorhandler(403)

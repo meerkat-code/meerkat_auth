@@ -239,12 +239,17 @@ function drawUserEditor(username){
         html += "<div class='form-section clearfix'> <div class='section-title'> " + 
                 i18n.gettext("Add New Access") + " </div>";
 
-        html += "<div class='input-group row'>" + 
-                "<label class='country col-xs-12 col-md-6 col-lg-5'>" +
+        //Show the countries selector, only if the user has access to multiple countries.
+        var countries = Object.keys(user.acc);
+        
+        html += "<div class='input-group row ";
+
+        if( countries.length <=1 )  html += "hidden";
+       
+        html += "'><label class='country col-xs-12 col-md-6 col-lg-5'>" +
                 i18n.gettext("Country:") + "</label>" + 
                 "<select class='country col-xs-12 col-md-6 col-lg-7' >";
 
-        var countries = Object.keys(user.acc);
         for( var i in countries){
             country = countries[i];
             html += "<option value='" + country + "' ";

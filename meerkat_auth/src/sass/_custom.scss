@@ -321,6 +321,10 @@ body.blue{
     }
 }
 
+input:read-only{
+    border:none;
+}
+
 .loading{
     background: url('/static/img/loading.gif');
     background-repeat: no-repeat;

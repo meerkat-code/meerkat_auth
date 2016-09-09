@@ -1,4 +1,21 @@
 #!/usr/local/bin/python3
+"""
+This is a utility script to help set up some accounts for testing and development.
+It create a registered, manager and root account for every country currently under
+active development. NOTE: the passwords for every account is just 'password'.
+
+Run:
+    `local_db.py --clear` (To get rid of any existing db)
+    `local_db.py --setup` (To setup the db tables)
+    `local_db.py --populate` (To populate the tables with accounts & roles)
+    `local_db.py --list` (To list the acounts in the db)
+
+If no flag is provided (i.e. you just run `local_db.py`) it will perform all steps
+in the above order.
+
+You can run these commands inside the docker container if there are database issues.
+"""
+
 import boto3, meerkat_auth, logging, argparse
 from meerkat_auth.role import Role
 from meerkat_auth.user import User
@@ -58,50 +75,66 @@ if args.setup:
 
 if args.populate:
     print('Populate dev db')
-    #Add some data for development
-    roles = [
-        Role( 'demo', 'registered', 'A standard registered user', [] ),
-        Role( 'demo', 'cd', 'Access to CD data.', ['registered'] ),
-        Role( 'demo', 'ncd', 'Access to NCD data.', ['registered'] ),
-        Role( 'demo', 'all', 'Access to both CD and NCD data.', ['cd','ncd']),
-        Role( 'demo', 'manager', 'A manager with backend access.', ['all'] ),
-        Role( 'demo', 'root', 'Complete access', ['manager'] )
-    ]
+    #Create some roles for each country.
+    #TODO: Need a clever solution to match dev to deployment here.
+    #Maybe we define roles for dev and deployment in a sngle file and import.
+    countries = ['demo','jordan','mad','rms']
+    roles = []
+    
+    for country in countries:
+        #Add some data for development
+        roles += [
+            Role( country, 'registered', 'A standard registered user', [] ),
+            Role( country, 'cd', 'Access to CD data.', ['registered'] ),
+            Role( country, 'ncd', 'Access to NCD data.', ['registered'] ),
+            Role( country, 'all', 'Access to both CD and NCD data.', ['cd','ncd']),
+            Role( country, 'manager', 'A manager with backend access.', ['all'] ),
+            Role( country, 'root', 'Complete access', ['manager'] )
+        ]
     for role in roles:
         print( role.to_db() )
 
-    users = [ 
-        User( 
-            'registered', 
-            'registered@test.org.uk', 
-            ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
-            'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
-            ['demo'],
-            ['registered'],
-            data={ 'name':{'val':'Testy McTestface'} },
-            state='new'
-        ),
-        User(
-            'manager', 
-            'manager@test.org.uk', 
-            ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
-            'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
-            ['demo'],
-            ['manager'],
-            data={ 'name':{ 'value':'Mr Boss Man' } },
-            state='new'
-        ),
-        User(
-            'root', 
-            'root@test.org.uk', 
-            ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
-            'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
-            ['demo'],
-            ['root'],
-            data={ 'name':{'val':'Supreme Omnipotent Overlord'} },
-            state='new'
-        )
-    ]
+    #Create registered, manager and root user objects for each country.
+    users = []
+
+    for country in countries:
+        #Password for all dev accounts is just 'password'.
+        users += [ 
+            User( 
+                '{}-registered'.format(country), 
+                'registered@{}test.org.uk'.format(country),  
+                ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+                'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+                [country],
+                ['registered'],
+                data={ 'name':{'val':'Testy McTestface'} },
+                state='new'
+            ),
+            User(
+                '{}-manager'.format(country), 
+                'manger@{}test.org.uk'.format(country), 
+                ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+                'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+                [country],
+                ['manager'],
+                data={ 'name':{ 'value':'Mr Boss Man' } },
+                state='new'
+            )
+
+        ]
+
+    #Create an overall root acount with access to everything.
+    users += [ User(
+        'root', 
+        'root@test.org.uk', 
+        ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+        'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+        countries,
+        ['root' for c in countries],
+        data={ 'name':{'val':'Supreme Omnipotent Overlord'} },
+        state='new'
+    ) ]
+
     for user in users:
         print( user.to_db() )
 
@@ -109,7 +142,10 @@ if args.populate:
 
 if args.list:
     print('Listing data in the database.')
-    db = boto3.resource('dynamodb', endpoint_url='http://dynamodb:8000', region_name='eu_west')
+    db = boto3.resource(
+            'dynamodb', 
+            endpoint_url='http://dynamodb:8000', region_name='eu_west'
+    )
     try:
         accounts = db.Table(meerkat_auth.app.config['USERS']).scan().get("Items",[])
 

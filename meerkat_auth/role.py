@@ -33,7 +33,7 @@ class Role:
     def __repr__(self):
         """Override to create a better string representation of a Role object."""
         parents = ', '.join(self.parents)
-        return '<{} {}-{} parents:[{}] {}>'.format(
+        return '<{}: {}-{} parents:[{}] {}>'.format(
             self.__class__.__name__, 
             self.role, 
             self.country,

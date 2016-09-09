@@ -57,11 +57,6 @@ def index(language):
     app.logger.warning(g.language)
     return render_template('login.html', root=app.config["ROOT_URL"])
 
-@app.route('/favicon.ico')
-def favicon():
-    app.logger.warning("Favicon requested")
-    abort(404)
-
 #Handle errors
 @app.errorhandler(401)
 @app.errorhandler(403)
@@ -78,5 +73,4 @@ def error500(error):
     Args:
         error (int): The error code given by the error handler.
     """
-    app.logger.warning( "flag: error" )
     return render_template('error.html', error=error,  )

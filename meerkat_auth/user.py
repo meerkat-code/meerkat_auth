@@ -54,7 +54,7 @@ class User:
         )  
         updated = "" if self.creation == self.updated else "|" + self.updated
 
-        return '<{}-{}({}) email:{} pass:{} countries:[{}] time:({}{})>'.format(
+        return '<{}: {}({}) email: {} pass: {} countries: [{}] time: ({}{})>'.format(
             self.__class__.__name__, 
             self.username,
             self.state,
@@ -72,7 +72,7 @@ class User:
         )  
         updated = "" if self.creation == self.updated else "|" + self.updated
 
-        return '<{}-{}({}) email:{} countries:[{}]>'.format(
+        return '<{}: {}({}) email: {} countries: [{}]>'.format(
             self.__class__.__name__, 
             self.username,
             self.state,

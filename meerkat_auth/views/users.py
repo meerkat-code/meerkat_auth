@@ -18,6 +18,14 @@ def requires_auth():
     this Blueprint.
     """
     auth.check_auth( ['manager'] )
+    current_app.logger.warning(g.payload['acc'])
+
+    #Only allow manager's to edit accounts in their own countries.
+    #i.e. if manager as non-manager access to another country. 
+    for country in g.payload['acc']:
+        if 'manager' not in country:
+            del country
+    current_app.logger.warning( g.payload['acc'] )
 
 @users.route('/get_users')
 def get_users():

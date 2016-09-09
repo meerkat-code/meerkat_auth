@@ -97,7 +97,7 @@ def check_auth( access, countries=[""] ):
     """
 
     #Only translate error strings if Bable is up and running.
-    #For example, Bable runs in frontend but not API - both import this module.
+    #Bable runs in frontend but not API - both import this module and musn't fail.
     not_authenticated = ( "You have not authenticated yet. "
                           "Please login before viewing this page." )
     incorrect_access = "User doesn't have required access levels for this page."
@@ -110,10 +110,9 @@ def check_auth( access, countries=[""] ):
         
     #Get the jwt.
     token = get_token()
-    logging.warning( "Authorising with token: " + str(token))
+
     #If no token is found return an "not authenticated" message
     if not token:
-        logging.warning( "Aborting with 401" )
         abort( 401, not_authenticated )
 
     try:

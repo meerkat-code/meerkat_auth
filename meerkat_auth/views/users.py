@@ -18,14 +18,15 @@ def requires_auth():
     this Blueprint.
     """
     auth.check_auth( ['manager'] )
-    current_app.logger.warning(g.payload['acc'])
 
     #Only allow manager's to edit accounts in their own countries.
-    #i.e. if manager as non-manager access to another country. 
-    for country in g.payload['acc']:
-        if 'manager' not in country:
-            del country
-    current_app.logger.warning( g.payload['acc'] )
+    #i.e. if manager has non-manager access to another country.
+    countries = list(g.payload['acc'].keys())
+    for country in countries:
+        if 'manager' not in g.payload['acc'][country]:
+            del g.payload['acc'][ country ]
+
+    current_app.logger.warning(g.payload['acc'])
 
 @users.route('/get_users')
 def get_users():
@@ -38,15 +39,22 @@ def get_users():
         objects where each object represents a row of the user accounts table.
     """
     #Set attributes to get and restrict available accounts to the user's countries.
-    countries = list(g.payload['acc'].keys())
+    user_access = g.payload['acc']
+    countries = list(user_access.keys())
     attributes = ["email", "roles", "username", "countries", "creation", "data"]
     rows = User.get_all( countries, attributes )
 
-    #Remove any accounts that are outside the users access.
-    for row in rows:
-        for i in range(len(countries)):
-            if row['roles'][i] not in g.payload['acc'][countries[i]]:
-                rows.remove(row)
+    #Remove any data rows (accounts) that are outside the users access.
+    for account in rows:
+        #Look at each access level the account has.
+        for i in range(len(account['roles'])):
+            account_role = account['roles'][i]
+            account_country = account['countries'][i]
+            #If the account has an access level the current user doesn't have...
+            #(If the current user has access in that country...)
+            if account_role not in user_access.get(account_country, [account_role]):
+                rows.remove(account)    
+                break
 
     return jsonify( {'rows': rows} )
 

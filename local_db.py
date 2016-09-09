@@ -133,7 +133,16 @@ if args.populate:
         ['root' for c in countries],
         data={ 'name':{'val':'Supreme Omnipotent Overlord'} },
         state='new'
-    ) ]
+    ), User(
+        'test', 
+        'test@test.org.uk', 
+        ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+        'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+        ['jordan', 'rms'],
+        ['registered','root'],
+        data={ 'name':{'val':'Supreme Omnipotent Overlord'} },
+        state='new'
+    ), ]
 
     for user in users:
         print( user.to_db() )

@@ -49,35 +49,35 @@ class User:
 
     def __repr__(self):
         """Override to create a better string representation of a User object."""
-        countries = ','.join(
+        access = ','.join(
             '({}|{})'.format(*t) for t in zip(self.countries, self.roles)
         )  
         updated = "" if self.creation == self.updated else "|" + self.updated
 
-        return '<{}: {}({}) email: {} pass: {} countries: [{}] time: ({}{})>'.format(
+        return '<{}: {}({}) email: {} pass: {} access: [{}] time: ({}{})>'.format(
             self.__class__.__name__, 
             self.username,
             self.state,
             self.email,
             self.password,
-            countries,
+            access,
             self.creation,
             updated
         )  
          
     def __str__(self):
         """Override to create a better string representation of a User object."""
-        countries = ','.join(
+        access = ','.join(
             '({}|{})'.format(*t) for t in zip(self.countries, self.roles)
         )  
         updated = "" if self.creation == self.updated else "|" + self.updated
 
-        return '<{}: {}({}) email: {} countries: [{}]>'.format(
+        return '<{}: {}({}) email: {} access: [{}]>'.format(
             self.__class__.__name__, 
             self.username,
             self.state,
             self.email,
-            countries,
+            access,
         )       
     
     def __eq__(self, other):

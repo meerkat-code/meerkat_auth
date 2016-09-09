@@ -4,7 +4,7 @@ auth.py
 A Flask Blueprint module for the authentication api calls.
 """
 import calendar, time, meerkat_auth, json
-from flask_restful import Resource, reqparse
+from flask_restful import Resource, reqparse, current_app
 from flask import Blueprint, Response, current_app, jsonify, make_response, request, redirect
 from meerkat_auth.user import User, InvalidCredentialException
 from meerkat_auth.role import InvalidRoleException
@@ -42,6 +42,7 @@ def login():
     #Try to authenticate the user and set JWT in a cookie
     try:
         user = User.authenticate( args['username'], args['password'] )
+        current_app.logger.warning("Authenticated: " + str(user))
         exp = calendar.timegm( time.gmtime() ) + meerkat_auth.app.config['TOKEN_LIFE']
         response = make_response( jsonify( {'message':'successful'} ) ) 
         response.set_cookie( 

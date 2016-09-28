@@ -55,14 +55,13 @@ function drawUserTable(){
 
     //A function that prepares the data for displaying in the table.
     function prepData(res){
-        console.log( "Unprepped data" );
-        console.log( res.rows );
         for( var a in res.rows ){
             //Format the access to make it more visually appearing
             access = "";
             var row = res.rows[a];
 
-            for( var b in row.countries ){
+            //Assemble access
+            for( var b=0; b<Math.min(row.countries.length, row.roles.length); b++ ){
                 access += caps(row.countries[b]) + "-" + caps(row.roles[b]) + " | ";
             }
             row.access = access.slice(0, -3);
@@ -83,8 +82,6 @@ function drawUserTable(){
 
             //TODO: Format the creation time stamp to make it more readable.
         }
-        console.log( "Prepped data" );
-        console.log( res.rows );
         return res.rows;
     }
     

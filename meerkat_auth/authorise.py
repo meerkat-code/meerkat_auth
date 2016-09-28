@@ -62,6 +62,15 @@ def check_access(access, countries, acc):
     return authorised
 
 def get_token():
+    """
+    Get's the Json Web Token. from the cookies or authroization headers.
+
+    This function defines how the token should be retrieved.  It exists because 
+    we need to look for the token in multiple places depending on the type of request. 
+    
+    Returns:
+        The token or an empty string.
+    """
     #Extract the token from the cookies
     token = request.cookies.get(JWT_COOKIE_NAME)
 
@@ -93,7 +102,6 @@ def check_auth( access, countries=[""] ):
             Would give access to managers and shared accounts from any country.
             E.g. require_jwt(['manager','shared'], countries=['jordan'])
             Would give access to managers and shared accounts only from Jordan.
-
     """
 
     #Only translate error strings if Bable is up and running.
@@ -125,7 +133,6 @@ def check_auth( access, countries=[""] ):
 
         #Check that the jwt has required access.
         if check_access(access, countries, payload['acc'] ):
-            
             g.payload = payload
             return jwt
 

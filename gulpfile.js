@@ -138,7 +138,7 @@ gulp.task('gif', function(){
 
 //LANGUAGE TASKS
 gulp.task('po2json', function () {
-    return gulp.src(['meerkat_auth/src/translations/*/LC_MESSAGES/messages.po'])
+    return gulp.src(['meerkat_auth/translations/*/LC_MESSAGES/messages.po'])
 		.pipe(debug())
         .pipe(po2json({format:"jed1.x"}))
         .pipe(gulp.dest('meerkat_auth/static/translations'));

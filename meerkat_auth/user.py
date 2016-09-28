@@ -257,6 +257,7 @@ class User:
         """
         Creates a python object for a given username using
         data fetched from the database table specified by config['USERS'].
+
         Args:
             username (str)
         Returns:
@@ -373,34 +374,6 @@ class User:
         """
         for country, role in zip( countries, roles ):
             Role.validate_role( country, role )
- 
-    @staticmethod
-    def validate_user( username, email, unhashed_pass, countries, roles ):
-        """
-        Validates the specified user details (can't duplicate usernames, roles must exist
-        might want to implement a password policy, etc...)
-
-        Args:
-            username (str) Must be unique in the database.
-            unhashed_pass (str) The unhashed password, to comply with any password policy.
-            email (str) Must be a valid email address.
-            countries ([str]) A list of countries the account has access to.
-            roles ([str]) A corresponding list of access roles for each country
-                with the same index in the countries argument.
-    
-        Raises:
-            InvalidCredentialException if the username or password isn't valid.
-            InvalidRoleException if a role doesn't exist or doesn't have a valid
-                ancestor list.
-        """               
-        #Raises an InvalidCredentialException if username not valid.
-        User.validate_username( username )
-        #Raises an InvalidRoleException if role, or ancestor role doesn't exist.
-        User.validate_roles( countries, roles )
-        #Raises an InvalidCredentialException if the email is not valid.
-        if not User.EMAIL_REGEX.match(email):
-            raise InvalidCredentialException('email', email)
-        #Can implement password policy here if desired.
 
     @staticmethod
     def hash_password( password ):
@@ -414,42 +387,6 @@ class User:
             str The hashed password
         """
         return pbkdf2_sha256.encrypt(password)
-    
-    @staticmethod
-    def new_user( username, email, unhashed_pass, countries, roles, data={} ):
-        """
-        Utility function to help create new user objects. 
-        Validates and prepares the data given, creates a new user writes the user to the
-        db and returns the user to the caller. Preparation includes the hashing of the
-        password.
-
-        Args:
-            username (str) Must be unique in the database.
-            email (str) Must be a valid email address.
-            unhashed_pass (str) The unhashed password.
-            countries ([str]) A list of countries the account has access to.
-            roles ([str]) A corresponding list of access roles for each country
-                with the same index in the countries argument.
-
-        Returns:
-            The new user object if it has been successfully validated.
-    
-        Raises:
-            InvalidCredentialException if the username or password isn't valid.
-            InvalidRoleException if a role doesn't exist or doesn't have a valid
-                ancestor list.
-        """
-
-        #Validate the details
-        User.validate_user( username, email, unhashed_pass, countries, roles )
-        
-        #Hash the password with a random salt size of 16 bytes and 29000 rounds.
-        hashed_pass = User.hash_password( unhashed_pass )
-
-        #Create the user, write it to db and return the object.
-        user = User( username, email, hashed_pass, countries, roles, state="new" )
-        user.to_db()
-        return user
 
     @staticmethod
     def update_user( username, email, unhashed_pass, countries, roles, data={} ):

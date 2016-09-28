@@ -7,7 +7,6 @@
 <script src="{{ url_for('static', filename='js/bootstrap-table.js') }}"></script>
 <script src="{{ url_for('static', filename='js/jsoneditor.js') }}"></script>
 <script src="{{ url_for('static', filename='js/vis.js') }}"></script>
-<script src="{{ url_for('static', filename='js/app.js') }}"></script>
 <script>
   //Store the url root of the auth module.
   var root = "{{root}}";
@@ -23,3 +22,4 @@
   $(".lang-sel").attr( 'title', '{{_("Choose a language")}}' ); //Translatable tool tip.
 
 </script>
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>

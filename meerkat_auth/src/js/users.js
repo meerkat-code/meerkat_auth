@@ -181,48 +181,48 @@ function drawUserEditor(username){
         html += "<div class='row top-part'><div class='col-xs-12 col-sm-6 col-md-4'>";
 
         html += "<div class='input-group row'>" + 
-                "<label class='username  col-xs-12 col-md-6 col-lg-5'>" + i18n.gettext("Username:") + 
-                "</label><input type='text' class='username col-xs-12 col-md-6 col-lg-7' " +
+                "<label class='username  col-xs-12 col-md-6 col-lg-5'>" + i18n.gettext("Username") + 
+                ":</label><input type='text' class='username col-xs-12 col-md-6 col-lg-7' " +
                 "name='username' value='" + data.username + "' id='username' " +
                 "oninput='checkValidUsername()' /></div>";
 
         html += "<div class='input-group row'>" +
                 "<label class='email  col-xs-12 col-md-6 col-lg-5'>" + 
-                i18n.gettext("Email:") + "</label>" + 
+                i18n.gettext("Email") + ":</label>" + 
                 "<input id='email' type='text' class='email col-xs-12 col-md-6 col-lg-7' " +
                 "oninput='checkEqual(\"email\", \"email2\")' name='email' value='" + 
                 data.email + "'/></div>";
 
         html += "<div class='input-group row'>" + 
                 "<label class='email2 col-xs-12 col-md-6 col-lg-5'>" + 
-                i18n.gettext("Retype Email:") + "</label>" + 
+                i18n.gettext("Retype Email") + ":</label>" + 
                 "<input  id='email2' type='text' oninput='checkEqual(\"email\", \"email2\")' " +
                 "class='email2 col-xs-12 col-md-6 col-lg-7' value='" + 
                 data.email + "'/></div>";
 
         html += "<div class='input-group row'>" + 
                 "<label class='password col-xs-12 col-md-6 col-lg-5'>" + 
-                i18n.gettext("Password:") + "</label>" + 
+                i18n.gettext("Password") + ":</label>" + 
                 "<input id='password' oninput='checkEqual(\"password\", \"password2\")' " + 
                 "type='password' class='password col-xs-12 col-md-6 col-lg-7' " +
                 "name='password' value=''/></div>";
 
         html += "<div class='input-group row'>" + 
                 "<label class='password2 col-xs-12 col-md-6 col-lg-5'>" + 
-                i18n.gettext("Retype Password:") + "</label>" + 
+                i18n.gettext("Retype Password") + ":</label>" + 
                 "<input id='password2' oninput='checkEqual(\"password\", \"password2\")' " +
                 "type='password' class='password2 col-xs-12 col-md-6 col-lg-7' "+
                 "value=''/></div>";
 
         html += "<div class='input-group row'>" + 
                 "<label class='creation col-xs-12 col-md-6 col-lg-5'>" +
-                i18n.gettext("Creation time:") + "</label>" + 
+                i18n.gettext("Creation time") + ":</label>" + 
                 "<input type='text' readonly class='creation col-xs-12 col-md-6 col-lg-7' value='" + 
                 data.creation + "' name='creation' /></div>";
 
         html += "<div class='input-group row'>" + 
                 "<label class='updated col-xs-12 col-md-6 col-lg-5'>" + 
-                i18n.gettext("Last update:") + "</label>" + 
+                i18n.gettext("Last update") + ":</label>" + 
                 "<input type='text' readonly class='updated col-xs-12 col-md-6 col-lg-7' value='" + 
                 data.updated + "'/></div>";
 
@@ -244,7 +244,7 @@ function drawUserEditor(username){
         if( countries.length <=1 )  html += "hidden";
        
         html += "'><label class='country col-xs-12 col-md-6 col-lg-5'>" +
-                i18n.gettext("Country:") + "</label>" + 
+                i18n.gettext("Country") + ":</label>" + 
                 "<select class='country col-xs-12 col-md-6 col-lg-7' >";
 
         for( var i in countries){
@@ -258,7 +258,7 @@ function drawUserEditor(username){
 
         html += "<div class='input-group row'>" + 
                 "<label class='role col-xs-12 col-md-6 col-lg-5'>" + 
-                i18n.gettext("Access Role:") + "</label>" + 
+                i18n.gettext("Access Role") + ":</label>" + 
                 "<select class='role col-xs-12 col-md-6 col-lg-7'>";
 
         function drawAvailableRoles(country){

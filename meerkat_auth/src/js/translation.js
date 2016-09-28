@@ -12,7 +12,7 @@ function get_translator(){
 		$.ajax({
 			dataType: "json",
 			async: false,
-			url: "/static/translations/"+language+"/LC_MESSAGES/messages.json",
+			url: root+"/static/translations/"+language+"/LC_MESSAGES/messages.json",
 			success: function(translation) {
 				translator = new Jed(translation);
 			}

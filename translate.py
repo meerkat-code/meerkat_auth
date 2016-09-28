@@ -4,9 +4,7 @@ Helper file to manage translations for the Meerkat Authentication module.
 
 We have two types of translations, general and implementation specific
 
-The general translations are extracted from the python, jijna2 and js files. 
-
-The implementation specific text that needs to be translated is stored in a csv file. 
+The general translations are extracted from the python, jijna2 and js files.
 
 """
  

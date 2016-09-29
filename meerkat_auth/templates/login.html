@@ -25,8 +25,6 @@
   {% block head %} {% endblock %}
 </head>
 <body class="blue">
-
-<div class="login-title"> {{_('Public Health Surveillance') }}</div>
 <div class="breaker"></div>
 <div class="row">
 	<div class="login-box-holder">
@@ -71,8 +69,9 @@ $('input.submit').click( function(){
             window.location.replace( "{{root}}/"+language+"/users/");
         },
         error: function (data) {
-            if( data.hasOwnProperty( 'message' ) ){
-                alert( data.message );
+            console.log( data );
+            if( data.responseJSON.hasOwnProperty( 'message' ) ){
+                alert( data.responseJSON.message );
             }else{
                 alert( i18n.gettext("There has been a server error. " + 
                                     "Please contact administrator and try again later.") );

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2016-09-28 10:50+0000\n"
+"POT-Creation-Date: 2016-09-29 13:43+0000\n"
 "PO-Revision-Date: 2016-07-27 15:52+0100\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr\n"
@@ -47,7 +47,7 @@ msgstr "Données"
 msgid "Are you sure you want to delete the following users?"
 msgstr "Voulez-vous supprimer les utilisateurs suivants?"
 
-#: meerkat_auth/src/js/users.js:149 meerkat_auth/src/js/users.js:575
+#: meerkat_auth/src/js/users.js:149 meerkat_auth/src/js/users.js:587
 msgid ""
 "There has been a server error. Please contact administrator and try again"
 " later."
@@ -67,91 +67,91 @@ msgstr "Mot de passe"
 msgid "Retype Password"
 msgstr "Mot de passe"
 
-#: meerkat_auth/src/js/users.js:219
+#: meerkat_auth/src/js/users.js:223
 msgid "Creation time"
 msgstr "Date de création"
 
-#: meerkat_auth/src/js/users.js:225
+#: meerkat_auth/src/js/users.js:229
 msgid "Last update"
 msgstr "Dernière mise à jour"
 
-#: meerkat_auth/src/js/users.js:237
+#: meerkat_auth/src/js/users.js:247
 msgid "Add New Access"
 msgstr "Ajouter un nouvel accès"
 
-#: meerkat_auth/src/js/users.js:247
+#: meerkat_auth/src/js/users.js:257
 msgid "Country"
 msgstr "Pays"
 
-#: meerkat_auth/src/js/users.js:261
+#: meerkat_auth/src/js/users.js:271
 msgid "Access Role"
 msgstr "Rôle d'accès"
 
-#: meerkat_auth/src/js/users.js:289
+#: meerkat_auth/src/js/users.js:299
 msgid "Complete access from: "
 msgstr "Accès complet à partir de: "
 
-#: meerkat_auth/src/js/users.js:292
+#: meerkat_auth/src/js/users.js:302
 msgid "Does not inherit any access."
 msgstr "Ne pas hériter tout accès."
 
-#: meerkat_auth/src/js/users.js:304
+#: meerkat_auth/src/js/users.js:314
 msgid "Add Access"
 msgstr "Ajouter accès"
 
-#: meerkat_auth/src/js/users.js:309
+#: meerkat_auth/src/js/users.js:319
 msgid "Select Current Access:"
 msgstr "Sélectionnez Accès actuel:"
 
-#: meerkat_auth/src/js/users.js:329
+#: meerkat_auth/src/js/users.js:339
 msgid "Delete Access"
 msgstr "Supprimer l'accès"
 
-#: meerkat_auth/src/js/users.js:339 meerkat_auth/src/js/users.js:425
+#: meerkat_auth/src/js/users.js:351 meerkat_auth/src/js/users.js:437
 msgid "Edit Data"
 msgstr "Modifier les données"
 
-#: meerkat_auth/src/js/users.js:347
+#: meerkat_auth/src/js/users.js:359
 msgid "Data Value:"
 msgstr "Valeur de données:"
 
-#: meerkat_auth/src/js/users.js:351 meerkat_auth/src/js/users.js:436
+#: meerkat_auth/src/js/users.js:363 meerkat_auth/src/js/users.js:448
 msgid "Add Data"
 msgstr "Ajouter des données"
 
-#: meerkat_auth/src/js/users.js:356
+#: meerkat_auth/src/js/users.js:368
 msgid "Select Current Data:"
 msgstr "Sélectionnez Données actuelles:"
 
-#: meerkat_auth/src/js/users.js:380
+#: meerkat_auth/src/js/users.js:392
 msgid "Delete Data"
 msgstr "Supprimer les données"
 
-#: meerkat_auth/src/js/users.js:396
+#: meerkat_auth/src/js/users.js:408
 msgid "Create User"
 msgstr "Créer un utilisateur"
 
-#: meerkat_auth/src/js/users.js:396
+#: meerkat_auth/src/js/users.js:408
 msgid "Submit Changes"
 msgstr "Soumettre des changements"
 
-#: meerkat_auth/src/js/users.js:472
+#: meerkat_auth/src/js/users.js:484
 msgid "Are you sure you want to delete this data?"
 msgstr "Voulez-vous supprimer ces données?"
 
-#: meerkat_auth/src/js/users.js:523
+#: meerkat_auth/src/js/users.js:535
 msgid "Are you sure you want to delete this access?"
 msgstr "Voulez-vous supprimer cet accès?"
 
-#: meerkat_auth/src/js/users.js:549
+#: meerkat_auth/src/js/users.js:561
 msgid "Working"
 msgstr "En Travaillant"
 
-#: meerkat_auth/src/js/users.js:641
+#: meerkat_auth/src/js/users.js:653
 msgid "Fields must be Matching."
 msgstr "Les champs doivent être les mêmes"
 
-#: meerkat_auth/src/js/users.js:670
+#: meerkat_auth/src/js/users.js:682
 msgid "Invalid username.  Username already exists."
 msgstr "Nom d'utilisateur invalide. Le nom d'utilisateur existe déjà."
 
@@ -197,7 +197,7 @@ msgstr "Utilisateurs"
 msgid "Log out"
 msgstr "Se déconnecter"
 
-#: meerkat_auth/templates/js.html:23
+#: meerkat_auth/templates/js.html:22
 msgid "Choose a language"
 msgstr "Choisissez une langue"
 

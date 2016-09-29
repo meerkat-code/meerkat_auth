@@ -63,9 +63,6 @@ target/
 secret.cfg
 deploy.sh
 
-# Translations
-*.mo
-
 # Mr Developer
 .mr.developer.cfg
 .project

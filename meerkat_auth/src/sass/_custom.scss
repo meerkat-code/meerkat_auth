@@ -264,7 +264,7 @@ body.blue{
         padding: 3px 5px;
     }
     label{
-        padding-left: 0px;
+        padding: 7px 10px 3px 0px;
     }
 
     @media screen and (min-width: 1083px){
@@ -321,9 +321,10 @@ body.blue{
     }
 }
 
-input:read-only{
-    border:none;
-    background: $lightGrey;
+.user-editor input[readonly] {
+    background: white;
+    border: none;
+    margin-top: 5px;
 }
 
 .loading{

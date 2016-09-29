@@ -178,7 +178,7 @@ function drawUserEditor(username){
         //Creating the inputs for editing core details.
         //---------------------------------------------
 
-        html += "<div class='row top-part'><div class='col-xs-12 col-sm-6 col-md-4'>";
+        html += "<div class='row top-part'><div class='col-xs-12 col-sm-6 col-md-6'>";
 
         html += "<div class='input-group row'>" + 
                 "<label class='username  col-xs-12 col-md-6 col-lg-5'>" + i18n.gettext("Username") + 
@@ -198,14 +198,14 @@ function drawUserEditor(username){
                 i18n.gettext("Retype Email") + ":</label>" + 
                 "<input  id='email2' type='text' oninput='checkEqual(\"email\", \"email2\")' " +
                 "class='email2 col-xs-12 col-md-6 col-lg-7' value='" + 
-                data.email + "'/></div>";
+                data.email + "' autocomplete='off'/></div>";
 
         html += "<div class='input-group row'>" + 
                 "<label class='password col-xs-12 col-md-6 col-lg-5'>" + 
                 i18n.gettext("Password") + ":</label>" + 
                 "<input id='password' oninput='checkEqual(\"password\", \"password2\")' " + 
                 "type='password' class='password col-xs-12 col-md-6 col-lg-7' " +
-                "name='password' value=''/></div>";
+                "name='password' autocomplete='off' value=''/></div>";
 
         html += "<div class='input-group row'>" + 
                 "<label class='password2 col-xs-12 col-md-6 col-lg-5'>" + 
@@ -213,18 +213,28 @@ function drawUserEditor(username){
                 "<input id='password2' oninput='checkEqual(\"password\", \"password2\")' " +
                 "type='password' class='password2 col-xs-12 col-md-6 col-lg-7' "+
                 "value=''/></div>";
+        
+        //Make the time stamps readable.
+        creation = data.creation ? new Date(data.creation).toString() : "";
+        updated = data.updated ? new Date(data.updated).toString() : "";
 
         html += "<div class='input-group row'>" + 
                 "<label class='creation col-xs-12 col-md-6 col-lg-5'>" +
                 i18n.gettext("Creation time") + ":</label>" + 
                 "<input type='text' readonly class='creation col-xs-12 col-md-6 col-lg-7' value='" + 
-                data.creation + "' name='creation' /></div>";
+                 creation + "' name='creation' /></div>";
 
         html += "<div class='input-group row'>" + 
                 "<label class='updated col-xs-12 col-md-6 col-lg-5'>" + 
                 i18n.gettext("Last update") + ":</label>" + 
                 "<input type='text' readonly class='updated col-xs-12 col-md-6 col-lg-7' value='" + 
-                data.updated + "'/></div>";
+                updated + "'/></div>";
+        
+        //HACK
+        //These hidden password fields stop most browsers applying auto complete to the form.
+        //Hidden and dsiabled so they don't cause any detriment to user experience.
+        html += "<input type='password' class='hidden' disabled/>";
+        html += "<input type='password' class='hidden' disabled />";
 
         html += "</div>";
 
@@ -332,8 +342,10 @@ function drawUserEditor(username){
 
         //Now create the data editor.
         //---------------------------
+        //FOR NOW HIDE THE DATA EDITOR TO KEEP THINGS SIMPLER FOR THE USER
+        //...since we don't really use it yet.
 
-        html += "<div class='col-xs-12 col-sm-6 col-md-4'>";
+        html += "<div class='hidden col-xs-12 col-sm-6 col-md-4'>";
 
         html += "<div class='form-section clearfix'> <div class='section-title'>" + 
                 i18n.gettext("Edit Data") + "</div>";

@@ -168,8 +168,8 @@ msgstr ""
 "expérience."
 
 #: meerkat_auth/templates/base.html:17 meerkat_auth/templates/login.html:16
-msgid "I Understand"
-msgstr "Je comprends"
+msgid "Understood"
+msgstr "Compris"
 
 #: meerkat_auth/templates/base.html:18 meerkat_auth/templates/login.html:17
 msgid "More information"

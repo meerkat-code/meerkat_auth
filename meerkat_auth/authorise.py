@@ -63,7 +63,7 @@ def check_access(access, countries, acc):
 
 def get_token():
     """
-    Get's the Json Web Token. from the cookies or authroization headers.
+    Get's the Json Web Token. From the cookies or authorization headers.
 
     This function defines how the token should be retrieved.  It exists because 
     we need to look for the token in multiple places depending on the type of request. 

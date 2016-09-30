@@ -184,21 +184,21 @@ function drawUserEditor(username){
                 "<label class='username  col-xs-12 col-md-6 col-lg-5'>" + i18n.gettext("Username") + 
                 ":</label><input type='text' class='username col-xs-12 col-md-6 col-lg-7' " +
                 "name='username' value='" + data.username + "' id='username' " +
-                "oninput='checkValidUsername()' /></div>";
+                "oninput='checkValidUsername()' required /></div>";
 
         html += "<div class='input-group row'>" +
                 "<label class='email  col-xs-12 col-md-6 col-lg-5'>" + 
                 i18n.gettext("Email") + ":</label>" + 
                 "<input id='email' type='text' class='email col-xs-12 col-md-6 col-lg-7' " +
                 "oninput='checkEqual(\"email\", \"email2\")' name='email' value='" + 
-                data.email + "'/></div>";
+                data.email + "' required/></div>";
 
         html += "<div class='input-group row'>" + 
                 "<label class='email2 col-xs-12 col-md-6 col-lg-5'>" + 
                 i18n.gettext("Retype Email") + ":</label>" + 
                 "<input  id='email2' type='text' oninput='checkEqual(\"email\", \"email2\")' " +
                 "class='email2 col-xs-12 col-md-6 col-lg-7' value='" + 
-                data.email + "' autocomplete='off'/></div>";
+                data.email + "' autocomplete='off' required /></div>";
 
         html += "<div class='input-group row'>" + 
                 "<label class='password col-xs-12 col-md-6 col-lg-5'>" + 
@@ -318,7 +318,7 @@ function drawUserEditor(username){
         html += "<div class='input-group'><label class='access col-xs-12'>" +
                 i18n.gettext("Select Current Access:") + "</label>";
 
-        html += "<select multiple class='access-levels col-xs-12'>";
+        html += "<select multiple id='access-levels' class='access-levels col-xs-12'>";
 
         //Factorise this bit out so that we can redraw the options once access has been updated.
         function drawAccessOptions(){
@@ -407,7 +407,7 @@ function drawUserEditor(username){
 
         buttonText = username === "" ? i18n.gettext("Create User") : i18n.gettext("Submit Changes");
 
-        html += "<button type='button' class='col-xs-12 col-sm-6 btn btn-large submit-form pull-right'>"+
+        html += "<button type='submit' class='col-xs-12 col-sm-6 btn btn-large submit-form pull-right'>"+
                 buttonText + "</button>";
 
         html += "</form>";
@@ -556,48 +556,62 @@ function drawUserEditor(username){
         });       
 
         //FORM SUBMISSION
-        $('.user-editor .submit-form').click(function(){
-
-            $('.user-editor .submit-form').html( i18n.gettext("Working" ) + 
+        $('.user-editor .submit-form').click(function(evt){
+            
+            if( formValid() ){
+                evt.preventDefault();
+                $('.user-editor .submit-form').html( i18n.gettext("Working" ) + 
                                                  " <div class='loading'></div>" );
+                //Assemble complete json object.
+                var data = {};
+                var form = $('.user-editor');
+                var formArray = form.serializeArray();
 
-            //Assemble complete json object.
-            var data = {};
-            var form = $('.user-editor');
-            var formArray = form.serializeArray();
+                for( var z in formArray ){
+                    var element = formArray[z];
+                    data[element.name] = element.value;
+                }
 
-            for( var z in formArray ){
-                var element = formArray[z];
-                data[element.name] = element.value;
+                $.extend( data, extractAccess() );
+                $.extend( data, extractData() );
+
+                //Post json to server.
+                $.ajax({
+                    url: root + '/en/users/update_user/' + data.original_username,
+                    type: 'post',
+                    success: function (data) {
+                        alert(data);
+                        drawUserEditor("");
+                        $('#user-table table').bootstrapTable('refresh');
+                    },
+                    error: function (data) {
+                        alert( i18n.gettext("There has been a server error. " + 
+                                            "Please contact administrator and try again later.") );
+                        $('.user-editor .submit-form').text( buttonText );
+                        $('#user-table table').bootstrapTable('refresh');
+                    },
+                    contentType: 'application/json;charset=UTF-8',
+                    data: JSON.stringify(data, null, '\t')
+                });
             }
-
-            $.extend( data, extractAccess() );
-            $.extend( data, extractData() );
-
-            //Post json to server.
-            $.ajax({
-                url: root + '/en/users/update_user/' + data.original_username,
-                type: 'post',
-                success: function (data) {
-                    alert(data);
-                    drawUserEditor("");
-                    $('#user-table table').bootstrapTable('refresh');
-                },
-                error: function (data) {
-                    alert( i18n.gettext("There has been a server error. " + 
-                                        "Please contact administrator and try again later.") );
-                    $('.user-editor .submit-form').text( buttonText );
-                    $('#user-table table').bootstrapTable('refresh');
-                },
-                contentType: 'application/json;charset=UTF-8',
-                data: JSON.stringify(data, null, '\t')
-            });
         });
 
     });
 
 }
 
+function formValid(){
+
+    var valid = true;
+
+    if( extractAccess().countries.length === 0 ){
+        var select = document.getElementById('access-levels');
+        select.setCustomValidity( i18n.gettext('Must add at least one access level.') );
+        valid=false;
+    } 
+
+    return valid;    
+}
 
 /**:cleanArray(array)
 

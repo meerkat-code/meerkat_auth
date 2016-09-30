@@ -45,7 +45,7 @@
                         <label>{{_('Password')}}</label>
                         <input type="password" class="text" name="password" />
                     </div>
-                    <input type="button" value="Login" class="submit pull-right" />
+                    <input type="submit" value="Login" class="submit pull-right" />
 				</form>
 			</div>
 		</div>
@@ -56,7 +56,8 @@
 {% include 'js.html' %}
 {% block pageJS %}
 <script>
-$('input.submit').click( function(){
+$('input.submit').click( function(evt){
+    evt.preventDefault();
     var formArray = {
         'username': $('input[name=username]').val(),
         'password': $('input[name=password]').val()

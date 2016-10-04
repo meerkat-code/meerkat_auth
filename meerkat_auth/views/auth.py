@@ -5,7 +5,7 @@ A Flask Blueprint module for the authentication api calls.
 """
 import calendar, time, meerkat_auth, json
 from flask_restful import Resource, reqparse, current_app
-from flask import Blueprint, Response, current_app, jsonify, make_response, request, redirect
+from flask import Blueprint, Response, current_app, jsonify, make_response, request, redirect, g
 from meerkat_auth.user import User, InvalidCredentialException
 from meerkat_auth.role import InvalidRoleException
 from meerkat_auth.authorise import authorise
@@ -38,6 +38,7 @@ def login():
 
     #Load the form's data.
     args = request.json
+    current_app.logger.warning( args )
 
     #Try to authenticate the user and set JWT in a cookie
     try:
@@ -65,7 +66,8 @@ def login():
         response.status_code = 500
         return response
 
-@auth.route('/get_user', methods=['POST'])
+#@authorise(['registered'])
+#@auth.route('/get_user')
 def get_user():
     """
     Return a user object in JSON for a given JWT. 
@@ -80,7 +82,7 @@ def get_user():
     """
     
     try: 
-        return User.from_db(payload['usr']).to_json()
+        return User.from_db(g.payload['usr']).to_json()
 
     #If we fail to get the user from the database return a 500 http error.
     except Exception as e:

@@ -4,10 +4,16 @@ Meerkat Auth Tests
 
 Unit tests for the utility class User in Meerkat Auth.
 """
-import json, meerkat_auth, unittest, jwt, calendar, time, logging
+import json, meerkat_auth, unittest, jwt, calendar, time, logging, boto3, os
 from datetime import datetime
 from meerkat_auth.user import User, InvalidCredentialException
 from meerkat_auth.role import Role, InvalidRoleException
+
+#Need this module to be importable without the whole of meerkat_auth config.
+#Directly load the secret settings file from which to import required variables.
+#File must include JWT_COOKIE_NAME, JWT_ALGORITHM and JWT_PUBLIC_KEY variables.
+filename = os.environ.get( 'MEERKAT_AUTH_SETTINGS' )
+exec( compile(open(filename, "rb").read(), filename, 'exec') )
 
 class MeerkatAuthUserTestCase(unittest.TestCase):
 
@@ -18,7 +24,16 @@ class MeerkatAuthUserTestCase(unittest.TestCase):
         meerkat_auth.app.config['TESTING'] = True
         meerkat_auth.app.config['USERS'] = 'test_auth_users'
         meerkat_auth.app.config['ROLES'] = 'test_auth_roles'
-
+        User.DB= boto3.resource(
+            'dynamodb', 
+            endpoint_url="https://dynamodb.eu-west-1.amazonaws.com", 
+            region_name='eu-west-1'
+        )
+        Role.DB= boto3.resource(
+            'dynamodb', 
+            endpoint_url="https://dynamodb.eu-west-1.amazonaws.com", 
+            region_name='eu-west-1'
+        )
         #The database should have the following objects already in it.
         roles = [
             Role( 'demo', 'registered', 'Registered description.', [] ),
@@ -121,20 +136,19 @@ class MeerkatAuthUserTestCase(unittest.TestCase):
         )
         #Create JWT from the test user with a very short lifetime (1 second)
         exp = calendar.timegm( time.gmtime() ) + 1
+   
         encoded = user.get_jwt(exp)
-        print(encoded)
         
         #Decode the JWT and check it is as expected.
         decoded = jwt.decode(
             encoded, 
-            meerkat_auth.app.config['PUBLIC'], 
-            meerkat_auth.app.config['ALGORITHM']
+            JWT_PUBLIC_KEY, 
+            JWT_ALGORITHM
         )
-        print(decoded)
-        print( type(decoded) )
+
         expected = {
             u'acc': {
-                u'demo': [u'manager', u'registered', u'personal', u'shared'], 
+                u'demo': [u'manager', u'registered', u'shared', u'personal'], 
                 u'jordan': [u'registered', u'personal']
             }, 
             u'data': {u'name': u'Testy McTestface'}, 
@@ -142,16 +156,24 @@ class MeerkatAuthUserTestCase(unittest.TestCase):
             u'exp': exp,  
             u'email': u'test@test.org.uk'
         }
-        self.assertEqual( expected, decoded )
 
-        #Let the computer sleep through the liftime of the JWT. 
-        time.sleep(1)
+        #Extract the access lists and compare seperately because their order isn't predictable.
+        decoded_acc = decoded.pop('acc', None )
+        expected_acc = expected.pop( 'acc', None )
+        for key in expected_acc.keys():
+            self.assertEqual( set(expected_acc[key]), set( decoded_acc[key] ) )
+
+        #Check the rest of the tokens are equal.
+        self.assertEqual(expected, decoded)
         
+        #Let the computer sleep through the liftime of the JWT. 
+        time.sleep(2)
+
         #Check that decoding the JWT not complains with an ExpiredSignatureError
         self.assertRaises( jwt.ExpiredSignatureError, lambda: jwt.decode(
             encoded, 
-            meerkat_auth.app.config['PUBLIC'], 
-            meerkat_auth.app.config['ALGORITHM']
+            JWT_PUBLIC_KEY, 
+            JWT_ALGORITHM
         ))
 
     def test_validate_user(self):
@@ -159,13 +181,14 @@ class MeerkatAuthUserTestCase(unittest.TestCase):
 
         #Check that a valid set of arguments passes the validation function.
         try:
-            User.validate_user( 
+            User( 
                 'testUser', 
                 'test@test.org.uk',
-                'password',
+                User.hash_password('password'),
                 ['demo', 'jordan'],
-                ['manager', 'personal']
-            )
+                ['manager', 'personal'],
+                state='new'
+            ).validate()
         except InvalidCredentialException as e:
             self.fail( repr(e) ) 
         except InvalidRoleException as e:
@@ -174,33 +197,36 @@ class MeerkatAuthUserTestCase(unittest.TestCase):
         #Check that bad arguments raises the correct exceptions
         self.assertRaises( 
             InvalidCredentialException,
-            lambda: User.validate_user( 
+            lambda: User( 
                 'testUser', 
                 'testtest.org.uk',
-                'password',
+                User.hash_password('password'),
                 ['demo', 'jordan'],
-                ['manager', 'personal']
-            )
+                ['manager', 'personal'],
+                state='new'
+            ).validate()
         )         
         self.assertRaises( 
             InvalidRoleException,
-            lambda: User.validate_user( 
+            lambda: User( 
                 'testUser', 
                 'test@test.org.uk',
-                'password',
+                User.hash_password('password'),
                 ['demo', 'jordan'],
-                ['superroot', 'personal']        
-            )
+                ['superroot', 'personal'],  
+                state='new'      
+            ).validate()
         ) 
         self.assertRaises( 
             InvalidRoleException,
-            lambda: User.validate_user( 
+            lambda: User( 
                 'testUser', 
                 'test@test.org.uk',
-                'password',
+                User.hash_password('password'),
                 ['neverland', 'jordan'],
-                ['manager', 'personal']
-            )
+                ['manager', 'personal'],
+                state='new'
+            ).validate()
         ) 
         
         #Create and write to db a valid user with the same username. 
@@ -218,17 +244,6 @@ class MeerkatAuthUserTestCase(unittest.TestCase):
             state='new'
         )    
         user.to_db()
-
-        self.assertRaises(  
-            InvalidCredentialException,
-            lambda: User.validate_user( 
-                'testUser', 
-                'test@test.org.uk',
-                'password',
-                ['demo', 'jordan'],
-                ['superroot', 'personal']
-            )
-        ) 
         
         #Edit the user badly and check it's picked up by validate()
         user.password = 'password'
@@ -291,49 +306,6 @@ class MeerkatAuthUserTestCase(unittest.TestCase):
             lambda: User.authenticate( 'wronguser', 'password' ) 
         )
 
-    def test_new_user(self):
-        """Test the staticmethod new_user that helps cleanly create a new user."""
-
-        try:
-            #Create the new user using valid details (shouldn't raise exception)
-            user1 = User.new_user(
-                'testUser', 
-                'test@test.org.uk',
-                'test_password',
-                ['demo', 'jordan'],
-                ['manager', 'personal']
-            )
-            print( repr(user1) ) 
-
-            #Check that the user has gone into the database successfully
-            #Do this by trying to authenticate as the user.
-            user2 = User.authenticate( 'testUser', 'test_password' )
-            self.assertEqual( user1.username, user2.username )
-            self.assertEqual( user1.email, user2.email ) 
-            self.assertEqual( user1.password, user2.password )
-            self.assertEqual( user1.countries, user2.countries )
-            self.assertEqual( user1.roles, user2.roles )
-            self.assertEqual( user1.data, user2.data)
-            self.assertEqual( len(user1.role_objs), len(user2.role_objs) )
-
-        except InvalidCredentialException as e:
-            self.fail( repr(e) )
-
-        except InvaliRoleException as e:
-            self.fail( repr(e) )
-    
-        #Now check that things break appropriately for the wrong details.
-        self.assertRaises( 
-            InvalidCredentialException,
-            lambda: User.new_user(
-                'testUser', 
-                'test@test.org.uk',
-                'test_password',
-                ['demo', 'jordan'],
-                ['manager', 'personal']
-            ) 
-        ) 
-
     def test_get_all(self):
         """Test the staticmethod get_all()."""
         #Create the test users.
@@ -393,8 +365,6 @@ class MeerkatAuthUserTestCase(unittest.TestCase):
 
         #We don't know what order the responses will be returned in.
         for item in response:
-            #'data' remains a json string, so for comparison with to_dict() load as a dict.
-            item['data'] = json.loads( item['data'] )
             if item['username'] == user1.username:
                 self.assertEqual( item, user1.to_dict() )                
             elif item['username'] == user2.username:

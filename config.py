@@ -47,3 +47,4 @@ class Testing(Config):
     TESTING = True
     USERS = 'test_auth_users'
     ROLES = 'test_auth_roles'
+    DB_URL = "https://dynamodb.eu-west-1.amazonaws.com"

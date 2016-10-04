@@ -17,13 +17,13 @@ def requires_auth():
     Checks that the user has authenticated before returning any page from 
     this Blueprint.
     """
-    auth.check_auth( ['manager'] )
+    auth.check_auth( ['admin'] )
 
-    #Only allow manager's to edit accounts in their own countries.
+    #Only allow admin's to edit accounts in their own countries.
     #i.e. if manager has non-manager access to another country.
     countries = list(g.payload['acc'].keys())
     for country in countries:
-        if 'manager' not in g.payload['acc'][country]:
+        if 'admin' not in g.payload['acc'][country]:
             del g.payload['acc'][ country ]
 
     current_app.logger.warning(g.payload['acc'])

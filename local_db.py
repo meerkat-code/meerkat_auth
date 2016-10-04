@@ -85,11 +85,11 @@ if args.populate:
         #Add some data for development
         roles += [
             Role( country, 'registered', 'A standard registered user', [] ),
-            Role( country, 'cd', 'Access to CD data.', ['registered'] ),
-            Role( country, 'ncd', 'Access to NCD data.', ['registered'] ),
+            Role( country, 'cd', 'Access to CD data.', [] ),
+            Role( country, 'ncd', 'Access to NCD data.', [] ),
             Role( country, 'all', 'Access to both CD and NCD data.', ['cd','ncd']),
-            Role( country, 'manager', 'A manager with backend access.', ['all'] ),
-            Role( country, 'root', 'Complete access', ['manager'] )
+            Role( country, 'admin', 'A manager with backend access.', ['registered'] ),
+            Role( country, 'root', 'Complete access', ['admin'] )
         ]
     for role in roles:
         print( role.to_db() )
@@ -111,12 +111,12 @@ if args.populate:
                 state='new'
             ),
             User(
-                '{}-manager'.format(country), 
+                '{}-admin'.format(country), 
                 'manger@{}test.org.uk'.format(country), 
                 ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
                 'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
                 [country],
-                ['manager'],
+                ['admin'],
                 data={ 'name':{ 'value':'Mr Boss Man' } },
                 state='new'
             )

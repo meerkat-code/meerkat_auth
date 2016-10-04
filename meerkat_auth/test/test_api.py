@@ -4,7 +4,7 @@ Meerkat Auth Tests
 
 Unit tests for REST API resources in Meerkat Auth.
 """
-import json, meerkat_auth, unittest, jwt, calendar, time, logging, jwt
+import json, meerkat_auth, unittest, jwt, calendar, time, logging, jwt, boto3
 from datetime import datetime
 from meerkat_auth.user import User, InvalidCredentialException
 from meerkat_auth.role import Role, InvalidRoleException
@@ -18,8 +18,19 @@ class MeerkatAuthAPITestCase(unittest.TestCase):
         meerkat_auth.app.config['TESTING'] = True
         meerkat_auth.app.config['USERS'] = 'test_auth_users'
         meerkat_auth.app.config['ROLES'] = 'test_auth_roles'
+        meerkat_auth.app.config['DB_URL'] = 'https://dynamodb.eu-west-1.amazonaws.com'
+        User.DB= boto3.resource(
+            'dynamodb', 
+            endpoint_url="https://dynamodb.eu-west-1.amazonaws.com", 
+            region_name='eu-west-1'
+        )
+        Role.DB= boto3.resource(
+            'dynamodb', 
+            endpoint_url="https://dynamodb.eu-west-1.amazonaws.com", 
+            region_name='eu-west-1'
+        )
         self.app = meerkat_auth.app.test_client()
-
+        logging.warning( meerkat_auth.app.config['DB_URL'] )
         #The database should have the following objects already in it.
         roles = [
             Role( 'demo', 'registered', 'Registered description.', [] ),
@@ -133,13 +144,14 @@ class MeerkatAuthAPITestCase(unittest.TestCase):
 
         #Load user and get JWT token.
         exp =calendar.timegm( time.gmtime() ) + 10
-        token = User.from_db('testUser1').get_jwt(exp)
+        token = User.from_db('testUser1').get_jwt(exp).decode('UTF-8')
         headers = {
             'Authorization': 'Bearer ' + token
         }
 
         #Make a request with the jwt token in the header.
         response = self.app.get( '/user', headers=headers)
+        logging.warning( response.data.decode('UTF-8') )
         user_out = json.loads( response.data.decode('UTF-8') )
         user_in = User.from_db('testUser1').to_dict()    
         

@@ -15,7 +15,12 @@ class MeerkatAuthRoleTestCase(unittest.TestCase):
         meerkat_auth.app.config['TESTING'] = True
         meerkat_auth.app.config['USERS'] = 'test_auth_users'
         meerkat_auth.app.config['ROLES'] = 'test_auth_roles'
-
+        meerkat_auth.app.config['DB_URL'] = 'https://dynamodb.eu-west-1.amazonaws.com'      
+        Role.DB= boto3.resource(
+            'dynamodb', 
+            endpoint_url="https://dynamodb.eu-west-1.amazonaws.com", 
+            region_name='eu-west-1'
+        )
         #Put some roles into the test db.
         roles = [ 
             Role( 'demo', 'registered', 'Registered description.', [] ),
@@ -40,7 +45,7 @@ class MeerkatAuthRoleTestCase(unittest.TestCase):
     def tearDown(self):
         """Tear down after testing."""
         #Delete the roles in the database after finishing the tests.
-        table = boto3.resource('dynamodb').Table(meerkat_auth.app.config['ROLES'])
+        table = Role.DB.Table(meerkat_auth.app.config['ROLES'])
         response = table.scan()
         with table.batch_writer() as batch:
             for role in response.get('Items', []):

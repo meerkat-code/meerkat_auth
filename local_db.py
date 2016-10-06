@@ -91,7 +91,10 @@ if args.populate:
         roles += [
             Role( country, 'registered', 'A standard registered user', [] ),
             Role( country, 'admin', 'A manager with backend access.', ['registered'] ),
-            Role( country, 'root', 'Complete access', ['admin'] )
+            Role( country, 'cd', 'Communicable disease access', [] ),
+            Role( country, 'ncd', 'Non-Communicable disease access', [] ),
+            Role( country, 'all', 'All disease access', ['cd', 'ncd'] ),
+            Role( country, 'root', 'Complete access', ['admin', 'all'] )
         ]
 
     #Create the jordan access network

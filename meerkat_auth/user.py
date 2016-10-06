@@ -164,7 +164,7 @@ class User:
         """
         access = {}
         for role in self.role_objs:
-            access[role.country] = role.all_access()
+            access.setdefault( role.country, [] ).extend( role.all_access() )
         return access
 
     def get_jwt(self, exp):

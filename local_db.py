@@ -78,19 +78,33 @@ if args.populate:
     #Create some roles for each country.
     #TODO: Need a clever solution to match dev to deployment here.
     #Maybe we define roles for dev and deployment in a sngle file and import.
-    countries = ['demo','jordan','mad','rms']
+    countries = ['demo','mad','rms']
     roles = []
     
     for country in countries:
         #Add some data for development
         roles += [
             Role( country, 'registered', 'A standard registered user', [] ),
-            Role( country, 'cd', 'Access to CD data.', [] ),
-            Role( country, 'ncd', 'Access to NCD data.', [] ),
-            Role( country, 'all', 'Access to both CD and NCD data.', ['cd','ncd']),
             Role( country, 'admin', 'A manager with backend access.', ['registered'] ),
             Role( country, 'root', 'Complete access', ['admin'] )
         ]
+
+    #Create the jordan access network
+    #TODO:Find a way of syncing this with the live database.
+    roles += [
+        Role( 'jordan', 'reports', ' ', [] ),
+        Role( 'jordan', 'clinic', ' ', ['reports'] ),        
+        Role( 'jordan', 'directorate', ' ', ['clinic'] ),    
+        Role( 'jordan', 'central', ' ', ['directorate'] ),
+        Role( 'jordan', 'cd', ' ', [] ),
+        Role( 'jordan', 'ncd', ' ', [] ),
+        Role( 'jordan', 'mh', ' ', [] ),
+        Role( 'jordan', 'all', ' ', ['cd','ncd','mh'] ),
+        Role( 'jordan', 'admin', ' ', [] ),
+        Role( 'jordan', 'personal', ' ', [] ),
+        Role( 'jordan', 'root', ' ', ['central','all','admin','personal'] )
+    ]
+
     for role in roles:
         print( role.to_db() )
 
@@ -123,29 +137,54 @@ if args.populate:
 
         ]
 
+    #Create some Jordan accounts
+    users += [
+        User(
+            'jordan-reports', 
+            'reports@jordantest.org.uk', 
+            ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+            'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+            ['jordan', 'jordan'],
+            ['reports', 'all'],
+            data={ 'name':{ 'value':'Report Person' } },
+            state='new'
+        ), User(
+            'jordan-clinic', 
+            'clinic@jordantest.org.uk', 
+            ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+            'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+            ['jordan', 'jordan'],
+            ['clinic', 'all'],
+            data={ 'name':{ 'value':'Clinic Person' } },
+            state='new'
+        ), User(
+            'jordan-central-admin', 
+            'central.admin@jordantest.org.uk', 
+            ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+            'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+            ['jordan', 'jordan', 'jordan'],
+            ['central', 'all', 'admin'],
+            data={ 'name':{ 'value':'Central Administrator' } },
+            state='new'
+        )
+    ]
+
     #Create an overall root acount with access to everything.
     users += [ User(
         'root', 
         'root@test.org.uk', 
         ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
         'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
-        countries,
-        ['root' for c in countries],
+        countries + ['jordan'],
+        ['root' for c in countries] + ['root'],
         data={ 'name':{'val':'Supreme Omnipotent Overlord'} },
         state='new'
-    ), User(
-        'test', 
-        'test@test.org.uk', 
-        ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
-        'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
-        ['jordan', 'rms'],
-        ['registered','root'],
-        data={ 'name':{'val':'Supreme Omnipotent Overlord'} },
-        state='new'
-    ), ]
-
+    )]
+        
     for user in users:
         print( user.to_db() )
+
+    
 
     print('Populated dev db')
 
@@ -173,6 +212,4 @@ if args.list:
             print( "No dev roles exist." )
     except Exception as e:
         print("Listing failed. Has database been setup?")
-
-
 

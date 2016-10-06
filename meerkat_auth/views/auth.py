@@ -38,7 +38,6 @@ def login():
 
     #Load the form's data.
     args = request.json
-    current_app.logger.warning( args )
 
     #Try to authenticate the user and set JWT in a cookie
     try:

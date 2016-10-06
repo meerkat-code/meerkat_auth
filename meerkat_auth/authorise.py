@@ -80,7 +80,7 @@ def get_token():
 
     return token if token else ""
 
-def check_auth( access, countries=[""] ):
+def check_auth( access, countries ):
     """
     A function that checks whether the user is authorised to continue with the current
     request. It does this by verifying the jwt stored as a cookie. If the user isn't 
@@ -108,7 +108,7 @@ def check_auth( access, countries=[""] ):
     #Bable runs in frontend but not API - both import this module and musn't fail.
     not_authenticated = ( "You have not authenticated yet. "
                           "Please login before viewing this page." )
-    incorrect_access = "User doesn't have required access levels for this page."
+    incorrect_access = "User doesn't have required access levels for this page: {}."
 
     try:
         not_authenticated = gettext( not_authenticated )
@@ -124,6 +124,7 @@ def check_auth( access, countries=[""] ):
         abort( 401, not_authenticated )
 
     try:
+        logging.warning( token )
         #Decode the jwt and check it is structured as expected.
         payload = jwt.decode(
             token,
@@ -138,14 +139,14 @@ def check_auth( access, countries=[""] ):
 
         #Token is invalid if it doesn't have the required accesss levels.
         else:
-            raise InvalidTokenError( incorrect_access )
+            raise InvalidTokenError( incorrect_access.format(', '.join(map(str, access))) )
 
     #Return 403 if logged in but the jwt isn't valid.   
     except InvalidTokenError as e:
         abort( 403, str(e) ) 
     
 
-def authorise( access, countries=[""] ):
+def authorise( access, countries ):
     """
     Returns decorator that wraps a route function with another function that
     requires a valid jwt.

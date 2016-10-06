@@ -17,7 +17,7 @@ def requires_auth():
     Checks that the user has authenticated before returning any page from 
     this Blueprint.
     """
-    auth.check_auth( ['admin'] )
+    auth.check_auth( ['admin'], [''] )
 
 @roles.route('/get_roles')
 @roles.route('/get_roles/<country>')

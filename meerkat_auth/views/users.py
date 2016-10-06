@@ -17,7 +17,7 @@ def requires_auth():
     Checks that the user has authenticated before returning any page from 
     this Blueprint.
     """
-    auth.check_auth( ['admin'] )
+    auth.check_auth( ['admin'], [''] )
 
     #Only allow admin's to edit accounts in their own countries.
     #i.e. if manager has non-manager access to another country.

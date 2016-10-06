@@ -124,7 +124,6 @@ def check_auth( access, countries ):
         abort( 401, not_authenticated )
 
     try:
-        logging.warning( token )
         #Decode the jwt and check it is structured as expected.
         payload = jwt.decode(
             token,

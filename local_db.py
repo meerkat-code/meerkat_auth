@@ -34,13 +34,18 @@ if all(arg == False for arg in args_dict.values()):
         args_dict[arg] = True
 
 if args.clear:
-    print('Cleaning the dev db.')
     db = boto3.resource('dynamodb', endpoint_url='http://dynamodb:8000', region_name='eu_west')
-    response = db.Table(meerkat_auth.app.config['USERS']).delete()
-    print( response )
-    response = db.Table(meerkat_auth.app.config['ROLES']).delete()
-    print( response )
-    print('Cleaned the db.')
+    try:
+        print('Cleaning the dev db.')
+        response = db.Table(meerkat_auth.app.config['USERS']).delete()
+        print( response )
+        response = db.Table(meerkat_auth.app.config['ROLES']).delete()
+        print( response )
+        print('Cleaned the db.')
+    except Exception as e:
+        print( e )
+        print( 'There has been error, probably because no tables currently exist. Skipping the clean process.' )
+        
 
 if args.setup:
     print('Creating dev db')

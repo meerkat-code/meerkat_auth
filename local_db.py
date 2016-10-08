@@ -83,7 +83,7 @@ if args.populate:
     #Create some roles for each country.
     #TODO: Need a clever solution to match dev to deployment here.
     #Maybe we define roles for dev and deployment in a sngle file and import.
-    countries = ['demo','mad','rms']
+    countries = ['demo','madagascar','rms']
     roles = []
     
     for country in countries:

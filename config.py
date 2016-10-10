@@ -20,6 +20,11 @@ def from_env(env_var, default):
         return default
 
 class Config(object):
+
+    #Load the authentication settings file.
+    filename = os.environ.get( 'MEERKAT_AUTH_SETTINGS' )
+    exec( compile(open(filename, "rb").read(), filename, 'exec') )
+
     DEBUG = False
     TESTING = False
 

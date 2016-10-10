@@ -31,7 +31,18 @@ def get_roles( country=None ):
         A json object containing a single property 'roles' which is 
         a list of the roles for that country.
     """
-    return jsonify( {'roles': Role.get_all(country)} )
+    roles = Role.get_all(country)
+
+    #Remove roles that should be hidden from the user. 
+    #iterate backwards to avoid index changes when deleting items. 
+    for r in range(len(roles)-1, -1 ,-1):
+        role = roles[r]
+        for required in role.get('visible', []):
+            if required not in g.payload['acc'][country]:
+                del roles[r]
+                break
+
+    return jsonify( {'roles': roles} )
 
 @roles.route('/get_all_access/<country>/<role>')
 def get_all_access( country=None, role=None ):

@@ -14,7 +14,7 @@ class Role:
     Class to model a single access Role object and includes functions to handle
     writing, reading, deleting details from the database.
     """
-    def __init__(self, country, role, description, parents):
+    def __init__(self, country, role, description, parents, visible=[]):
         """
         Constructor for a role object.
         
@@ -24,20 +24,29 @@ class Role:
             description (string) A description of the role.
             parents ([string]) A list of roles from which this role inherits access.
                 The role will also inherit access that its parents inherits.
+            visible ([string]) A list of roles required in order to view and use this role.
+                Empty list [] denotes freely available.
         """
         self.country = country
         self.role = role
         self.description = description
-        self.parents = parents       
+        self.parents = parents
+        self.visible = visible       
 
     def __repr__(self):
         """Override to create a better string representation of a Role object."""
         parents = ', '.join(self.parents)
-        return '<{}: {}-{} parents:[{}] {}>'.format(
+        if self.visible != []:
+            visible = "visible:[{}]".format( ", ".join(self.visible) )
+        else:
+            visible = ""
+
+        return '<{}: {}-{} parents:[{}] {} {}>'.format(
             self.__class__.__name__, 
             self.role, 
             self.country,
             parents, 
+            visible,
             self.description
         )      
 
@@ -85,7 +94,8 @@ class Role:
             }, 
             AttributeUpdates={
                 'description':{ 'Value':self.description, 'Action':'PUT' },
-                'parents':{ 'Value':self.parents, 'Action':'PUT' }
+                'parents':{ 'Value':self.parents, 'Action':'PUT' },
+                'visible':{ 'Value':self.visible, 'Action':'PUT' }
             }
         )
 
@@ -156,11 +166,13 @@ class Role:
             )
         else:
             r = response["Item"]
+            
             role = Role(
                 r['country'],
                 r['role'],
                 r['description'],
-                r['parents']
+                r['parents'],
+                visible = r.get('visible', [])
             )
             logging.info( 'Returning role:\n' + repr(role) )
             return role

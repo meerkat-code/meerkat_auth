@@ -25,7 +25,6 @@ def login():
     Post data json args:
         username (str)\n
         password (str)\n
-        redirect (
 
     Returns:
         A json object containing a single argument 'message', stating 'successful'
@@ -113,5 +112,61 @@ def logout():
     response.set_cookie( meerkat_auth.app.config["JWT_COOKIE_NAME"], value="", expires=0 )
     return response
 
+@auth.route('/update_user', methods=['POST'])
+def update_user():
+    """
+    An API call that updates the specified users details.  Can be used to reset passwords.
     
+    POST Args:
+        username (str) The username of the user to be updated.
+        old_password (str) The original user's passowrd (it may be changed).
+        Any of the attributes of a user's object can also be suplied.
+    
+    Returns:
+        A jsonified message response either detailing the error or stating "successful". 
+    """
+    #Load the form's data.
+    args = request.json
+    current_app.logger.warning( args )
+
+    try:
+        #Check the user has supplied their old username and password correctly.
+        user = User.authenticate( args.pop('username'), args.pop('old_password') )
+    except Exception as e:
+        current_app.logger.info( 'Failed to authenticate. ' + repr(e) )
+        return Response( 
+            json.dumps( {'message':'Failed to authenticate. ' + str(e)} ), 
+            status=500, 
+            mimetype='application/json'  
+        )
+
+    try:
+        #Update each argument supplied correctly.
+        failed = []
+        for arg in args.keys():
+            current_app.logger.warning( str(type(arg)) + " " + str(arg) )
+            #Need to hash the password.
+            if arg=='password':
+                args[arg] = User.hash_password(args[arg])
+            try:
+                setattr(user, arg, args[arg])
+            except AttributeError:
+                failed.append(arg)
+        #Write the user to the database (this validates the user as well).
+        user.to_db()
+        #Return response
+        if not failed:
+            return jsonify( {'message': 'successful'} )
+        else:
+            return jsonify( {'message': 'Failed to update attributes: {}'.format(failed)} )
+   
+    #Handle any authentication/validation exceptions
+    except Exception as e:
+        current_app.logger.info( 'Failed to write. ' + repr(e) )
+        return Response( 
+            json.dumps( {'message':'Failed to write. ' + str(e)} ), 
+            status=500, 
+            mimetype='application/json'  
+        )
+         
     

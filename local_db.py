@@ -94,7 +94,8 @@ if args.populate:
             Role( country, 'cd', 'Communicable disease access', [] ),
             Role( country, 'ncd', 'Non-Communicable disease access', [] ),
             Role( country, 'all', 'All disease access', ['cd', 'ncd'] ),
-            Role( country, 'root', 'Complete access', ['admin', 'all'] )
+            Role( country, 'root', 'Complete access', ['admin', 'all'] ),
+            Role( country, 'emails', ' ', [], visible=['root'] )
         ]
 
     #Create the jordan access network
@@ -163,7 +164,7 @@ if args.populate:
             ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
             'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
             ['jordan', 'jordan'],
-            ['clinic', 'all'],
+            ['clinic', 'cd'],
             data={ 'name':{ 'value':'Clinic Person' } },
             state='new'
         ), User(
@@ -171,8 +172,26 @@ if args.populate:
             'central.admin@jordantest.org.uk', 
             ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
             'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
-            ['jordan', 'jordan', 'jordan'],
-            ['central', 'all', 'admin'],
+            ['jordan', 'jordan', 'jordan', 'jordan'],
+            ['central', 'all', 'admin', 'personal'],
+            data={ 'name':{ 'value':'Central Administrator' } },
+            state='new'
+        ), User(
+            'jordan-admin-cd', 
+            'central.admin@jordantest.org.uk', 
+            ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+            'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+            ['jordan', 'jordan', 'jordan', 'jordan'],
+            ['central', 'cd', 'admin', 'personal'],
+            data={ 'name':{ 'value':'Central Administrator' } },
+            state='new'
+        ), User(
+            'jordan-admin-ncd', 
+            'central.admin@jordantest.org.uk', 
+            ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+            'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+            ['jordan', 'jordan', 'jordan', 'jordan'],
+            ['central', 'ncd', 'admin', 'personal'],
             data={ 'name':{ 'value':'Central Administrator' } },
             state='new'
         )
@@ -189,7 +208,17 @@ if args.populate:
         data={ 'name':{'val':'Supreme Omnipotent Overlord'} },
         state='new'
     )]
-        
+
+    users += [ User(
+        'report-emails',
+        'report-emails@test.org.uk',
+        ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+        'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+        countries + countries + ['jordan', 'jordan'],
+        ['registered' for c in countries] + ['emails' for c in countries] + ['reports', 'emails'],
+        state='new'
+    )]
+
     for user in users:
         print( user.to_db() )
 

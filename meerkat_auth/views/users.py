@@ -45,7 +45,8 @@ def get_users():
     rows = User.get_all( countries, attributes )
 
     #Remove any data rows (accounts) that are outside the users access.
-    for account in rows:
+    for j in range(len(rows)-1, -1, -1):
+        account = rows[j]
         #Look at each access level the account has.
         for i in range(len(account['roles'])):
             account_role = account['roles'][i]
@@ -53,7 +54,7 @@ def get_users():
             #If the account has an access level the current user doesn't have...
             #(If the current user has access in that country...)
             if account_role not in user_access.get(account_country, [account_role]):
-                rows.remove(account)    
+                del rows[j]   
                 break
 
     return jsonify( {'rows': rows} )

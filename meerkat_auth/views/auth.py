@@ -44,7 +44,7 @@ def login():
         user = User.authenticate( args['username'], args['password'] )
         current_app.logger.warning("Authenticated: " + str(user))
         exp = calendar.timegm( time.gmtime() ) + meerkat_auth.app.config['TOKEN_LIFE']
-        response = make_response( jsonify( {'message':'successful'} ) ) 
+        response = jsonify( {'message':'successful'} ) 
         response.set_cookie( 
             meerkat_auth.app.config['JWT_COOKIE_NAME'], 
             value=user.get_jwt(exp)
@@ -65,6 +65,7 @@ def login():
         response.status_code = 500
         return response
 
+#Not using this at the moment but may be useful in the future.
 #@authorise(['registered'])
 #@auth.route('/get_user')
 def get_user():
@@ -111,4 +112,6 @@ def logout():
     response = make_response( redirect(url) )
     response.set_cookie( meerkat_auth.app.config["JWT_COOKIE_NAME"], value="", expires=0 )
     return response
+
+    
     

@@ -100,7 +100,6 @@ class MeerkatAuthAPITestCase(unittest.TestCase):
             JWT_PUBLIC_KEY, 
             algorithms=JWT_ALGORITHM
         )
-        self.assertTrue( payload.get( 'acc', False ) )
         self.assertTrue( payload.get( 'usr', False ) )
         self.assertTrue( payload.get( 'exp', False ) )
         
@@ -108,12 +107,6 @@ class MeerkatAuthAPITestCase(unittest.TestCase):
         max_exp = calendar.timegm( time.gmtime() ) + meerkat_auth.app.config['TOKEN_LIFE']
         self.assertTrue( payload['exp'] <= max_exp )
         self.assertEquals( payload['usr'], u'testUser1' )
-        expected = {
-            u'demo': [u'manager', u'registered', u'personal', u'shared'], 
-            u'jordan': [u'registered', u'personal']
-        }
-        for key in expected.keys():
-            self.assertEqual( set(expected[key]), set(payload['acc'][key]) )
 
         #Now check that login fails for the wrong credentials.
         post_data = json.dumps({'username':'testUser1', 'password':'password2'})

@@ -169,8 +169,30 @@ class User:
 
     def get_jwt(self, exp):
         """
-        Returns a secure Json Web Token (JWT) giving the users details and 
-        including the specified expiry time of the user's session.
+        Returns a small secure Json Web Token (JWT) giving the username
+        and the specified expiry time of the user's session.  This is specifically
+        kept extremely small so it can be stored as a cookie or header.
+
+        Args:
+            exp (string) The expiry time of the users session.
+        Returns:
+            The secure jwt.
+        """
+        payload = {
+            'exp': exp,
+            'usr': self.username
+        }
+        return jwt.encode(
+            payload, 
+            meerkat_auth.app.config['JWT_SECRET_KEY'], 
+            algorithm = meerkat_auth.app.config['JWT_ALGORITHM']
+        )
+
+
+    def get_user_jwt(self, exp):
+        """
+        Returns a  large secure Json Web Token (JWT) giving all the users details.
+        This is not intended for storing as a cookie or a header.
 
         Args:
             exp (string) The expiry time of the users session.
@@ -180,11 +202,19 @@ class User:
         payload = {
             'exp': exp,
             'acc': self.get_access(),
-            'usr': self.username
+            'usr': self.username,
+            'email': self.email,
+            'data': self.data
         }
-        secret = meerkat_auth.app.config['JWT_SECRET_KEY']
-        algorithm = meerkat_auth.app.config['JWT_ALGORITHM']
-        return jwt.encode(payload, secret, algorithm=algorithm)
+
+        token = jwt.encode(
+            payload, 
+            meerkat_auth.app.config['JWT_SECRET_KEY'], 
+            algorithm = meerkat_auth.app.config['JWT_ALGORITHM']
+        )
+        token = token.decode('UTF-8')
+
+        return token
 
     def validate(self):
         """

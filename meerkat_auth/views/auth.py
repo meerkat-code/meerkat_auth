@@ -3,7 +3,7 @@ auth.py
 
 A Flask Blueprint module for the authentication api calls.
 """
-import calendar, time, meerkat_auth, json
+import calendar, time, meerkat_auth, json, jwt
 from flask_restful import Resource, reqparse, current_app
 from flask import Blueprint, Response, current_app, jsonify, make_response, request, redirect, g
 from meerkat_auth.user import User, InvalidCredentialException
@@ -64,13 +64,14 @@ def login():
         response.status_code = 500
         return response
 
-#Not using this at the moment but may be useful in the future.
-#@authorise(['registered'])
-#@auth.route('/get_user')
+@auth.route('/get_user', methods=['POST'])
 def get_user():
     """
-    Return a user object in JSON for a given JWT. 
-
+    Return all user data that doesn't need to be in the header. Headers need to be
+    kept small, and our "access" dictionary was starting to get too big. The access
+    details, personal data and account settings are bundled up in a big signed JWT that 
+    is servered upon request.
+    
     Arguments are passed in the request data.
 
     Args:
@@ -81,9 +82,19 @@ def get_user():
     """
     
     try: 
-        return User.from_db(g.payload['usr']).to_json()
+        token = request.json['jwt']   
+        token = jwt.decode(
+            token,
+            meerkat_auth.app.config['JWT_PUBLIC_KEY'], 
+            algorithms=[meerkat_auth.app.config['JWT_ALGORITHM']]
+        )
+        user = User.from_db( token['usr'] )
+        exp = calendar.timegm( time.gmtime() ) + 30
+        #Return the large jwt with a short expiry time.  
+        #It only needs to be decoded once at the other end. 
+        return jsonify( {'jwt': user.get_user_jwt(exp)} )
 
-    #If we fail to get the user from the database return a 500 http error.
+    #If we fail to get the user from the database to return a 500 http error.
     except Exception as e:
         current_app.logger.info( repr(e) )
         return Response( 

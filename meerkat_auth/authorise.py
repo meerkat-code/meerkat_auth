@@ -2,7 +2,7 @@ from flask import abort, request, make_response, jsonify, g
 from functools import wraps
 from jwt import InvalidTokenError
 from flask.ext.babel import gettext
-import jwt, inspect, logging, os
+import jwt, inspect, logging, os, requests, calendar, time
 
 #Need this module to be importable without the whole of meerkat_auth config.
 #Directly load the secret settings file from which to import required variables.
@@ -131,7 +131,18 @@ def check_auth( access, countries ):
             algorithms=[JWT_ALGORITHM]
         )
 
-        #Check that the jwt has required access.
+        #Payload gives username and expiry only. Now get complete user details from the auth module.
+        r = requests.post( AUTH_ROOT +'/api/get_user', json = {'jwt': token} )
+        user = jwt.decode(
+            r.json()['jwt'],
+            JWT_PUBLIC_KEY, 
+            algorithms=[JWT_ALGORITHM]
+        )
+
+        #Merge user details into payload
+        payload = {**user, **payload}
+
+        #Check that the user has required access.
         if check_access(access, countries, payload['acc'] ):
             g.payload = payload
             return jwt

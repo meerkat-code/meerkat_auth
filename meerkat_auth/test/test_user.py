@@ -137,6 +137,7 @@ class MeerkatAuthUserTestCase(unittest.TestCase):
         #Create JWT from the test user with a very short lifetime (1 second)
         exp = calendar.timegm( time.gmtime() ) + 1
    
+        user_encoded = user.get_user_jwt(exp)
         encoded = user.get_jwt(exp)
         
         #Decode the JWT and check it is as expected.
@@ -145,8 +146,13 @@ class MeerkatAuthUserTestCase(unittest.TestCase):
             JWT_PUBLIC_KEY, 
             JWT_ALGORITHM
         )
+        user_decoded = jwt.decode(
+            user_encoded, 
+            JWT_PUBLIC_KEY, 
+            JWT_ALGORITHM
+        )
 
-        expected = {
+        user_expected = {
             u'acc': {
                 u'demo': [u'manager', u'registered', u'shared', u'personal'], 
                 u'jordan': [u'registered', u'personal']
@@ -157,14 +163,20 @@ class MeerkatAuthUserTestCase(unittest.TestCase):
             u'email': u'test@test.org.uk'
         }
 
+        expected = {
+            u'usr':u'testUser',
+            u'exp': exp
+        }
+
         #Extract the access lists and compare seperately because their order isn't predictable.
-        decoded_acc = decoded.pop('acc', None )
-        expected_acc = expected.pop( 'acc', None )
+        decoded_acc = user_decoded.pop('acc', None )
+        expected_acc = user_expected.pop( 'acc', None )
         for key in expected_acc.keys():
             self.assertEqual( set(expected_acc[key]), set( decoded_acc[key] ) )
 
         #Check the rest of the tokens are equal.
         self.assertEqual(expected, decoded)
+        self.assertEqual(user_expected, user_decoded)
         
         #Let the computer sleep through the liftime of the JWT. 
         time.sleep(2)
@@ -172,6 +184,11 @@ class MeerkatAuthUserTestCase(unittest.TestCase):
         #Check that decoding the JWT not complains with an ExpiredSignatureError
         self.assertRaises( jwt.ExpiredSignatureError, lambda: jwt.decode(
             encoded, 
+            JWT_PUBLIC_KEY, 
+            JWT_ALGORITHM
+        ))
+        self.assertRaises( jwt.ExpiredSignatureError, lambda: jwt.decode(
+            user_encoded, 
             JWT_PUBLIC_KEY, 
             JWT_ALGORITHM
         ))

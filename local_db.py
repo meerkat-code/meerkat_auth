@@ -94,8 +94,10 @@ if args.populate:
             Role( country, 'cd', 'Communicable disease access', [] ),
             Role( country, 'ncd', 'Non-Communicable disease access', [] ),
             Role( country, 'all', 'All disease access', ['cd', 'ncd'] ),
-            Role( country, 'root', 'Complete access', ['admin', 'all'] ),
-            Role( country, 'emails', ' ', [], visible=['root'] )
+            Role( country, 'personal', 'A Personal account with access to account settings.', [] ),
+            Role( country, 'root', 'Complete access', ['admin', 'all', 'personal'] ),
+            Role( country, 'emails', ' ', [], visible=['root'] ),
+
         ]
 
     #Create the jordan access network

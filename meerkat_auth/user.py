@@ -180,9 +180,7 @@ class User:
         payload = {
             'exp': exp,
             'acc': self.get_access(),
-            'usr': self.username,
-            'email': self.email,
-            'data': self.data
+            'usr': self.username
         }
         secret = meerkat_auth.app.config['JWT_SECRET_KEY']
         algorithm = meerkat_auth.app.config['JWT_ALGORITHM']
@@ -520,6 +518,6 @@ class InvalidCredentialException( Exception ):
 
     def __repr__(self):
         """String referencing both the invalid credential and the its invalid value."""
-        return "INVALID CREDENTIALS: {} '{}' is not valid. {}".format(
-            self.credential, self.value, self.message
+        return "INVALID CREDENTIALS: {} is not valid. {}".format(
+            self.credential, self.message
         )

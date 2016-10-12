@@ -127,7 +127,6 @@ def update_user():
     """
     #Load the form's data.
     args = request.json
-    current_app.logger.warning( args )
 
     try:
         #Check the user has supplied their old username and password correctly.

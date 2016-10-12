@@ -143,7 +143,6 @@ def update_user():
         #Update each argument supplied correctly.
         failed = []
         for arg in args.keys():
-            current_app.logger.warning( str(type(arg)) + " " + str(arg) )
             #Need to hash the password.
             if arg=='password':
                 args[arg] = User.hash_password(args[arg])

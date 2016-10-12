@@ -165,16 +165,18 @@ class MeerkatAuthUserTestCase(unittest.TestCase):
 
         expected = {
             u'usr':u'testUser',
-            u'exp': exp
+            u'exp': exp,
         }
 
         #Extract the access lists and compare seperately because their order isn't predictable.
+        
         decoded_acc = user_decoded.pop('acc', None )
         expected_acc = user_expected.pop( 'acc', None )
         for key in expected_acc.keys():
             self.assertEqual( set(expected_acc[key]), set( decoded_acc[key] ) )
 
         #Check the rest of the tokens are equal.
+        decoded.pop( 'acc', None )  #TEMPORARY measure during deployment. Acc is left in.
         self.assertEqual(expected, decoded)
         self.assertEqual(user_expected, user_decoded)
         

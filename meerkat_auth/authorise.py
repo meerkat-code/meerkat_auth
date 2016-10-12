@@ -133,11 +133,17 @@ def check_auth( access, countries ):
 
         #Payload gives username and expiry only. Now get complete user details from the auth module.
         r = requests.post( AUTH_ROOT +'/api/get_user', json = {'jwt': token} )
-        user = jwt.decode(
-            r.json()['jwt'],
-            JWT_PUBLIC_KEY, 
-            algorithms=[JWT_ALGORITHM]
-        )
+
+        #Decode the user JWT only if request was successful. 
+        try:
+            user = jwt.decode(
+                r.json()['jwt'],
+                JWT_PUBLIC_KEY, 
+                algorithms=[JWT_ALGORITHM]
+            )
+        except Exception:
+            logging.warning( "Failed to decode user JWT." )
+            user = {}
 
         #Merge user details into payload
         payload = {**user, **payload}

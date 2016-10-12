@@ -145,7 +145,6 @@ def check_auth( access, countries ):
         #Check that the user has required access.
         if check_access(access, countries, payload['acc'] ):
             g.payload = payload
-            return jwt
 
         #Token is invalid if it doesn't have the required accesss levels.
         else:

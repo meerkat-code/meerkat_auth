@@ -180,7 +180,8 @@ class User:
         """
         payload = {
             'exp': exp,
-            'usr': self.username
+            'usr': self.username,
+            'acc': self.get_access()
         }
         return jwt.encode(
             payload, 

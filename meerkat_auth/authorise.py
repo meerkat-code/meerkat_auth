@@ -132,18 +132,12 @@ def check_auth( access, countries ):
         )
 
         #Payload gives username and expiry only. Now get complete user details from the auth module.
-        r = requests.post( AUTH_ROOT +'/api/get_user', json = {'jwt': token} )
-
-        #Decode the user JWT only if request was successful. 
-        try:
-            user = jwt.decode(
-                r.json()['jwt'],
-                JWT_PUBLIC_KEY, 
-                algorithms=[JWT_ALGORITHM]
-            )
-        except Exception:
-            logging.warning( "Failed to decode user JWT." )
-            user = {}
+        r = requests.post( AUTH_ROOT +'api/get_user', json = {'jwt': token} )
+        user = jwt.decode(
+            r.json()['jwt'],
+            JWT_PUBLIC_KEY, 
+            algorithms=[JWT_ALGORITHM]
+        )
 
         #Merge user details into payload
         payload = {**user, **payload}
@@ -159,6 +153,10 @@ def check_auth( access, countries ):
     #Return 403 if logged in but the jwt isn't valid.   
     except InvalidTokenError as e:
         abort( 403, str(e) ) 
+
+    #Otherwise abort with an internal server error page.
+    except Exception as e:
+        abort( 500, str(e) )
     
 
 def authorise( access, countries ):

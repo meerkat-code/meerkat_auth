@@ -2,7 +2,7 @@ from flask import abort, request, make_response, jsonify, g
 from functools import wraps
 from jwt import InvalidTokenError
 from flask.ext.babel import gettext
-import jwt, inspect, logging, os, requests, calendar, time
+import jwt, inspect, logging, os, requests, calendar, time, json
 
 #Need this module to be importable without the whole of meerkat_auth config.
 #Directly load the secret settings file from which to import required variables.
@@ -131,18 +131,27 @@ def check_auth( access, countries ):
             algorithms=[JWT_ALGORITHM]
         )
 
-        #Payload gives username and expiry only. Now get complete user details from the auth module.
-        r = requests.post( AUTH_ROOT +'api/get_user', json = {'jwt': token} )
-        try: 
-            user = jwt.decode(
-                r.json()['jwt'],
-                JWT_PUBLIC_KEY, 
-                algorithms=[JWT_ALGORITHM]
-            )
+        #Get the user token, directly if we are in auth module, or remotely otherwise.
+        try:
+            from meerkat_auth.user import User
+            user = User.from_db( payload['usr'] ).get_payload( payload['exp'] )
+            logging.warning( "Succeeded to get user data directly." )
+
         except Exception as e:
-            logging.warning( "No response from get user request!" )
+            logging.warning( "Failed to get user data directly." )
             logging.warning( repr(e) )
-            user = {}
+
+            try:
+                r = requests.post( AUTH_ROOT +'/api/get_user', json = {'jwt': token} )
+                user_token = r.json()['jwt'] 
+                user = jwt.decode(
+                    user_token,
+                    JWT_PUBLIC_KEY, 
+                    algorithms=[JWT_ALGORITHM]
+                )
+            except Exception as e:
+                logging.warning( "Failed to get remote user token: " + repr(e) )
+                user = {}
 
         #Merge user details into payload
         payload = {**user, **payload}

@@ -113,9 +113,10 @@ if args.populate:
         Role( 'jordan', 'all', ' ', ['cd','ncd','mh'] ),
         Role( 'jordan', 'admin', ' ', [] ),
         Role( 'jordan', 'personal', ' ', [] ),
-        Role( 'jordan', 'root', ' ', ['central','all','admin','personal'] ),
-        Role( 'jordan', 'emails', ' ', [], visible=['root'] ),
-        Role( 'jordan', 'refugee', ' ', [ ] )
+        Role( 'jordan', 'refugee', ' ', [ ] ),
+        Role( 'jordan', 'root', ' ', ['central','all','admin','personal','refugee'] ),
+        Role( 'jordan', 'emails', ' ', [], visible=['root'] )
+
     ]
 
     for role in roles:

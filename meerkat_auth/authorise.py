@@ -131,16 +131,13 @@ def check_auth( access, countries ):
             algorithms=[JWT_ALGORITHM]
         )
 
-        #Get the user token, directly if we are in auth module, or remotely otherwise.
+        #Get the user's data, directly if we are in auth module, or remotely otherwise.
         try:
             from meerkat_auth.user import User
             user = User.from_db( payload['usr'] ).get_payload( payload['exp'] )
-            logging.warning( "Succeeded to get user data directly." )
 
+        #Feels hacky.  If we can't get data directly, then try a request to the url.
         except Exception as e:
-            logging.warning( "Failed to get user data directly." )
-            logging.warning( repr(e) )
-
             try:
                 r = requests.post( AUTH_ROOT +'/api/get_user', json = {'jwt': token} )
                 user_token = r.json()['jwt'] 

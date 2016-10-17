@@ -114,7 +114,8 @@ if args.populate:
         Role( 'jordan', 'admin', ' ', [] ),
         Role( 'jordan', 'personal', ' ', [] ),
         Role( 'jordan', 'root', ' ', ['central','all','admin','personal'] ),
-        Role( 'jordan', 'emails', ' ', [], visible=['root'] )
+        Role( 'jordan', 'emails', ' ', [], visible=['root'] ),
+        Role( 'jordan', 'refugee', ' ', [ ] )
     ]
 
     for role in roles:
@@ -194,6 +195,15 @@ if args.populate:
             'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
             ['jordan', 'jordan', 'jordan', 'jordan'],
             ['central', 'ncd', 'admin', 'personal'],
+            data={ 'name':{ 'value':'Central Administrator' } },
+            state='new'
+        ), User(
+            'jordan-refugee', 
+            'refugee@jordantest.org.uk', 
+            ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+            'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+            ['jordan', 'jordan'],
+            ['refugee', 'admin'],
             data={ 'name':{ 'value':'Central Administrator' } },
             state='new'
         )

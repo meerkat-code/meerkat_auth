@@ -104,7 +104,8 @@ if args.populate:
     #TODO:Find a way of syncing this with the live database.
     roles += [
         Role( 'jordan', 'reports', ' ', [] ),
-        Role( 'jordan', 'clinic', ' ', ['reports'] ),        
+        Role( 'jordan', 'dashboard', ' ', [] ),
+        Role( 'jordan', 'clinic', ' ', ['reports', 'dashboard'] ),        
         Role( 'jordan', 'directorate', ' ', ['clinic'] ),    
         Role( 'jordan', 'central', ' ', ['directorate'] ),
         Role( 'jordan', 'pip', ' ', [] ),
@@ -208,6 +209,15 @@ if args.populate:
             ['jordan', 'jordan'],
             ['refugee', 'admin'],
             data={ 'name':{ 'value':'Central Administrator' } },
+            state='new'
+        ), User(
+            'jordan-pip', 
+            'pip@jordantest.org.uk', 
+            ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+            'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+            ['jordan', 'jordan'],
+            ['pip', 'clinic'],
+            data={ 'name':{ 'value':'Pip user' } },
             state='new'
         )
     ]

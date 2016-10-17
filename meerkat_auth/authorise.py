@@ -18,7 +18,7 @@ def check_access(access, countries, acc):
     Accepts "" as a wildcard country, meaning any country.
 
     Args:
-        access ([str]) A list of role titles that meet the qauthorisation requirements.
+        access ([str]) A list of role titles that meet the authorisation requirements.
         countries ([str]) An optional list of countries for which each role
             title correspond to. access[0] corresponds to country[0] and so on...
             If the length of countries is smaller than the length of access, then
@@ -84,7 +84,10 @@ def check_auth( access, countries ):
     """
     A function that checks whether the user is authorised to continue with the current
     request. It does this by verifying the jwt stored as a cookie. If the user isn't 
-    authorised the request is aborted with an Invalid Token Error.
+    authorised the request is aborted with an Invalid Token Error. 
+    
+    NOTE: The roles specifed or ORed to figure out access. i.e. ANY of the given access roles will
+    grant access (we don't require ALL of them).
 
     Args: 
         access ([str]) A list of role titles that have access to this function.

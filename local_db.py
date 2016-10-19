@@ -239,8 +239,8 @@ if args.populate:
         'report-emails@test.org.uk',
         ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
         'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
-        countries + countries + ['jordan', 'jordan'],
-        ['registered' for c in countries] + ['emails' for c in countries] + ['reports', 'emails'],
+        countries + countries + ['jordan', 'jordan', 'jordan'],
+        ['registered' for c in countries] + ['emails' for c in countries] + ['reports', 'emails', 'all'],
         state='new'
     )]
 

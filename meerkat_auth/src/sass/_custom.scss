@@ -356,3 +356,104 @@ body.blue{
 #role-vis{
     height: 400px;
 }
+.access-network-container{
+    position: relative;
+}
+.access-network-form{
+    position:absolute;
+    top: 0px;
+    right: 0px;
+    padding: 10px;
+}
+
+.selection-details{
+    margin: 10px 10px 30px 10px;
+
+}
+
+table.selected{
+
+    .selected-level{
+        .level__title div{
+            border: 1px solid $textGrey;
+            border-radius: 5px 0px 0px 5px;
+            background: $lightGrey;
+            padding: 5px 10px;
+            font-weight: bold;
+            height: 100%;
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            width: 100%;
+        }
+
+        .level__description div{
+            border: 1px solid $textGrey;
+            border-radius: 0px 5px 5px 0px;
+            background: #FFF;
+            padding: 5px 10px;
+            border-left: none;
+        }
+    }
+
+
+    td{
+        position: relative;
+    }   
+
+
+    .inherits{
+        .level__title div{
+            border: 1px solid $textGrey;
+            background: $lightGrey;
+            padding: 5px 10px;
+            border-bottom:none;
+            font-weight: bold;
+            height: 100%;
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            width: 100%;
+            
+        }
+
+        .level__description div{
+            border: 1px solid $textGrey;
+            background: #FFF;
+            padding: 5px 10px;
+            border-left: none;
+            border-bottom:none;
+        }
+
+        tr:first-child{
+            .level__title div{
+                border-top-left-radius: 5px;
+            }
+
+            .level__description div{
+                border-top-right-radius: 5px;
+            }
+        }
+
+        tr:last-child{
+            .level__title div{
+                border-bottom-left-radius: 5px;
+                border-bottom: 1px solid $textGrey;
+            }
+
+            .level__description div{
+                border-bottom-right-radius: 5px;
+                border-bottom: 1px solid $textGrey;
+            }
+        }
+    }
+
+    label{
+        padding: 15px 30px;
+    }
+
+}
+
+.no-pad{
+    padding: 0px;
+}

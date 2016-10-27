@@ -44,7 +44,7 @@ def check_access(access, countries, acc):
         #...if that country is specified in the token...
         if country in acc:
             #...and if the corresponding country's role is specified in the token...
-            if access[i] in acc[country]:
+            if access[i] in acc[country] or access[i] == "":
                 #...then authorise.
                 authorised = True
                 break
@@ -54,7 +54,7 @@ def check_access(access, countries, acc):
             #...Look through all countries specified in the jwt...
             for c in acc:
                 #...if any access level in jwt matches a level in the decorator...
-                if access[i] in acc[c]:
+                if access[i] in acc[c] or access[i] == "":
                     #....then authorise.
                     authorised = True
                     break
@@ -86,7 +86,10 @@ def check_auth( access, countries ):
     request. It does this by verifying the jwt stored as a cookie. If the user isn't 
     authorised the request is aborted with an Invalid Token Error. 
     
-    NOTE: The roles specifed or ORed to figure out access. i.e. ANY of the given access roles will
+    If access is granted the user details is stored in flask g, under the property "payload", i.e.
+    `g.payload`.
+
+    NOTE: The roles specifed are ORed to figure out access. i.e. ANY of the given access roles will
     grant access (we don't require ALL of them).
 
     Args: 
@@ -156,7 +159,7 @@ def check_auth( access, countries ):
         #Merge user details into payload
         payload = {**user, **payload}
 
-        #Check that the user has required access.
+        #Check that the user has required access, and if so, store user details in g.
         if check_access(access, countries, payload['acc'] ):
             g.payload = payload
 

@@ -65,7 +65,7 @@ def login():
         return response
 
 @auth.route('/get_user', methods=['POST'])
-def get_user(auth_token = None):
+def get_user():
     """
     Return all user data that doesn't need to be in the header. Headers need to be
     kept small, and our "access" dictionary was starting to get too big. The access
@@ -80,7 +80,6 @@ def get_user(auth_token = None):
     Returns:
         A json object detailing the user associated with the given JWT. 
     """
-    current_app.logger.warning( "Get user called" )
     try: 
         token = request.json['jwt']   
         token = jwt.decode(
@@ -88,18 +87,18 @@ def get_user(auth_token = None):
             meerkat_auth.app.config['JWT_PUBLIC_KEY'], 
             algorithms=[meerkat_auth.app.config['JWT_ALGORITHM']]
         )
-        current_app.logger.warning( "User: " + str(token['usr']) )
+
         user = User.from_db( token['usr'] )
         exp = calendar.timegm( time.gmtime() ) + 30
         return_json = {'jwt': user.get_user_jwt(exp)}
-        current_app.logger.warning( "Returning: " + str(return_json) )
+
         #Return the large jwt with a short expiry time.  
         #It only needs to be decoded once at the other end. 
         return jsonify( return_json )
 
     #If we fail to get the user from the database to return a 500 http error.
     except Exception as e:
-        current_app.logger.info( repr(e) )
+        current_app.logger.warning( repr(e) )
         return Response( 
             json.dumps( {'message':str(e)} ), 
             status=500, 

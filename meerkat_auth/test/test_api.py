@@ -137,30 +137,40 @@ class MeerkatAuthAPITestCase(unittest.TestCase):
         self.assertTrue( post_json.get( 'message', False ) )    
         role.to_db()
 
-# THIS ISN'T REQUIRED YET
-#    def test_get_user(self):
-#        """Test the user resource."""
-#
-#        #Load user and get JWT token.
-#        exp =calendar.timegm( time.gmtime() ) + 10
-#        token = User.from_db('testUser1').get_jwt(exp).decode('UTF-8')
-#        headers = {
-#            'Authorization': 'Bearer ' + token
-#        }
-#
-#        #Make a request with the jwt token in the header.
-#        response = self.app.get( '/api/get_user', headers=headers)
-#        logging.warning( response.data.decode('UTF-8') )
-#        user_out = json.loads( response.data.decode('UTF-8') )
-#        user_in = User.from_db('testUser1').to_dict()    
-#        
-#        #Assert that the user returned equals the user put into the database.
-#        for key in user_in:
-#            matched = user_in[key] == user_out[key] 
-#            if not matched:
-#                logging.warning( "Key '" + key + "' not matched." )           
-#            self.assertTrue( matched )
+    def test_get_user(self):
+        """Test the user resource."""
 
-    #TODO: Properly test the require_jwt decorator and check_access functions.
+        #Load user and get JWT token.
+        exp =calendar.timegm( time.gmtime() ) + 10
+        user = User.from_db('testUser1')
+        token = user.get_jwt(exp).decode('UTF-8')
+        headers = {
+            'Authorization': 'Bearer ' + token
+        }
 
+        #Make a request with the jwt token in the header.
+        response = self.app.post( 
+            '/api/get_user', 
+            data=json.dumps({'jwt':token}),
+            content_type='application/json'
+        )
         
+        #Assemble the user that went into and the user that was taken out of the function
+        user_out = jwt.decode(
+            json.loads( response.data.decode('UTF-8') )['jwt'], 
+            JWT_PUBLIC_KEY, 
+            algorithms=JWT_ALGORITHM
+        )
+        user_in = user.to_dict()  
+  
+        logging.warning( user_in )
+        logging.warning( user_out )
+
+        #Check the user hasn't changed during executing the function.
+        self.assertEqual( user_in['username'], user_out['usr'] )
+        self.assertEqual( user_in['email'], user_out['email'] )
+        self.assertEqual( user_in['data'], user_out['data'] )
+        self.assertEqual( user.get_access(), user_out['acc'] )
+        self.assertTrue( (calendar.timegm( time.gmtime() ) + 30) <= user_out['exp'] )
+
+   #TODO: Test logout and update user.    

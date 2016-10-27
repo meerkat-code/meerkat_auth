@@ -171,6 +171,6 @@ class MeerkatAuthAPITestCase(unittest.TestCase):
         self.assertEqual( user_in['email'], user_out['email'] )
         self.assertEqual( user_in['data'], user_out['data'] )
         self.assertEqual( user.get_access(), user_out['acc'] )
-        self.assertTrue( (calendar.timegm( time.gmtime() ) + 30) <= user_out['exp'] )
+        self.assertTrue( (calendar.timegm( time.gmtime() ) + 10) <= user_out['exp'] )
 
    #TODO: Test logout and update user.    

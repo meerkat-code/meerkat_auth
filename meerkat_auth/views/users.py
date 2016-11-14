@@ -131,9 +131,6 @@ def update_user(username='new'):
     else:
         data["password"] = data["original_password"]
 
-    current_app.logger.warning( type(data["data"]) )
-    current_app.logger.warning( data["data"] )
-
     #Create a user object represented by the form input.
     user = User(
         data["username"],
@@ -146,32 +143,36 @@ def update_user(username='new'):
         creation = data["creation"],
         data = data["data"]
     )   
-
+    current_app.logger.warning( "Original username: " + username + " New username: " + data['username'] )
 
     #If username changed, then create a new record for the purposes of validation.
     #...because validation will say "username already exists" unless user state is "new".
     if username != data["username"]:
         user.state = "new"
 
-    #Validate the new user object.     
-    try:
-        user.validate()
-    except (InvalidRoleException, InvalidCredentialException) as e:
-        return str(e)
-    except Exception as e:
-        return str(e)
-        raise
+    #Factor out the multiple lines of error handling for writing a user to the database.
+    def write( user ):     
+        try:
+            user.to_db()
+        except (InvalidRoleException, InvalidCredentialException) as e:
+            return str(e)
+        except Exception as e:
+            return str(e)
+            raise
 
-    #If username has changed, then we are creating a new db record so delete the old one.
-    #Reset state once validation complete, so changing username doesn't wipe the user's state.
-    if username != data["username"]:
+    #Try to write the user to the database, this process includes server-side validation.
+    write( user )
+
+    #Reset state once validation and writing complete; changing username shouldn't wipe the state.
+    if user.state != data["state"]:
+        user = User.from_db( user.username )
         user.state = data["state"]
+        write( user )
+        
+    #If username has changed, then we are creating a new db record so delete the old one.
+    if username != data["username"]:
         User.delete( username )
 
-    current_app.logger.warning( user.data )
-
-    #If succesfully validated, write the changes to the database.
-    user.to_db()
     return "Successfully Updated"
 
 @users.route('/delete_users', methods=['POST'])
@@ -183,8 +184,7 @@ def delete_users():
     Returns:
         A string either stating success or the existance of an error.
     """
-    current_app.logger.warning( request.json )
-    
+
     #Load the list of users to be deleted.
     users = request.json
     

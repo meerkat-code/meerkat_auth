@@ -3,9 +3,10 @@ roles.py
 
 A Flask Blueprint module for the role manager page.
 """
-from flask import Blueprint, render_template, current_app, jsonify, g
+from flask import Blueprint, render_template, jsonify, g
 from meerkat_auth.role import Role
 from meerkat_auth import authorise as auth
+from meerkat_auth import app
 
 roles = Blueprint('roles', __name__, url_prefix="/<language>")
 
@@ -68,5 +69,5 @@ def index():
     return render_template(
         'roles/index.html',
         user=g.payload,
-        root=current_app.config["ROOT_URL"]
+        root=app.config["ROOT_URL"]
     )

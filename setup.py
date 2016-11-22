@@ -13,12 +13,12 @@ reqs = [str(ir.req) for ir in install_reqs]
 print(find_packages())
 
 setup(
-    name='Meerkat Hermes',
+    name='Meerkat Auth',
     version='0.0.1',
     long_description=__doc__,
-    packages=find_packages(),
+    packages=['meerkat_auth'],
     include_package_data=True,
     zip_safe=False,
     install_requires=reqs,
-    test_suite='meerkat_hermes.test'
+    test_suite='meerkat_auth.test'
 )

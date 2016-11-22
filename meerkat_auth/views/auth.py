@@ -7,7 +7,7 @@ from flask import Blueprint, Response, current_app, jsonify
 from flask import make_response, request, redirect
 from meerkat_auth.user import User, InvalidCredentialException
 from meerkat_auth.role import InvalidRoleException
-from meerkat_auth.app import config
+from meerkat_auth import app
 
 import calendar
 import time
@@ -47,10 +47,10 @@ def login():
     try:
         user = User.authenticate(args['username'], args['password'])
         current_app.logger.warning("Authenticated: " + str(user))
-        exp = calendar.timegm(time.gmtime()) + config['TOKEN_LIFE']
+        exp = calendar.timegm(time.gmtime()) + app.config['TOKEN_LIFE']
         response = jsonify({'message': 'successful'})
         response.set_cookie(
-            config['JWT_COOKIE_NAME'],
+            app.config['JWT_COOKIE_NAME'],
             value=user.get_jwt(exp)
         )
         return response
@@ -92,8 +92,8 @@ def get_user():
         token = request.json['jwt']
         token = jwt.decode(
             token,
-            config['JWT_PUBLIC_KEY'],
-            algorithms=[config['JWT_ALGORITHM']]
+            app.config['JWT_PUBLIC_KEY'],
+            algorithms=[app.config['JWT_ALGORITHM']]
         )
 
         user = User.from_db(token['usr'])
@@ -131,7 +131,7 @@ def logout():
     """
     url = request.args.get('url', '/')
     response = make_response(redirect(url))
-    response.set_cookie(config["JWT_COOKIE_NAME"], value="", expires=0)
+    response.set_cookie(app.config["JWT_COOKIE_NAME"], value="", expires=0)
     return response
 
 

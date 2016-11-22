@@ -7,7 +7,7 @@ Unit tests for REST API resources in Meerkat Auth.
 from meerkat_auth.user import User
 from meerkat_auth.role import Role
 from unittest import mock
-from meerkat_auth.app import config
+from meerkat_auth import app
 import meerkat_auth
 import json
 import unittest
@@ -17,6 +17,7 @@ import time
 import logging
 import boto3
 import os
+
 
 # Need this module to be importable without the whole of meerkat_auth config.
 # Directly load secret settings file from which to import required config.
@@ -29,10 +30,10 @@ class MeerkatAuthAPITestCase(unittest.TestCase):
 
     def setUp(self):
         """Setup for testing"""
-        config['TESTING'] = True
-        config['USERS'] = 'test_auth_users'
-        config['ROLES'] = 'test_auth_roles'
-        config['DB_URL'] = 'https://dynamodb.eu-west-1.amazonaws.com'
+        app.config['TESTING'] = True
+        app.config['USERS'] = 'test_auth_users'
+        app.config['ROLES'] = 'test_auth_roles'
+        app.config['DB_URL'] = 'https://dynamodb.eu-west-1.amazonaws.com'
         User.DB = boto3.resource(
             'dynamodb',
             endpoint_url="https://dynamodb.eu-west-1.amazonaws.com",
@@ -44,7 +45,7 @@ class MeerkatAuthAPITestCase(unittest.TestCase):
             region_name='eu-west-1'
         )
         self.app = meerkat_auth.app.test_client()
-        logging.warning(config['DB_URL'])
+        logging.warning(app.config['DB_URL'])
         # The database should have the following objects already in it
         roles = [
             Role('demo', 'registered', 'Registered description.', []),
@@ -118,7 +119,7 @@ class MeerkatAuthAPITestCase(unittest.TestCase):
         self.assertTrue(payload.get('exp', False))
 
         # Check the payload contents make sense.
-        max_exp = calendar.timegm(time.gmtime()) + config['TOKEN_LIFE']
+        max_exp = calendar.timegm(time.gmtime()) + app.config['TOKEN_LIFE']
         self.assertTrue(payload['exp'] <= max_exp)
         self.assertEquals(payload['usr'], u'testUser1')
 

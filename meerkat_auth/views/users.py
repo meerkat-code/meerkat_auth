@@ -3,12 +3,14 @@ users.py
 
 A Flask Blueprint module for the user manager page.
 """
-from flask import Blueprint, render_template, current_app, request, jsonify, g
+from flask import Blueprint, render_template, request, jsonify, g
 from meerkat_auth.user import User, InvalidCredentialException
 from meerkat_auth.role import InvalidRoleException
 from meerkat_auth import authorise as auth
-import json
+from meerkat_auth import app
 import datetime
+import logging
+
 
 users = Blueprint('users', __name__, url_prefix="/<language>")
 
@@ -28,7 +30,7 @@ def requires_auth():
         if 'admin' not in g.payload['acc'][country]:
             del g.payload['acc'][country]
 
-    current_app.logger.warning(g.payload['acc'])
+    logging.warning(g.payload['acc'])
 
 
 @users.route('/get_users')
@@ -132,7 +134,7 @@ def update_user(username='new'):
         A string stating success or error.
     """
     # Load the form's data.
-    data = request.json
+    data = request.get_json()
 
     # Form's password field default is empty, only update if something entered.
     # Original password hash stored hidden input so don't to reload user here.
@@ -153,7 +155,7 @@ def update_user(username='new'):
         creation=data["creation"],
         data=data["data"]
     )
-    current_app.logger.warning(
+    logging.warning(
         "Original username: " + username + " New username: " + data['username']
     )
 
@@ -200,7 +202,7 @@ def delete_users():
     """
 
     # Load the list of users to be deleted.
-    users = request.json
+    users = request.get_json()
 
     # Try to delete users
     try:
@@ -219,5 +221,5 @@ def index():
     return render_template(
         'users/index.html',
         user=g.payload,
-        root=current_app.config["ROOT_URL"]
+        root=app.config["ROOT_URL"]
     )

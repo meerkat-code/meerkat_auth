@@ -2,7 +2,7 @@ from datetime import datetime
 from meerkat_auth.role import Role
 from passlib.hash import pbkdf2_sha256
 from flask import jsonify
-import meerkat_auth
+from meerkat_auth import app
 import logging
 import boto3
 import jwt
@@ -20,7 +20,7 @@ class User:
     # The database resource
     DB = boto3.resource(
         'dynamodb',
-        endpoint_url=meerkat_auth.app.config['DB_URL'],
+        endpoint_url=app.config['DB_URL'],
         region_name='eu-west-1'
     )
 
@@ -132,7 +132,7 @@ class User:
 
         # Write to DB.
         logging.info("Validated. Writing object to database.")
-        users = User.DB.Table(meerkat_auth.app.config['USERS'])
+        users = User.DB.Table(app.config['USERS'])
 
         # If new user, set the state as live now it is going into the db.
         # Also add the creation timestamp.
@@ -193,8 +193,8 @@ class User:
         }
         return jwt.encode(
             payload,
-            meerkat_auth.app.config['JWT_SECRET_KEY'],
-            algorithm=meerkat_auth.app.config['JWT_ALGORITHM']
+            app.config['JWT_SECRET_KEY'],
+            algorithm=app.config['JWT_ALGORITHM']
         )
 
     def get_user_jwt(self, exp):
@@ -209,8 +209,8 @@ class User:
         """
         token = jwt.encode(
             self.get_payload(exp),
-            meerkat_auth.app.config['JWT_SECRET_KEY'],
-            algorithm=meerkat_auth.app.config['JWT_ALGORITHM']
+            app.config['JWT_SECRET_KEY'],
+            algorithm=app.config['JWT_ALGORITHM']
         )
         token = token.decode('UTF-8')
         return token
@@ -310,7 +310,7 @@ class User:
         """
         # Load data
         logging.info('Loading user ' + username + ' from database.')
-        users = User.DB.Table(meerkat_auth.app.config['USERS'])
+        users = User.DB.Table(app.config['USERS'])
         response = users.get_item(
             Key={
                 'username': username
@@ -353,7 +353,7 @@ class User:
             The amazon dynamodb response.
         """
         logging.info('Deleting user ' + username)
-        users = User.DB.Table(meerkat_auth.app.config['USERS'])
+        users = User.DB.Table(app.config['USERS'])
         response = users.delete_item(
             Key={
                 'username': username
@@ -374,7 +374,7 @@ class User:
         Returns:
             bool True if in db, False if not in db.
         """
-        users = User.DB.Table(meerkat_auth.app.config['USERS'])
+        users = User.DB.Table(app.config['USERS'])
         response = users.get_item(
             Key={'username': username},
             AttributesToGet=['username'],
@@ -503,7 +503,7 @@ class User:
         """
         # Set things up.
         logging.info('Loading users for ' + str(countries) + ' from database.')
-        table = User.DB.Table(meerkat_auth.app.config['USERS'])
+        table = User.DB.Table(app.config['USERS'])
 
         # Allow any value for attributes and countries that equates to false.
         if not attributes:

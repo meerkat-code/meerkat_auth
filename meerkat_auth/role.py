@@ -1,4 +1,4 @@
-import meerkat_auth
+from meerkat_auth import app
 import logging
 import boto3
 
@@ -8,7 +8,7 @@ class Role:
     # The database resource
     DB = boto3.resource(
         'dynamodb',
-        endpoint_url=meerkat_auth.app.config['DB_URL'],
+        endpoint_url=app.config['DB_URL'],
         region_name='eu-west-1'
     )
 
@@ -92,7 +92,7 @@ class Role:
 
         # Write the object to the database.
         logging.info("Object validated. Writing object to database.")
-        roles = Role.DB.Table(meerkat_auth.app.config['ROLES'])
+        roles = Role.DB.Table(app.config['ROLES'])
         response = roles.update_item(
             Key={
                 'country': self.country,
@@ -158,7 +158,7 @@ class Role:
         logging.info(
             'Loading role "' + role + '" for ' + country + ' from database.'
         )
-        roles = Role.DB.Table(meerkat_auth.app.config['ROLES'])
+        roles = Role.DB.Table(app.config['ROLES'])
         response = roles.get_item(
             Key={
                 'country': country,
@@ -195,7 +195,7 @@ class Role:
             The amazon dynamodb response.
         """
         logging.info('Deleting role ' + role + ' in ' + country)
-        roles = Role.DB.Table(meerkat_auth.app.config['ROLES'])
+        roles = Role.DB.Table(app.config['ROLES'])
         response = roles.delete_item(
             Key={
                 'country': country,
@@ -243,7 +243,7 @@ class Role:
         logging.info(
             'Loading roles for country ' + str(countries) + ' from database.'
         )
-        table = Role.DB.Table(meerkat_auth.app.config['ROLES'])
+        table = Role.DB.Table(app.config['ROLES'])
 
         # Allow any value for countries that equates to false.
         if not countries:

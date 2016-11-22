@@ -4,24 +4,19 @@ Meerkat Auth Tests
 
 Unit tests for the authorise.py module in Meerkat Auth
 """
-from datetime import datetime
 from werkzeug import exceptions
-from meerkat_auth.user import User, InvalidCredentialException
-from meerkat_auth.role import Role, InvalidRoleException
+from meerkat_auth.user import User
+from meerkat_auth.role import Role
 from meerkat_auth import authorise as auth
-from unittest.mock import MagicMock
-from unittest import mock
-from app import config
 from meerkat_auth import app
-import json
 import unittest
-import jwt
 import calendar
 import time
 import logging
 import boto3
 import os
 
+# Hacky!
 # Need this module to be importable without the whole of meerkat_auth config.
 # Directly load secret settings file from which to import required config.
 # File must define JWT_COOKIE_NAME, JWT_ALGORITHM and JWT_PUBLIC_KEY variables.
@@ -33,10 +28,10 @@ class MeerkatAuthAuthoriseTestCase(unittest.TestCase):
 
     def setUp(self):
         """Setup for testing"""
-        config['TESTING'] = True
-        config['USERS'] = 'test_auth_users'
-        config['ROLES'] = 'test_auth_roles'
-        config['DB_URL'] = 'https://dynamodb.eu-west-1.amazonaws.com'
+        app.config['TESTING'] = True
+        app.config['USERS'] = 'test_auth_users'
+        app.config['ROLES'] = 'test_auth_roles'
+        app.config['DB_URL'] = 'https://dynamodb.eu-west-1.amazonaws.com'
         User.DB = boto3.resource(
             'dynamodb',
             endpoint_url="https://dynamodb.eu-west-1.amazonaws.com",
@@ -48,7 +43,7 @@ class MeerkatAuthAuthoriseTestCase(unittest.TestCase):
             region_name='eu-west-1'
         )
         self.app = app.test_client()
-        logging.warning(config['DB_URL'])
+        logging.warning(app.config['DB_URL'])
         # The database should have the following objects already in it.
         roles = [
             Role('demo', 'clinic', 'clinic description.', []),

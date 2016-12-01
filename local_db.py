@@ -1,8 +1,9 @@
 #!/usr/local/bin/python3
 """
-This is a utility script to help set up some accounts for testing and development.
-It create a registered, manager and root account for every country currently under
-active development. NOTE: the passwords for every account is just 'password'.
+This is a utility script to help set up some accounts for testing and
+development. It create a registered, manager and root account for every country
+currently under active development. NOTE: the passwords for every account is
+just 'password'.
 
 Run:
     `local_db.py --clear` (To get rid of any existing db)
@@ -10,269 +11,321 @@ Run:
     `local_db.py --populate` (To populate the tables with accounts & roles)
     `local_db.py --list` (To list the acounts in the db)
 
-If no flag is provided (i.e. you just run `local_db.py`) it will perform all steps
-in the above order.
+If no flag is provided (i.e. you just run `local_db.py`) it will perform all
+steps in the above order.
 
-You can run these commands inside the docker container if there are database issues.
+You can run these commands inside the docker container if there are database
+issues.
 """
 
-import boto3, meerkat_auth, logging, argparse
+import boto3
+from os import path
+import ast
+import meerkat_auth
+import argparse
 from meerkat_auth.role import Role
 from meerkat_auth.user import User
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--setup', help='Setup the local dynamodb development database.', action='store_true')
-parser.add_argument('--list', help='List data from the local dynamodb development database.', action='store_true')
-parser.add_argument('--clear', help='Clear the local dynamodb development database.', action='store_true')
-parser.add_argument('--populate', help='Populate the local dynamodb development database.', action='store_true')
+parser.add_argument(
+    '--setup',
+    help='Setup the local dynamodb development database.',
+    action='store_true'
+)
+parser.add_argument(
+    '--list',
+    help='List data from the local dynamodb development database.',
+    action='store_true'
+)
+parser.add_argument(
+    '--clear', help='Clear the local dynamodb development database.',
+    action='store_true'
+)
+parser.add_argument(
+    '--populate',
+    help='Populate the local dynamodb development database.',
+    action='store_true'
+)
 args = parser.parse_args()
 args_dict = vars(args)
 
-if all(arg == False for arg in args_dict.values()):
-    print( "Re-starting the dev database." )
+if all(arg is False for arg in args_dict.values()):
+    print("Re-starting the dev database.")
     for arg in args_dict:
         args_dict[arg] = True
 
 if args.clear:
-    db = boto3.resource('dynamodb', endpoint_url='http://dynamodb:8000', region_name='eu_west')
+    db = boto3.resource(
+        'dynamodb', endpoint_url='http://dynamodb:8000', region_name='eu_west')
     try:
         print('Cleaning the dev db.')
         response = db.Table(meerkat_auth.app.config['USERS']).delete()
-        print( response )
+        print(response)
         response = db.Table(meerkat_auth.app.config['ROLES']).delete()
-        print( response )
+        print(response)
         print('Cleaned the db.')
     except Exception as e:
-        print( e )
-        print( 'There has been error, probably because no tables currently exist. Skipping the clean process.' )
-        
+        print(e)
+        print('There has been error, probably because no tables currently '
+              'exist. Skipping the clean process.')
+
 
 if args.setup:
     print('Creating dev db')
 
-    #Create the client for the local database
-    db = boto3.client('dynamodb', endpoint_url='http://dynamodb:8000', region_name='eu_west')
+    # Create the client for the local database
+    db = boto3.client(
+        'dynamodb', endpoint_url='http://dynamodb:8000', region_name='eu_west')
 
-    #Create the required tables in the database
-    response = db.create_table( 
-        TableName=meerkat_auth.app.config['USERS'], 
-        AttributeDefinitions=[{ 'AttributeName':'username', 'AttributeType':'S'}], 
-        KeySchema=[{ 'AttributeName':'username', 'KeyType':'HASH' }], 
-        ProvisionedThroughput={ 'ReadCapacityUnits':5, 'WriteCapacityUnits':5} 
-    )
-
-    print( response )
-
-    response = db.create_table( 
-        TableName=meerkat_auth.app.config['ROLES'], 
+    # Create the required tables in the database
+    response = db.create_table(
+        TableName=meerkat_auth.app.config['USERS'],
         AttributeDefinitions=[
-            { 'AttributeName':'country', 'AttributeType':'S'},
-            { 'AttributeName':'role', 'AttributeType':'S'}
-        ], 
-        KeySchema=[
-            { 'AttributeName':'country', 'KeyType':'HASH' },
-            { 'AttributeName':'role', 'KeyType':'RANGE' }
-        ], 
-        ProvisionedThroughput={ 'ReadCapacityUnits':5, 'WriteCapacityUnits':5} 
+            {'AttributeName': 'username', 'AttributeType': 'S'}],
+        KeySchema=[{'AttributeName': 'username', 'KeyType': 'HASH'}],
+        ProvisionedThroughput={'ReadCapacityUnits': 5, 'WriteCapacityUnits': 5}
     )
 
-    print( response )
+    print(response)
+
+    response = db.create_table(
+        TableName=meerkat_auth.app.config['ROLES'],
+        AttributeDefinitions=[
+            {'AttributeName': 'country', 'AttributeType': 'S'},
+            {'AttributeName': 'role', 'AttributeType': 'S'}
+        ],
+        KeySchema=[
+            {'AttributeName': 'country', 'KeyType': 'HASH'},
+            {'AttributeName': 'role', 'KeyType': 'RANGE'}
+        ],
+        ProvisionedThroughput={'ReadCapacityUnits': 5, 'WriteCapacityUnits': 5}
+    )
+
+    print(response)
 
 if args.populate:
     print('Populate dev db')
-    #Create some roles for each country.
-    #TODO: Need a clever solution to match dev to deployment here.
-    #Maybe we define roles for dev and deployment in a sngle file and import.
-    countries = ['demo','madagascar','rms']
+    # Create some roles for each country.
+    # TODO: Need a clever solution to match dev to deployment here.
+    # Maybe we define roles for dev and deployment in a sngle file and import.
+    countries = ['demo', 'madagascar', 'rms']
     roles = []
-    
+
     for country in countries:
-        #Add some data for development
+        # Add some data for development
         roles += [
-            Role( country, 'registered', 'A standard registered user', [] ),
-            Role( country, 'admin', 'A manager with backend access.', ['registered'] ),
-            Role( country, 'cd', 'Communicable disease access', [] ),
-            Role( country, 'ncd', 'Non-Communicable disease access', [] ),
-            Role( country, 'all', 'All disease access', ['cd', 'ncd'] ),
-            Role( country, 'personal', 'A Personal account with access to account settings.', [] ),
-            Role( country, 'root', 'Complete access', ['admin', 'all', 'personal'] ),
-            Role( country, 'emails', ' ', [], visible=['root'] ),
+            Role(country, 'registered', 'A standard registered user', []),
+            Role(country, 'admin',
+                 'A manager with backend access.', ['registered']),
+            Role(country, 'cd', 'Communicable disease access', []),
+            Role(country, 'ncd', 'Non-Communicable disease access', []),
+            Role(country, 'all', 'All disease access', ['cd', 'ncd']),
+            Role(country, 'personal',
+                 'A Personal account with access to account settings.', []),
+            Role(country, 'root', 'Complete access',
+                 ['admin', 'all', 'personal']),
+            Role(country, 'emails', ' ', [], visible=['root']),
 
         ]
 
-    #Create the jordan access network
-    #TODO:Find a way of syncing this with the live database.
+    # Create the jordan access network
+    # TODO:Find a way of syncing this with the live database.
     roles += [
-        Role( 'jordan', 'reports', ' ', [] ),
-        Role( 'jordan', 'dashboard', ' ', [] ),
-        Role( 'jordan', 'clinic', ' ', ['reports', 'dashboard'] ),        
-        Role( 'jordan', 'directorate', ' ', ['clinic'] ),    
-        Role( 'jordan', 'central', ' ', ['directorate'] ),
-        Role( 'jordan', 'pip', ' ', [] ),
-        Role( 'jordan', 'foreign', ' ', [] ),
-        Role( 'jordan', 'cd', ' ', ['pip','foreign'] ),
-        Role( 'jordan', 'ncd', ' ', [] ),
-        Role( 'jordan', 'mh', ' ', [] ),
-        Role( 'jordan', 'all', ' ', ['cd','ncd','mh'] ),
-        Role( 'jordan', 'admin', ' ', [] ),
-        Role( 'jordan', 'personal', ' ', [] ),
-        Role( 'jordan', 'refugee', ' ', [ ] ),
-        Role( 'jordan', 'root', ' ', ['central','all','admin','personal','refugee'] ),
-        Role( 'jordan', 'emails', ' ', [], visible=['root'] )
+        Role('jordan', 'reports', ' ', []),
+        Role('jordan', 'dashboard', ' ', []),
+        Role('jordan', 'clinic', ' ', ['reports', 'dashboard']),
+        Role('jordan', 'directorate', ' ', ['clinic']),
+        Role('jordan', 'central', ' ', ['directorate']),
+        Role('jordan', 'pip', ' ', []),
+        Role('jordan', 'foreign', ' ', []),
+        Role('jordan', 'cd', ' ', ['pip', 'foreign']),
+        Role('jordan', 'ncd', ' ', []),
+        Role('jordan', 'mh', ' ', []),
+        Role('jordan', 'all', ' ', ['cd', 'ncd', 'mh']),
+        Role('jordan', 'admin', ' ', []),
+        Role('jordan', 'personal', ' ', []),
+        Role('jordan', 'refugee', ' ', []),
+        Role('jordan', 'root', ' ', ['central',
+                                     'all', 'admin', 'personal', 'refugee']),
+        Role('jordan', 'emails', ' ', [], visible=['root'])
 
     ]
 
     for role in roles:
-        print( role.to_db() )
+        print(role.to_db())
 
-    #Create registered, manager and root user objects for each country.
+    # Create registered, manager and root user objects for each country.
     users = []
 
     for country in countries:
-        #Password for all dev accounts is just 'password'.
-        users += [ 
-            User( 
-                '{}-registered'.format(country), 
-                'registered@{}test.org.uk'.format(country),  
+        # Password for all dev accounts is just 'password'.
+        users += [
+            User(
+                '{}-registered'.format(country),
+                'registered@{}test.org.uk'.format(country),
                 ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
-                'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+                 'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
                 [country],
                 ['registered'],
-                data={ 'name':{'val':'Testy McTestface'} },
+                data={'name': {'val': 'Testy McTestface'}},
                 state='new'
             ),
             User(
-                '{}-admin'.format(country), 
-                'manger@{}test.org.uk'.format(country), 
+                '{}-admin'.format(country),
+                'manger@{}test.org.uk'.format(country),
                 ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
-                'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+                 'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
                 [country],
                 ['admin'],
-                data={ 'name':{ 'value':'Mr Boss Man' } },
+                data={'name': {'value': 'Mr Boss Man'}},
                 state='new'
             )
 
         ]
 
-    #Create some Jordan accounts
+    # Create some Jordan accounts
     users += [
         User(
-            'jordan-reports', 
-            'reports@jordantest.org.uk', 
+            'jordan-reports',
+            'reports@jordantest.org.uk',
             ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
-            'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+             'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
             ['jordan', 'jordan'],
             ['reports', 'all'],
-            data={ 'name':{ 'value':'Report Person' } },
+            data={'name': {'value': 'Report Person'}},
             state='new'
         ), User(
-            'jordan-clinic', 
-            'clinic@jordantest.org.uk', 
+            'jordan-clinic',
+            'clinic@jordantest.org.uk',
             ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
-            'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+             'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
             ['jordan', 'jordan'],
             ['clinic', 'cd'],
-            data={ 'name':{ 'value':'Clinic Person' } },
+            data={'name': {'value': 'Clinic Person'}},
             state='new'
         ), User(
-            'jordan-central-admin', 
-            'central.admin@jordantest.org.uk', 
+            'jordan-central-admin',
+            'central.admin@jordantest.org.uk',
             ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
-            'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+             'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
             ['jordan', 'jordan', 'jordan', 'jordan'],
             ['central', 'all', 'admin', 'personal'],
-            data={ 'name':{ 'value':'Central Administrator' } },
+            data={'name': {'value': 'Central Administrator'}},
             state='new'
         ), User(
-            'jordan-admin-cd', 
-            'central.admin@jordantest.org.uk', 
+            'jordan-admin-cd',
+            'central.admin@jordantest.org.uk',
             ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
-            'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+             'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
             ['jordan', 'jordan', 'jordan', 'jordan'],
             ['central', 'cd', 'admin', 'personal'],
-            data={ 'name':{ 'value':'Central Administrator' } },
+            data={'name': {'value': 'Central Administrator'}},
             state='new'
         ), User(
-            'jordan-admin-ncd', 
-            'central.admin@jordantest.org.uk', 
+            'jordan-admin-ncd',
+            'central.admin@jordantest.org.uk',
             ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
-            'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+             'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
             ['jordan', 'jordan', 'jordan', 'jordan'],
             ['central', 'ncd', 'admin', 'personal'],
-            data={ 'name':{ 'value':'Central Administrator' } },
+            data={'name': {'value': 'Central Administrator'}},
             state='new'
         ), User(
-            'jordan-refugee', 
-            'refugee@jordantest.org.uk', 
+            'jordan-refugee',
+            'refugee@jordantest.org.uk',
             ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
-            'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+             'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
             ['jordan', 'jordan'],
             ['refugee', 'admin'],
-            data={ 'name':{ 'value':'Central Administrator' } },
+            data={'name': {'value': 'Central Administrator'}},
             state='new'
         ), User(
-            'jordan-pip', 
-            'pip@jordantest.org.uk', 
+            'jordan-pip',
+            'pip@jordantest.org.uk',
             ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
-            'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+             'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
             ['jordan', 'jordan'],
             ['pip', 'clinic'],
-            data={ 'name':{ 'value':'Pip user' } },
+            data={'name': {'value': 'Pip user'}},
             state='new'
         )
     ]
 
-    #Create an overall root acount with access to everything.
-    users += [ User(
-        'root', 
-        'root@test.org.uk', 
+    # Create an overall root acount with access to everything.
+    users += [User(
+        'root',
+        'root@test.org.uk',
         ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
-        'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+         'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
         countries + ['jordan'],
         ['root' for c in countries] + ['root'],
-        data={ 'name':{'val':'Supreme Omnipotent Overlord'} },
+        data={'name': {'val': 'Supreme Omnipotent Overlord'}},
         state='new'
     )]
 
-    users += [ User(
+    users += [User(
         'report-emails',
         'report-emails@test.org.uk',
         ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
-        'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+         'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
         countries + countries + ['jordan', 'jordan', 'jordan'],
-        ['registered' for c in countries] + ['emails' for c in countries] + ['reports', 'emails', 'all'],
+        ['registered' for c in countries] +
+        ['emails' for c in countries] + ['reports', 'emails', 'all'],
         state='new'
     )]
 
-    for user in users:
-        print( user.to_db() )
+    try:
+        # Get developer accounts from file to be inserted into local database.
+        fpath = path.dirname(path.realpath(__file__)) + '/../.accounts.cfg'
+        devs_file = open(fpath, 'r+').read()
+        devs = ast.literal_eval(devs_file) if devs_file else {}
 
-    
+        # Create the developer accounts
+        for devuser, dev in devs.items():
+            users += [User(
+                dev['username'],
+                dev['email'],
+                dev['password'],
+                countries + ['jordan'],
+                ['root' for c in countries] + ['root'],
+                data={'name': {
+                    'val': '{} {}'.format(dev['first_name'], dev['last_name'])
+                }},
+                state='new'
+            )]
+
+    except Exception as e:
+        print('There has been an error with the developer\'s accounts...')
+        print(e)
+
+    for user in users:
+        print(user.to_db())
 
     print('Populated dev db')
 
 if args.list:
     print('Listing data in the database.')
     db = boto3.resource(
-            'dynamodb', 
-            endpoint_url='http://dynamodb:8000', region_name='eu_west'
+        'dynamodb',
+        endpoint_url='http://dynamodb:8000', region_name='eu_west'
     )
     try:
-        accounts = db.Table(meerkat_auth.app.config['USERS']).scan().get("Items",[])
+        accounts = db.Table(meerkat_auth.app.config[
+                            'USERS']).scan().get("Items", [])
 
         if accounts:
-            print( "Dev acounts created:" )
+            print("Dev acounts created:")
             for item in accounts:
-                print( "  " + str(User.from_db(item["username"])) )
+                print("  " + str(User.from_db(item["username"])))
         else:
-            print( "No dev accounts exist." )
-        roles = db.Table(meerkat_auth.app.config['ROLES']).scan().get("Items",[])
+            print("No dev accounts exist.")
+        roles = db.Table(meerkat_auth.app.config[
+                         'ROLES']).scan().get("Items", [])
         if roles:
-            print( "Dev roles created:" )
+            print("Dev roles created:")
             for item in roles:
-                print( "  " + str(Role.from_db(item["country"], item["role"])) )
+                print("  " + str(Role.from_db(item["country"], item["role"])))
         else:
-            print( "No dev roles exist." )
+            print("No dev roles exist.")
     except Exception as e:
         print("Listing failed. Has database been setup?")
-

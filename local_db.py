@@ -276,7 +276,8 @@ if args.populate:
 
     try:
         # Get developer accounts from file to be inserted into local database.
-        fpath = path.dirname(path.realpath(__file__)) + '/../.accounts.cfg'
+        fpath = (path.dirname(path.realpath(__file__)) +
+                 '/../.settings/accounts.cfg')
         devs_file = open(fpath, 'r+').read()
         devs = ast.literal_eval(devs_file) if devs_file else {}
 

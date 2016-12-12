@@ -108,7 +108,7 @@ if args.populate:
     # Create some roles for each country.
     # TODO: Need a clever solution to match dev to deployment here.
     # Maybe we define roles for dev and deployment in a sngle file and import.
-    countries = ['demo', 'madagascar', 'rms']
+    countries = ['demo', 'rms']
     roles = []
 
     for country in countries:
@@ -129,7 +129,6 @@ if args.populate:
         ]
 
     # Create the jordan access network
-    # TODO:Find a way of syncing this with the live database.
     roles += [
         Role('jordan', 'reports', ' ', []),
         Role('jordan', 'dashboard', ' ', []),
@@ -149,6 +148,18 @@ if args.populate:
                                      'all', 'admin', 'personal', 'refugee']),
         Role('jordan', 'emails', ' ', [], visible=['root'])
 
+    ]
+
+    # Add the madagascar access network.
+    roles += [
+        Role('madagascar', 'reports', ' ', []),
+        Role('madagascar', 'dashboard', ' ', ['reports']),
+        Role('madagascar', 'explore', ' ', ['dashboard']),
+        Role('madagascar', 'download', ' ', ['explore']),
+        Role('madagascar', 'personal', ' ', []),
+        Role('madagascar', 'admin', ' ', ['personal']),
+        Role('madagascar', 'root', ' ', ['download', 'admin']),
+        Role('madagascar', 'emails', ' ', [], visible=['root'])
     ]
 
     for role in roles:
@@ -247,6 +258,56 @@ if args.populate:
             ['jordan', 'jordan'],
             ['pip', 'clinic'],
             data={'name': {'value': 'Pip user'}},
+            state='new'
+        )
+    ]
+
+    # Create some Madagascar accounts
+    users += [
+        User(
+            'madagascar-reports',
+            'reports@madagascartest.org.uk',
+            ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+             'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+            ['madagascar'],
+            ['reports'],
+            data={'name': {'value': 'Report Person'}},
+            state='new'
+        ), User(
+            'madagascar-dashboard',
+            'clinic@madagascartest.org.uk',
+            ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+             'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+            ['madagascar'],
+            ['dashboard'],
+            data={'name': {'value': 'Dashboard Person'}},
+            state='new'
+        ), User(
+            'madagascar-explore',
+            'central.admin@madagascartest.org.uk',
+            ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+             'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+            ['madagascar'],
+            ['explore'],
+            data={'name': {'value': 'Explore Person'}},
+            state='new'
+        ), User(
+            'madagascar-download',
+            'central.admin@madagascartest.org.uk',
+            ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+             'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+            ['madagascar'],
+            ['download'],
+            data={'name': {'value': 'Download Person'}},
+            state='new'
+        ), User(
+            'madagascar-admin-download',
+            'central.admin@madagascartest.org.uk',
+            ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+             'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+            ['madagascar', 'madagascar'],
+            ['download', 'admin'],
+            data={'name': {'value': 'Central Administrator'}},
             state='new'
         )
     ]

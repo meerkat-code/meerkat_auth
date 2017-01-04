@@ -1,14 +1,11 @@
-from flask import abort, request, make_response, jsonify, g
+from flask import abort, request, g
 from functools import wraps
 from jwt import InvalidTokenError
 from flask.ext.babel import gettext
 import jwt
-import inspect
 import logging
 import os
 import requests
-import calendar
-import time
 import json
 
 # Need this module to be importable without the whole of meerkat_auth config.
@@ -173,6 +170,8 @@ def check_auth(access, countries):
             except Exception as e:
                 logging.warning("Failed to get remote user token: " + repr(e))
                 user = {}
+
+        logging.warning("REMOTE USER: {}".format(user))
 
         # Merge user details into payload
         payload = {**user, **payload}

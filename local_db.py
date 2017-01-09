@@ -329,9 +329,11 @@ if args.populate:
         'report-emails@test.org.uk',
         ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
          'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
-        countries + countries + ['jordan', 'jordan', 'jordan'],
+        countries + countries + ['jordan', 'jordan', 'jordan'] +
+        ['madagascar', 'madagascar'],
         ['registered' for c in countries] +
-        ['emails' for c in countries] + ['reports', 'emails', 'all'],
+        ['emails' for c in countries] + ['reports', 'emails', 'all'] +
+        ['emails', 'reports'],
         state='new'
     )]
 
@@ -348,8 +350,8 @@ if args.populate:
                 dev['username'],
                 dev['email'],
                 dev['password'],
-                countries + ['jordan'],
-                ['root' for c in countries] + ['root'],
+                countries + ['jordan', 'madagascar'],
+                ['root' for c in countries] + ['root', 'root'],
                 data={'name': {
                     'val': '{} {}'.format(dev['first_name'], dev['last_name'])
                 }},

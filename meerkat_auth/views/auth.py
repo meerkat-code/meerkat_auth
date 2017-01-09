@@ -97,7 +97,7 @@ def get_user():
         )
 
         user = User.from_db(token['usr'])
-        exp = calendar.timegm(time.gmtime()) + 30
+        exp = calendar.timegm(time.gmtime()) + 60
         return_json = {'jwt': user.get_user_jwt(exp)}
 
         # Return the large jwt with a short expiry time.

@@ -371,11 +371,13 @@ if args.list:
     print('Listing data in the database.')
     db = boto3.resource(
         'dynamodb',
-        endpoint_url='http://dynamodb:8000', region_name='eu_west'
+        endpoint_url='http://dynamodb:8000',
+        region_name='eu_west'
     )
     try:
-        accounts = db.Table(meerkat_auth.app.config[
-                            'USERS']).scan().get("Items", [])
+        accounts = db.Table(
+            meerkat_auth.app.config['USERS']
+        ).scan().get("Items", [])
 
         if accounts:
             print("Dev acounts created:")
@@ -383,13 +385,17 @@ if args.list:
                 print("  " + str(User.from_db(item["username"])))
         else:
             print("No dev accounts exist.")
-        roles = db.Table(meerkat_auth.app.config[
-                         'ROLES']).scan().get("Items", [])
+
+        roles = db.Table(
+            meerkat_auth.app.config['ROLES']
+        ).scan().get("Items", [])
+
         if roles:
             print("Dev roles created:")
             for item in roles:
                 print("  " + str(Role.from_db(item["country"], item["role"])))
         else:
             print("No dev roles exist.")
+
     except Exception as e:
         print("Listing failed. Has database been setup?")

@@ -161,14 +161,19 @@ if args.populate:
         Role('madagascar', 'root', ' ', ['download', 'admin']),
         Role('madagascar', 'emails', ' ', [], visible=['root'])
     ]
-
+    roles += [
+        Role('somalia', 'registered', ' ', []),
+        Role('somalia', 'admin', ' ', ['registered']),
+        Role('somalia', 'root', ' ', ['admin']),
+        Role('somalia', 'personal', ' ', []),
+    ]
     for role in roles:
         print(role.to_db())
 
     # Create registered, manager and root user objects for each country.
     users = []
 
-    for country in countries:
+    for country in countries + ["somalia"]:
         # Password for all dev accounts is just 'password'.
         users += [
             User(
@@ -318,8 +323,8 @@ if args.populate:
         'root@test.org.uk',
         ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
          'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
-        countries + ['jordan', 'madagascar'],
-        ['root' for c in countries] + ['root', 'root'],
+        countries + ['jordan', 'madagascar', 'somalia'],
+        ['root' for c in countries] + ['root', 'root', 'root'],
         data={'name': {'val': 'Supreme Omnipotent Overlord'}},
         state='new'
     )]

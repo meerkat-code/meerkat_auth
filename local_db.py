@@ -174,6 +174,20 @@ if args.populate:
     # Create registered, manager and root user objects for each country.
     users = []
 
+    for country in countries:
+        users += [
+            User(
+                '{}-cd'.format(country),
+                'cd@{}test.org.uk'.format(country),
+                ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+                 'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+                [country, country],
+                ['registered', 'cd'],
+                data={'name': {'val': 'Testy McTestface'}},
+                state='new'
+            )
+        ]
+
     for country in countries + ["somalia"]:
         # Password for all dev accounts is just 'password'.
         users += [
@@ -330,6 +344,7 @@ if args.populate:
         state='new'
     )]
 
+    # Create an account to authenticate email sending.
     users += [User(
         'report-emails',
         'report-emails@test.org.uk',

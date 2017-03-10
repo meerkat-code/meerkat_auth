@@ -131,6 +131,7 @@ if args.populate:
     # Create the jordan access network
     roles += [
         Role('jordan', 'reports', ' ', []),
+        Role('jordan', 'foreigner', ' ', []),
         Role('jordan', 'dashboard', ' ', []),
         Role('jordan', 'clinic', ' ', ['reports', 'dashboard']),
         Role('jordan', 'directorate', ' ', ['clinic']),
@@ -145,7 +146,7 @@ if args.populate:
         Role('jordan', 'personal', ' ', []),
         Role('jordan', 'refugee', ' ', []),
         Role('jordan', 'root', ' ', ['central',
-                                     'all', 'admin', 'personal', 'refugee']),
+                                     'all', 'admin', 'personal', 'refugee', 'foreigner']),
         Role('jordan', 'emails', ' ', [], visible=['root'])
 
     ]

@@ -82,7 +82,7 @@ class Role:
     def to_db(self):
         """
         Writes this user object to the database table specified by
-        config['USERS'].
+        config['ROLES'].
 
         Returns:
             The amazon dynamodb response.

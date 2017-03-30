@@ -56,7 +56,10 @@ if all(arg is False for arg in args_dict.values()):
 
 if args.clear:
     db = boto3.resource(
-        'dynamodb', endpoint_url='http://dynamodb:8000', region_name='eu_west')
+        'dynamodb',
+        endpoint_url='http://dynamodb:8000',
+        region_name='eu-west-1'
+    )
     try:
         print('Cleaning the dev db.')
         response = db.Table(meerkat_auth.app.config['USERS']).delete()
@@ -75,7 +78,10 @@ if args.setup:
 
     # Create the client for the local database
     db = boto3.client(
-        'dynamodb', endpoint_url='http://dynamodb:8000', region_name='eu_west')
+        'dynamodb',
+        endpoint_url='http://dynamodb:8000',
+        region_name='eu-west-1'
+    )
 
     # Create the required tables in the database
     response = db.create_table(
@@ -104,6 +110,13 @@ if args.setup:
     print(response)
 
 if args.populate:
+    # Create the client for the local database
+    db = boto3.client(
+        'dynamodb',
+        endpoint_url='http://dynamodb:8000',
+        region_name='eu-west-1'
+    )
+
     print('Populate dev db')
     # Create some roles for each country.
     # TODO: Need a clever solution to match dev to deployment here.
@@ -393,7 +406,7 @@ if args.list:
     db = boto3.resource(
         'dynamodb',
         endpoint_url='http://dynamodb:8000',
-        region_name='eu_west'
+        region_name='eu-west-1'
     )
     try:
         accounts = db.Table(

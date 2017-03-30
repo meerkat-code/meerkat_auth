@@ -56,7 +56,10 @@ if all(arg is False for arg in args_dict.values()):
 
 if args.clear:
     db = boto3.resource(
-        'dynamodb', endpoint_url='http://dynamodb:8000', region_name='eu_west')
+        'dynamodb',
+        endpoint_url='http://dynamodb:8000',
+        region_name='eu-west-1'
+    )
     try:
         print('Cleaning the dev db.')
         response = db.Table(meerkat_auth.app.config['USERS']).delete()
@@ -75,7 +78,10 @@ if args.setup:
 
     # Create the client for the local database
     db = boto3.client(
-        'dynamodb', endpoint_url='http://dynamodb:8000', region_name='eu_west')
+        'dynamodb',
+        endpoint_url='http://dynamodb:8000',
+        region_name='eu-west-1'
+    )
 
     # Create the required tables in the database
     response = db.create_table(
@@ -104,6 +110,13 @@ if args.setup:
     print(response)
 
 if args.populate:
+    # Create the client for the local database
+    db = boto3.client(
+        'dynamodb',
+        endpoint_url='http://dynamodb:8000',
+        region_name='eu-west-1'
+    )
+
     print('Populate dev db')
     # Create some roles for each country.
     # TODO: Need a clever solution to match dev to deployment here.
@@ -131,6 +144,7 @@ if args.populate:
     # Create the jordan access network
     roles += [
         Role('jordan', 'reports', ' ', []),
+        Role('jordan', 'foreigner', ' ', []),
         Role('jordan', 'dashboard', ' ', []),
         Role('jordan', 'clinic', ' ', ['reports', 'dashboard']),
         Role('jordan', 'directorate', ' ', ['clinic']),
@@ -145,7 +159,7 @@ if args.populate:
         Role('jordan', 'personal', ' ', []),
         Role('jordan', 'refugee', ' ', []),
         Role('jordan', 'root', ' ', ['central',
-                                     'all', 'admin', 'personal', 'refugee']),
+                                     'all', 'admin', 'personal', 'refugee', 'foreigner']),
         Role('jordan', 'emails', ' ', [], visible=['root'])
 
     ]
@@ -161,7 +175,12 @@ if args.populate:
         Role('madagascar', 'root', ' ', ['download', 'admin']),
         Role('madagascar', 'emails', ' ', [], visible=['root'])
     ]
-
+    roles += [
+        Role('somalia', 'registered', ' ', []),
+        Role('somalia', 'admin', ' ', ['registered']),
+        Role('somalia', 'root', ' ', ['admin']),
+        Role('somalia', 'personal', ' ', []),
+    ]
     for role in roles:
         print(role.to_db())
 
@@ -169,6 +188,20 @@ if args.populate:
     users = []
 
     for country in countries:
+        users += [
+            User(
+                '{}-cd'.format(country),
+                'cd@{}test.org.uk'.format(country),
+                ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+                 'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+                [country, country],
+                ['registered', 'cd'],
+                data={'name': {'val': 'Testy McTestface'}},
+                state='new'
+            )
+        ]
+
+    for country in countries + ["somalia"]:
         # Password for all dev accounts is just 'password'.
         users += [
             User(
@@ -318,12 +351,13 @@ if args.populate:
         'root@test.org.uk',
         ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
          'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
-        countries + ['jordan', 'madagascar'],
-        ['root' for c in countries] + ['root', 'root'],
+        countries + ['jordan', 'madagascar', 'somalia'],
+        ['root' for c in countries] + ['root', 'root', 'root'],
         data={'name': {'val': 'Supreme Omnipotent Overlord'}},
         state='new'
     )]
 
+    # Create an account to authenticate email sending.
     users += [User(
         'report-emails',
         'report-emails@test.org.uk',
@@ -371,11 +405,13 @@ if args.list:
     print('Listing data in the database.')
     db = boto3.resource(
         'dynamodb',
-        endpoint_url='http://dynamodb:8000', region_name='eu_west'
+        endpoint_url='http://dynamodb:8000',
+        region_name='eu-west-1'
     )
     try:
-        accounts = db.Table(meerkat_auth.app.config[
-                            'USERS']).scan().get("Items", [])
+        accounts = db.Table(
+            meerkat_auth.app.config['USERS']
+        ).scan().get("Items", [])
 
         if accounts:
             print("Dev acounts created:")
@@ -383,13 +419,17 @@ if args.list:
                 print("  " + str(User.from_db(item["username"])))
         else:
             print("No dev accounts exist.")
-        roles = db.Table(meerkat_auth.app.config[
-                         'ROLES']).scan().get("Items", [])
+
+        roles = db.Table(
+            meerkat_auth.app.config['ROLES']
+        ).scan().get("Items", [])
+
         if roles:
             print("Dev roles created:")
             for item in roles:
                 print("  " + str(Role.from_db(item["country"], item["role"])))
         else:
             print("No dev roles exist.")
+
     except Exception as e:
         print("Listing failed. Has database been setup?")

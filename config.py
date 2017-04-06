@@ -39,7 +39,10 @@ class Config(object):
 
     DB_URL = from_env("DB_URL", "https://dynamodb.eu-west-1.amazonaws.com")
     ROOT_URL = from_env("MEERKAT_AUTH_ROOT", "/auth")
-
+    LOGGING_URL = "http://nginx/logging"
+    LOGGING_SOURCE = "auth"
+    LOGGING_SOUCRE_TYPE = "auth"
+    LOGGING_IMPLEMENTAION = "demo"
 
 class Production(Config):
     DEBUG = True

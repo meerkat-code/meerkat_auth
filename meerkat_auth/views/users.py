@@ -6,16 +6,15 @@ A Flask Blueprint module for the user manager page.
 from flask import Blueprint, render_template, request, jsonify, g
 from meerkat_auth.user import User, InvalidCredentialException
 from meerkat_auth.role import InvalidRoleException
-from meerkat_auth import authorise as auth
+from meerkat_auth.authorise import auth
 from meerkat_auth import app
 import datetime
 import logging
 
+users_blueprint = Blueprint('users', __name__, url_prefix="/<language>")
 
-users = Blueprint('users', __name__, url_prefix="/<language>")
 
-
-@users.before_request
+@users_blueprint.before_request
 def requires_auth():
     """
     Checks that the user has authenticated before returning any page from
@@ -24,7 +23,7 @@ def requires_auth():
     auth.check_auth(['admin'], [''])
 
     # Only allow admin's to edit accounts in their own countries.
-    # i.e. if manager has non-manager access to another country.
+    # i.e. if admin has non-admin access to another country.
     countries = list(g.payload['acc'].keys())
     for country in countries:
         if 'admin' not in g.payload['acc'][country]:
@@ -33,7 +32,7 @@ def requires_auth():
     logging.warning(g.payload['acc'])
 
 
-@users.route('/get_users')
+@users_blueprint.route('/get_users')
 def get_users():
     """
     Get a list of users for the bootstrap table listing users.  We do not allow
@@ -68,8 +67,8 @@ def get_users():
     return jsonify({'rows': rows})
 
 
-@users.route('/get_user/')
-@users.route('/get_user/<username>')
+@users_blueprint.route('/get_user/')
+@users_blueprint.route('/get_user/<username>')
 def get_user(username=""):
     """
     Get the specified user as a json reponse.
@@ -101,7 +100,7 @@ def get_user(username=""):
         return jsonify(User.from_db(username).to_dict())
 
 
-@users.route('/check_username/<username>')
+@users_blueprint.route('/check_username/<username>')
 def check_username(username):
     """
     Checks where or not the specified username i a vlid new username method.
@@ -116,8 +115,8 @@ def check_username(username):
     return jsonify({'valid': not User.check_username(username)})
 
 
-@users.route('/update_user/<username>', methods=['POST'])
-@users.route('/update_user/', methods=['POST'])
+@users_blueprint.route('/update_user/<username>', methods=['POST'])
+@users_blueprint.route('/update_user/', methods=['POST'])
 def update_user(username='new'):
     """
     Update/create a user. If username is set to "new" it will create and
@@ -191,7 +190,7 @@ def update_user(username='new'):
     return "Successfully Updated"
 
 
-@users.route('/delete_users', methods=['POST'])
+@users_blueprint.route('/delete_users', methods=['POST'])
 def delete_users():
     """
     Delete the users specified in the post arguments.
@@ -215,7 +214,7 @@ def delete_users():
     return "Users succesfully deleted."
 
 
-@users.route('/')
+@users_blueprint.route('/')
 def index():
     """Renders the user editor/creator/viewer page."""
     return render_template(

@@ -7,7 +7,7 @@ Unit tests for the authorise.py module in Meerkat Auth
 from werkzeug import exceptions
 from meerkat_auth.user import User
 from meerkat_auth.role import Role
-from meerkat_auth import authorise as auth
+from meerkat_auth.authorise import Authorise
 from meerkat_auth import app
 import unittest
 import calendar
@@ -86,6 +86,8 @@ class MeerkatAuthAuthoriseTestCase(unittest.TestCase):
         for user in users:
             user.to_db()
 
+        self.auth = Authorise()
+
     def tearDown(self):
         """Tear down after testing."""
         User.delete('testUser')
@@ -99,13 +101,13 @@ class MeerkatAuthAuthoriseTestCase(unittest.TestCase):
 
         # Check that function responds correctly to the different headers.
         with app.test_request_context('/', headers=auth_h):
-            self.assertEqual(auth.get_token(), 'headertoken')
+            self.assertEqual(self.auth.get_token(), 'headertoken')
         with app.test_request_context('/', headers=cookie_h):
-            self.assertEqual(auth.get_token(), 'cookietoken')
+            self.assertEqual(self.auth.get_token(), 'cookietoken')
         with app.test_request_context('/', headers={**auth_h, **cookie_h}):
-            self.assertEqual(auth.get_token(), 'cookietoken')
+            self.assertEqual(self.auth.get_token(), 'cookietoken')
         with app.test_request_context('/', headers={}):
-            self.assertEqual(auth.get_token(), '')
+            self.assertEqual(self.auth.get_token(), '')
 
     def test_check_access(self):
         """Test the check access function. Really important test!"""
@@ -114,61 +116,101 @@ class MeerkatAuthAuthoriseTestCase(unittest.TestCase):
         acc = User.from_db('testUser1').get_access()
         logging.warning(acc)
 
-        self.assertTrue(auth.check_access([''], [''], acc))
-        self.assertTrue(auth.check_access([''], ['jordan'], acc))
-        self.assertTrue(auth.check_access(['directorate'], [''], acc))
-        self.assertTrue(auth.check_access(['directorate'], ['jordan'], acc))
-        self.assertTrue(auth.check_access(['clinic'], ['jordan'], acc))
-        self.assertFalse(auth.check_access([''], ['demo'], acc))
-        self.assertFalse(auth.check_access(['central'], [''], acc))
-        self.assertFalse(auth.check_access(['admin'], ['jordan'], acc))
-        self.assertFalse(auth.check_access(['central'], ['jordan'], acc))
-        self.assertTrue(
-            auth.check_access(['directorate', 'admin'], ['jordan'], acc)
-        )
-        self.assertTrue(auth.check_access(
-            ['directorate', 'admin'], ['jordan', 'jordan'], acc)
-        )
-        self.assertTrue(auth.check_access(
-            ['directorate', 'clinic'], ['jordan', 'demo'], acc)
-        )
-        self.assertFalse(
-            auth.check_access(['central', 'admin'], ['jordan'], acc)
-        )
-        self.assertFalse(
-            auth.check_access(['central', 'admin'], ['jordan', 'jordan'], acc)
-        )
-        self.assertFalse(
-            auth.check_access(['directorate', 'clinic'], ['demo', 'demo'], acc)
-        )
+        self.assertTrue(self.auth.check_access(
+            [''], [''], acc
+        ))
+        self.assertTrue(self.auth.check_access(
+            [''], ['jordan'], acc
+        ))
+        self.assertTrue(self.auth.check_access(
+            ['directorate'], [''], acc
+        ))
+        self.assertTrue(self.auth.check_access(
+            ['directorate'], ['jordan'], acc
+        ))
+        self.assertTrue(self.auth.check_access(
+            ['clinic'], ['jordan'], acc
+        ))
+        self.assertFalse(self.auth.check_access(
+            [''], ['demo'], acc
+        ))
+        self.assertFalse(self.auth.check_access(
+            ['central'], [''], acc
+        ))
+        self.assertFalse(self.auth.check_access(
+            ['admin'], ['jordan'], acc
+        ))
+        self.assertFalse(self.auth.check_access(
+            ['central'], ['jordan'], acc
+        ))
+        self.assertTrue(self.auth.check_access(
+            ['directorate', 'admin'], ['jordan'], acc
+        ))
+        self.assertTrue(self.auth.check_access(
+            ['directorate', 'admin'], ['jordan', 'jordan'], acc
+        ))
+        self.assertTrue(self.auth.check_access(
+            ['directorate', 'clinic'], ['jordan', 'demo'], acc
+        ))
+        self.assertFalse(self.auth.check_access(
+            ['central', 'admin'], ['jordan'], acc
+        ))
+        self.assertFalse(self.auth.check_access(
+            ['central', 'admin'], ['jordan', 'jordan'], acc
+        ))
+        self.assertFalse(self.auth.check_access(
+            ['directorate', 'clinic'], ['demo', 'demo'], acc
+        ))
 
         # Access to many levels in many countries with many inherited levels.
         acc = User.from_db('testUser2').get_access()
         logging.warning(acc)
 
-        self.assertTrue(auth.check_access([''], [''], acc))
-        self.assertTrue(auth.check_access([''], ['jordan'], acc))
-        self.assertTrue(auth.check_access([''], ['demo'], acc))
-        self.assertTrue(auth.check_access(['personal'], [''], acc))
-        self.assertTrue(auth.check_access(['central'], ['jordan'], acc))
-        self.assertTrue(auth.check_access(['clinic'], ['jordan'], acc))
-        self.assertFalse(auth.check_access([''], ['random'], acc))
-        self.assertFalse(auth.check_access(['root'], [''], acc))
-        self.assertFalse(auth.check_access(['admin'], ['jordan'], acc))
-        self.assertFalse(auth.check_access(['central'], ['demo'], acc))
-        self.assertFalse(auth.check_access(['admin', 'root'], ['jordan'], acc))
-        self.assertTrue(
-            auth.check_access(['root', 'directorate'], ['jordan'], acc)
-        )
-        self.assertTrue(
-            auth.check_access(['root', 'clinic'], ['jordan', 'jordan'], acc)
-        )
-        self.assertTrue(
-            auth.check_access(['root', 'clinic'], ['jordan', 'demo'], acc)
-        )
-        self.assertFalse(
-            auth.check_access(['admin', 'central'], ['jordan', 'demo'], acc)
-        )
+        self.assertTrue(self.auth.check_access(
+            [''], [''], acc
+        ))
+        self.assertTrue(self.auth.check_access(
+            [''], ['jordan'], acc
+        ))
+        self.assertTrue(self.auth.check_access(
+            [''], ['demo'], acc
+        ))
+        self.assertTrue(self.auth.check_access(
+            ['personal'], [''], acc
+        ))
+        self.assertTrue(self.auth.check_access(
+            ['central'], ['jordan'], acc
+        ))
+        self.assertTrue(self.auth.check_access(
+            ['clinic'], ['jordan'], acc
+        ))
+        self.assertFalse(self.auth.check_access(
+            [''], ['random'], acc
+        ))
+        self.assertFalse(self.auth.check_access(
+            ['root'], [''], acc
+        ))
+        self.assertFalse(self.auth.check_access(
+            ['admin'], ['jordan'], acc
+        ))
+        self.assertFalse(self.auth.check_access(
+            ['central'], ['demo'], acc
+        ))
+        self.assertFalse(self.auth.check_access(
+            ['admin', 'root'], ['jordan'], acc
+        ))
+        self.assertTrue(self.auth.check_access(
+            ['root', 'directorate'], ['jordan'], acc
+        ))
+        self.assertTrue(self.auth.check_access(
+            ['root', 'clinic'], ['jordan', 'jordan'], acc
+        ))
+        self.assertTrue(self.auth.check_access(
+            ['root', 'clinic'], ['jordan', 'demo'], acc
+        ))
+        self.assertFalse(self.auth.check_access(
+            ['admin', 'central'], ['jordan', 'demo'], acc
+        ))
 
     def test_check_auth(self):
         """Test the check_auth function."""
@@ -178,7 +220,7 @@ class MeerkatAuthAuthoriseTestCase(unittest.TestCase):
             # Check that a 401 error is raised if no token is found
             self.assertRaises(
                 exceptions.Unauthorized,
-                lambda: auth.check_auth(['directorate'], ['jordan'])
+                lambda: self.auth.check_auth(['directorate'], ['jordan'])
             )
 
         # Create a token to authenticate the request.
@@ -191,7 +233,7 @@ class MeerkatAuthAuthoriseTestCase(unittest.TestCase):
             # 403 error should be raised trying to exceed users access levels.
             self.assertRaises(
                 exceptions.Forbidden,
-                lambda: auth.check_auth(['central'], ['jordan'])
+                lambda: self.auth.check_auth(['central'], ['jordan'])
             )
 
         # Create an expired token to try and authenticate the request.
@@ -204,5 +246,5 @@ class MeerkatAuthAuthoriseTestCase(unittest.TestCase):
             # 403 error should be raised trying to exceed users access levels.
             self.assertRaises(
                 exceptions.Forbidden,
-                lambda: auth.check_auth(['directorate'], ['jordan'])
+                lambda: self.auth.check_auth(['directorate'], ['jordan'])
             )

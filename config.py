@@ -43,7 +43,7 @@ class Config(object):
     LOGGING_URL = os.getenv("LOGGING_URL", None)
     LOGGING_SOURCE = os.getenv("LOGGING_SOURCE", "frontend")
     LOGGING_SOURCE_TYPE = "auth"
-    LOGGING_IMPLEMENTAION = os.getenv("LOGGING_IMPLEMENTAION", "demo")
+    LOGGING_IMPLEMENTATION = os.getenv("LOGGING_IMPLEMENTATION", "demo")
 
 class Production(Config):
     DEBUG = True

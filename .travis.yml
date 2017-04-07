@@ -18,6 +18,7 @@ install:
 before_script:
 - bower install
 - gulp
+- pip install git+https://github.com/meerkat-code/meerkat_libs.git@master
 script: nosetests --logging-level=WARNING
 notifications:
   slack:

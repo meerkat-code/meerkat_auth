@@ -42,7 +42,7 @@ class Config(object):
     DROPBOX = {}
     LOGGING_URL = os.getenv("LOGGING_URL", None)
     LOGGING_SOURCE = os.getenv("LOGGING_SOURCE", "frontend")
-    LOGGING_SOUCRE_TYPE = "auth"
+    LOGGING_SOURCE_TYPE = "auth"
     LOGGING_IMPLEMENTAION = os.getenv("LOGGING_IMPLEMENTAION", "demo")
 
 class Production(Config):

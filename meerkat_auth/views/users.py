@@ -3,7 +3,7 @@ users.py
 
 A Flask Blueprint module for the user manager page.
 """
-from flask import Blueprint, render_template, request, jsonify, g
+from flask import Blueprint, render_template, request, jsonify, g, abort
 from meerkat_auth.user import User, InvalidCredentialException
 from meerkat_auth.role import InvalidRoleException
 from meerkat_auth.authorise import auth
@@ -32,6 +32,28 @@ def requires_auth():
     logging.warning(g.payload['acc'])
 
 
+def compare_access(roles, countries):
+    """
+    Utility function to check that the current user has access to the
+    specified access levels.  Aborts the request if current user doesn't have
+    access.
+
+    Args:
+        roles ([str]): A list of access role names, to compare the current
+            users access against.
+        countries ([str]): The corresponding countries for each role in roles.
+    """
+    user_access = g.payload['acc']
+    # Look at each access level the account has.
+    for i in range(len(roles)):
+        acc_role = roles[i]
+        acc_country = countries[i]
+        # If the account has an access level the current user doesn't have:
+        # (If the current user has access in that country...)
+        if acc_role not in user_access.get(acc_country, [acc_role]):
+            abort(403, "You are not authorised to view or edit this user.")
+
+
 @users_blueprint.route('/get_users')
 def get_users():
     """
@@ -44,25 +66,19 @@ def get_users():
     """
     # Set attributes "to get"
     # And restrict accounts shown, to those from the user's countries.
-    user_access = g.payload['acc']
-    countries = list(user_access.keys())
+    acc = g.payload['acc']
+    countries = list(acc.keys())
     attributes = [
         "email", "roles", "username", "countries", "creation", "data"
     ]
     rows = User.get_all(countries, attributes)
 
     # Remove any data rows (accounts) that are outside the users access.
+    # Step backwards through the list so we can smoothly delete as we go.
     for j in range(len(rows)-1, -1, -1):
-        account = rows[j]
-        # Look at each access level the account has.
-        for i in range(len(account['roles'])):
-            acc_role = account['roles'][i]
-            acc_country = account['countries'][i]
-            # If the account has an access level the current user doesn't have:
-            # (If the current user has access in that country...)
-            if acc_role not in user_access.get(acc_country, [acc_role]):
-                del rows[j]
-                break
+        access = (rows[j]['roles'], rows[j]['countries'])
+        if not auth.check_access(*access, acc, 'AND'):
+            del rows[j]
 
     return jsonify({'rows': rows})
 
@@ -97,13 +113,17 @@ def get_user(username=""):
         })
 
     else:
-        return jsonify(User.from_db(username).to_dict())
+        user = User.from_db(username)
+        # Check that the current user has access to view the requested user.
+        auth.check_auth(user.roles, user.countries, 'AND')
+        return jsonify(user.to_dict())
 
 
 @users_blueprint.route('/check_username/<username>')
 def check_username(username):
     """
-    Checks where or not the specified username i a vlid new username method.
+    Checks whether or not the specified username is a valid new username.
+
     Args:
         username (str) the username to check
 
@@ -132,11 +152,16 @@ def update_user(username='new'):
     Returns:
         A string stating success or error.
     """
-    # Load the form's data.
+    # Load the form's data and check the current user has access to edit.
     data = request.get_json()
+    auth.check_access(data["roles"], data["countries"], 'AND')
+    if username != 'new':
+        user = User.from_db(username)
+        auth.check_auth(user.roles, user.countries, 'AND')
 
     # Form's password field default is empty, only update if something entered.
-    # Original password hash stored hidden input so don't to reload user here.
+    # Original password hash is stored in hidden input so we don't need to
+    # reload user here.
     if data["password"]:
         data["password"] = User.hash_password(data["password"])
     else:
@@ -206,6 +231,10 @@ def delete_users():
     # Try to delete users
     try:
         for username in users:
+            # Check current user has access to delete the specified user.
+            user = User.from_db(username)
+            auth.check_auth(user.roles, user.countries, logic='AND')
+            # Delete the user
             User.delete(username)
     except Exception as e:
         return ("Unfortunately there was an error:\n " + str(e) +

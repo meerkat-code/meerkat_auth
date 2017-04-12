@@ -7,7 +7,7 @@ from flask import Blueprint, render_template, request, jsonify, g, abort
 from meerkat_auth.user import User, InvalidCredentialException
 from meerkat_auth.role import InvalidRoleException
 from meerkat_auth.authorise import auth
-from meerkat_auth import app
+from meerkat_auth import app, add_domain
 import datetime
 import logging
 
@@ -249,5 +249,5 @@ def index():
     return render_template(
         'users/index.html',
         user=g.payload,
-        root=app.config["ROOT_URL"]
+        root=add_domain(app.config['ROOT_URL'])
     )

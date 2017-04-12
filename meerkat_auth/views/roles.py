@@ -6,7 +6,7 @@ A Flask Blueprint module for the role manager page.
 from flask import Blueprint, render_template, jsonify, g
 from meerkat_auth.role import Role
 from meerkat_auth.authorise import auth
-from meerkat_auth import app
+from meerkat_auth import app, add_domain
 
 roles_blueprint = Blueprint('roles', __name__, url_prefix="/<language>")
 
@@ -69,5 +69,5 @@ def index():
     return render_template(
         'roles/index.html',
         user=g.payload,
-        root=app.config["ROOT_URL"]
+        root=add_domain(app.config['ROOT_URL'])
     )

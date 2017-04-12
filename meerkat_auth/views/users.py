@@ -76,8 +76,8 @@ def get_users():
     # Remove any data rows (accounts) that are outside the users access.
     # Step backwards through the list so we can smoothly delete as we go.
     for j in range(len(rows)-1, -1, -1):
-        access = (rows[j]['roles'], rows[j]['countries'])
-        if not auth.check_access(*access, acc, 'AND'):
+        access = (rows[j]['roles'], rows[j]['countries'], acc)
+        if not auth.check_access(*access, 'AND'):
             del rows[j]
 
     return jsonify({'rows': rows})

@@ -177,9 +177,9 @@ if args.populate:
     ]
     roles += [
         Role('somalia', 'registered', ' ', []),
-        Role('somalia', 'admin', ' ', ['registered']),
-        Role('somalia', 'root', ' ', ['admin']),
         Role('somalia', 'personal', ' ', []),
+        Role('somalia', 'admin', ' ', ['registered', 'personal']),
+        Role('somalia', 'root', ' ', ['admin']),
     ]
     for role in roles:
         print(role.to_db())
@@ -384,8 +384,8 @@ if args.populate:
                 dev['username'],
                 dev['email'],
                 dev['password'],
-                countries + ['jordan', 'madagascar'],
-                ['root' for c in countries] + ['root', 'root'],
+                countries + ['jordan', 'madagascar', 'somalia'],
+                ['root' for c in countries] + ['root', 'root', 'root'],
                 data={'name': {
                     'val': '{} {}'.format(dev['first_name'], dev['last_name'])
                 }},

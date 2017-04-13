@@ -14,11 +14,11 @@ import time
 import json
 import jwt
 
-auth = Blueprint('auth', __name__)
+auth_blueprint = Blueprint('auth', __name__)
 
 
-@auth.route('/', methods=['POST'])
-@auth.route('/login', methods=['POST'])
+@auth_blueprint.route('/', methods=['POST'])
+@auth_blueprint.route('/login', methods=['POST'])
 def login():
     """
     Try to log a new user in. If a correct username and password have been
@@ -72,7 +72,7 @@ def login():
         return response
 
 
-@auth.route('/get_user', methods=['POST'])
+@auth_blueprint.route('/get_user', methods=['POST'])
 def get_user():
     """
     Return all user data that doesn't need to be in the header. Headers need
@@ -114,7 +114,7 @@ def get_user():
         )
 
 
-@auth.route('/logout')
+@auth_blueprint.route('/logout')
 def logout():
     """
     Logs a user out. This involves delete the current jwt stored in a cookie
@@ -135,11 +135,12 @@ def logout():
     return response
 
 
-@auth.route('/update_user', methods=['POST'])
+@auth_blueprint.route('/update_user', methods=['POST'])
 def update_user():
     """
     An API call that updates the specified users details.  Can be used to reset
-    passwords.
+    passwords. THIS IS AUTHENTICATED using the the username and password
+    given in the post args, which is why no other authorisation is needed.
 
     POST Args:
         username (str) The username of the user to be updated.

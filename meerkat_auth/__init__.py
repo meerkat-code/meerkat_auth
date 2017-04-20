@@ -57,7 +57,7 @@ def index(language):
     app.logger.warning(g.language)
     return render_template(
         'login.html',
-        root=add_domain(app.config["ROOT_URL"])
+        root=add_domain(app.config['ROOT_URL'])
     )
 
 

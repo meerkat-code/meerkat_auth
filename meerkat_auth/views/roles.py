@@ -69,5 +69,5 @@ def index():
     return render_template(
         'roles/index.html',
         user=g.payload,
-        root=add_domain(app.config['ROOT_URL'])
+        root=app.config['ROOT_URL']
     )

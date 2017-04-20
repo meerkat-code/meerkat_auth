@@ -249,5 +249,5 @@ def index():
     return render_template(
         'users/index.html',
         user=g.payload,
-        root=add_domain(app.config['ROOT_URL'])
+        root=app.config['ROOT_URL']
     )

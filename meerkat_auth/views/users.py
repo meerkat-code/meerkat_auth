@@ -7,7 +7,7 @@ from flask import Blueprint, render_template, request, jsonify, g, abort
 from meerkat_auth.user import User, InvalidCredentialException
 from meerkat_auth.role import InvalidRoleException
 from meerkat_auth.authorise import auth
-from meerkat_auth import app, add_domain
+from meerkat_auth import app
 import datetime
 import logging
 
@@ -76,8 +76,8 @@ def get_users():
     # Remove any data rows (accounts) that are outside the users access.
     # Step backwards through the list so we can smoothly delete as we go.
     for j in range(len(rows)-1, -1, -1):
-        access = (rows[j]['roles'], rows[j]['countries'])
-        if not auth.check_access(*access, acc, 'AND'):
+        access = (rows[j]['roles'], rows[j]['countries'], acc)
+        if not auth.check_access(*access, 'AND'):
             del rows[j]
 
     return jsonify({'rows': rows})
@@ -249,5 +249,5 @@ def index():
     return render_template(
         'users/index.html',
         user=g.payload,
-        root=add_domain(app.config['ROOT_URL'])
+        root=app.config['ROOT_URL']
     )

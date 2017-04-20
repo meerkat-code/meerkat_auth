@@ -12,26 +12,6 @@ babel = Babel(app)
 app.config.from_object('meerkat_auth.config.Production')
 app.config.from_envvar('MEERKAT_AUTH_SETTINGS')
 
-
-def add_domain(path):
-    """
-    Add's the domain from the request to the begining of the specified path.
-    Path shuld begin with a forward slash e.g. /index.html would become
-    jordan.emro.info/index.html for the jordan site.
-
-    Args:
-        path (str): The path of the url that you want to prefix with
-            the request's domain.
-    Returns:
-        string: The path prefixed with the request's domain.
-    """
-    url = path
-    domain = '/'.join(request.url_root.split('/')[0:3])
-    if path[0] == '/':
-        url = domain + path
-    return url
-
-
 from meerkat_auth.views.users import users_blueprint
 from meerkat_auth.views.roles import roles_blueprint
 from meerkat_auth.views.auth import auth_blueprint
@@ -57,7 +37,7 @@ def index(language):
     app.logger.warning(g.language)
     return render_template(
         'login.html',
-        root=add_domain(app.config['ROOT_URL'])
+        root=app.config['ROOT_URL']
     )
 
 

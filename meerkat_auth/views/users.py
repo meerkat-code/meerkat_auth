@@ -7,7 +7,7 @@ from flask import Blueprint, render_template, request, jsonify, g, abort
 from meerkat_auth.user import User, InvalidCredentialException
 from meerkat_auth.role import InvalidRoleException
 from meerkat_auth.authorise import auth
-from meerkat_auth import app, add_domain
+from meerkat_auth import app
 import datetime
 import logging
 

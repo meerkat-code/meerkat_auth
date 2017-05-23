@@ -129,7 +129,14 @@ class Role:
                     parents += get_parents(parent_obj)
             return parents
 
-        return list(set(get_parents(self) + [self]))
+        # Remove duplicates but maintain order.
+        # The fact that higher access appears further left is used in places.
+        all_access = []
+        for i in get_parents(self) + [self]:
+            if i not in all_access:
+                all_access.append(i)
+
+        return all_access
 
     def all_access(self):
         """

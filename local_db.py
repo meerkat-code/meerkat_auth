@@ -180,7 +180,11 @@ if args.populate:
         Role('somalia', 'ctc', ' ', []),
         Role('somalia', 'other', ' ', []),
         Role('somalia', 'all', ' ', ['ctc', 'other']),
-        Role('somalia', 'root', ' ', ['download', 'admin', 'all']),
+        Role('somalia', 'puntland', ' ', []),
+        Role('somalia', 'southcentral', ' ', []),
+        Role('somalia', 'somaliland', ' ', []),
+        Role('somalia', 'somalia', ' ', ['somaliland', 'puntland', 'southcentral']),
+        Role('somalia', 'root', ' ', ['download', 'admin', 'all', 'somalia']),
         Role('madagascar', 'root', ' ', ['download', 'admin'])
     ]
 
@@ -365,6 +369,45 @@ if args.populate:
         ['somalia', 'somalia'],
         ['ctc', 'dashboard'],
         data={'name': {'val': 'CTC User'}},
+        state='new'
+    )]
+
+    # Create a location restricted account for somalia
+    users += [User(
+        'puntland',
+        'puntland@test.org.uk',
+        ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+         'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+        ['somalia', 'somalia', 'somalia'],
+        ['puntland', 'download', 'other'],
+        data={'name': {'val': 'Puntland User'}},
+        state='new'
+    ), User(
+        'somaliland',
+        'somaliland@test.org.uk',
+        ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+         'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+        ['somalia', 'somalia', 'somalia'],
+        ['somaliland', 'download', 'other'],
+        data={'name': {'val': 'somaliland User'}},
+        state='new'
+    ), User(
+        'southcentral',
+        'southcentral@test.org.uk',
+        ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+         'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+        ['somalia', 'somalia', 'somalia'],
+        ['southcentral', 'download', 'other'],
+        data={'name': {'val': 'somaliland User'}},
+        state='new'
+    ), User(
+        'somalia',
+        'somalia@test.org.uk',
+        ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+         'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+        ['somalia', 'somalia', 'somalia'],
+        ['somalia', 'download', 'other'],
+        data={'name': {'val': 'somaliland User'}},
         state='new'
     )]
 

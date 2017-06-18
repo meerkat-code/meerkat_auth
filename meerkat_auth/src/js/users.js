@@ -1,11 +1,11 @@
 /**:drawUserTable()
 
-    A function that draws the table of users for the user manager.  
+    A function that draws the table of users for the user manager.
     It does this using bootstrap-table, a third party dependancy, collecting data
     from the /users/get_users resource.
 */
 function drawUserTable(){
- 
+
     //Define the table structure
     var columns = [{
             'field': 'state',
@@ -50,7 +50,7 @@ function drawUserTable(){
             'visible': false,
             'searchable': true,
             'width': "25%"
-        }         
+        }
     ];
 
     //A function that prepares the data for displaying in the table.
@@ -71,7 +71,7 @@ function drawUserTable(){
             if( typeof(row.data) != "object" ){
                 console.error("Bad user data - not an object.");
                 row.data = {};
-            } 
+            }
             var keys = Object.keys( row.data );
             for(var c in keys){
                 var element = row.data[keys[c]];
@@ -84,7 +84,7 @@ function drawUserTable(){
         }
         return res.rows;
     }
-    
+
     var tmp = root + '/en/users/get_users';
     console.log( "tmp: " + tmp );
 
@@ -106,7 +106,7 @@ function drawUserTable(){
     });
 
     //Add extra toolbar buttons
-    var buttons = "<div class='btn-group  pull-right table-custom-toolbar'>" + 
+    var buttons = "<div class='btn-group  pull-right table-custom-toolbar'>" +
         "<button class='btn highlight delete-users' type='button'>" +
         "<span class='glyphicon glyphicon-trash'/></button>" +
         "<button class='btn blue new-user' type='button'>" +
@@ -125,7 +125,7 @@ function drawUserTable(){
         //First of all extract the usernames of the users to be deleted.
         var selected = $('#user-table table').bootstrapTable('getSelections');
         var usernames = [];
-        var confirmString = i18n.gettext("Are you sure you want to delete the following users?") + 
+        var confirmString = i18n.gettext("Are you sure you want to delete the following users?") +
             "\n";
         for( var user in selected ){
             usernames.push( selected[user].username );
@@ -152,7 +152,7 @@ function drawUserTable(){
                     },
                     contentType: 'application/json;charset=UTF-8',
                     data: JSON.stringify(usernames, null, '\t')
-                }); 
+                });
             }
         }
     });
@@ -162,9 +162,9 @@ function drawUserTable(){
 
     A function that draws the form for editing/adding a user.  It assembles the html
     and binds all the vent handlers to validate the form and ensure it works properly.
-    
+
     :param string username:
-        The username of the user who's details we want to auto fill into the form. 
+        The username of the user who's details we want to auto fill into the form.
 */
 function drawUserEditor(username){
 
@@ -174,62 +174,62 @@ function drawUserEditor(username){
         console.log( user.acc );
 
         var html = "<form id='user-editor' class='user-editor'>";
-        
+
         //Creating the inputs for editing core details.
         //---------------------------------------------
 
-        html += "<div class='row top-part'><div class='col-xs-12 col-sm-6 col-md-6'>";
+        html += "<div class='row top-part'><div class='col-xs-12 col-sm-6 col-md-4'>";
 
-        html += "<div class='input-group row'>" + 
-                "<label class='username  col-xs-12 col-md-6 col-lg-5'>" + i18n.gettext("Username") + 
+        html += "<div class='input-group row'>" +
+                "<label class='username  col-xs-12 col-md-6 col-lg-5'>" + i18n.gettext("Username") +
                 ":</label><input type='text' class='username col-xs-12 col-md-6 col-lg-7' " +
                 "name='username' value='" + data.username + "' id='username' " +
                 "oninput='checkValidUsername()' required /></div>";
 
         html += "<div class='input-group row'>" +
-                "<label class='email  col-xs-12 col-md-6 col-lg-5'>" + 
-                i18n.gettext("Email") + ":</label>" + 
+                "<label class='email  col-xs-12 col-md-6 col-lg-5'>" +
+                i18n.gettext("Email") + ":</label>" +
                 "<input id='email' type='text' class='email col-xs-12 col-md-6 col-lg-7' " +
-                "oninput='checkEqual(\"email\", \"email2\")' name='email' value='" + 
+                "oninput='checkEqual(\"email\", \"email2\")' name='email' value='" +
                 data.email + "' required/></div>";
 
-        html += "<div class='input-group row'>" + 
-                "<label class='email2 col-xs-12 col-md-6 col-lg-5'>" + 
-                i18n.gettext("Retype Email") + ":</label>" + 
+        html += "<div class='input-group row'>" +
+                "<label class='email2 col-xs-12 col-md-6 col-lg-5'>" +
+                i18n.gettext("Retype Email") + ":</label>" +
                 "<input  id='email2' type='text' oninput='checkEqual(\"email\", \"email2\")' " +
-                "class='email2 col-xs-12 col-md-6 col-lg-7' value='" + 
+                "class='email2 col-xs-12 col-md-6 col-lg-7' value='" +
                 data.email + "' autocomplete='off' required /></div>";
 
-        html += "<div class='input-group row'>" + 
-                "<label class='password col-xs-12 col-md-6 col-lg-5'>" + 
-                i18n.gettext("Password") + ":</label>" + 
-                "<input id='password' oninput='checkEqual(\"password\", \"password2\")' " + 
+        html += "<div class='input-group row'>" +
+                "<label class='password col-xs-12 col-md-6 col-lg-5'>" +
+                i18n.gettext("Password") + ":</label>" +
+                "<input id='password' oninput='checkEqual(\"password\", \"password2\")' " +
                 "type='password' class='password col-xs-12 col-md-6 col-lg-7' " +
                 "name='password' autocomplete='off' value=''/></div>";
 
-        html += "<div class='input-group row'>" + 
-                "<label class='password2 col-xs-12 col-md-6 col-lg-5'>" + 
-                i18n.gettext("Retype Password") + ":</label>" + 
+        html += "<div class='input-group row'>" +
+                "<label class='password2 col-xs-12 col-md-6 col-lg-5'>" +
+                i18n.gettext("Retype Password") + ":</label>" +
                 "<input id='password2' oninput='checkEqual(\"password\", \"password2\")' " +
                 "type='password' class='password2 col-xs-12 col-md-6 col-lg-7' "+
                 "value=''/></div>";
-        
+
         //Make the time stamps readable.
         creation = data.creation ? new Date(data.creation).toString() : "";
         updated = data.updated ? new Date(data.updated).toString() : "";
 
-        html += "<div class='input-group row'>" + 
+        html += "<div class='input-group row'>" +
                 "<label class='creation col-xs-12 col-md-6 col-lg-5'>" +
-                i18n.gettext("Creation time") + ":</label>" + 
-                "<input type='text' readonly class='creation col-xs-12 col-md-6 col-lg-7' value='" + 
+                i18n.gettext("Creation time") + ":</label>" +
+                "<input type='text' readonly class='creation col-xs-12 col-md-6 col-lg-7' value='" +
                  creation + "' name='creation' /></div>";
 
-        html += "<div class='input-group row'>" + 
-                "<label class='updated col-xs-12 col-md-6 col-lg-5'>" + 
-                i18n.gettext("Last update") + ":</label>" + 
-                "<input type='text' readonly class='updated col-xs-12 col-md-6 col-lg-7' value='" + 
+        html += "<div class='input-group row'>" +
+                "<label class='updated col-xs-12 col-md-6 col-lg-5'>" +
+                i18n.gettext("Last update") + ":</label>" +
+                "<input type='text' readonly class='updated col-xs-12 col-md-6 col-lg-7' value='" +
                 updated + "'/></div>";
-        
+
         //HACK
         //These hidden password fields stop most browsers applying auto complete to the form.
         //Hidden and dsiabled so they don't cause any detriment to user experience.
@@ -243,18 +243,18 @@ function drawUserEditor(username){
 
         html += "<div class='col-xs-12 col-sm-6 col-md-4'>";
 
-        html += "<div class='form-section clearfix'> <div class='section-title'> " + 
+        html += "<div class='form-section clearfix'> <div class='section-title'> " +
                 i18n.gettext("Add New Access") + " </div>";
 
         //Show the countries selector, only if the user has access to multiple countries.
         var countries = Object.keys(user.acc);
-        
+
         html += "<div class='input-group row ";
 
         if( countries.length <=1 )  html += "hidden";
-       
+
         html += "'><label class='country col-xs-12 col-md-6 col-lg-5'>" +
-                i18n.gettext("Country") + ":</label>" + 
+                i18n.gettext("Country") + ":</label>" +
                 "<select class='country col-xs-12 col-md-6 col-lg-7' >";
 
         for( var i in countries){
@@ -263,12 +263,12 @@ function drawUserEditor(username){
             if( i === 0 ) html += "selected";
             html += ">" + caps( country ) + "</option>";
         }
-                                    
+
         html += "</select></div>";
 
-        html += "<div class='input-group row'>" + 
-                "<label class='role col-xs-12 col-md-6 col-lg-5'>" + 
-                i18n.gettext("Access Role") + ":</label>" + 
+        html += "<div class='input-group row'>" +
+                "<label class='role col-xs-12 col-md-6 col-lg-5'>" +
+                i18n.gettext("Access Role") + ":</label>" +
                 "<select class='role col-xs-12 col-md-6 col-lg-7'>";
 
         function drawAvailableRoles(country){
@@ -303,11 +303,11 @@ function drawUserEditor(username){
                     }
                     console.log( tooltip );
                     element.attr('title', tooltip);
-                    
+
                 });
             });
         }
-                    
+
         html += "</select></div>";
 
         html += "<button class='btn btn-sm pull-right add-access' type='button'>" +
@@ -345,30 +345,30 @@ function drawUserEditor(username){
         //FOR NOW HIDE THE DATA EDITOR TO KEEP THINGS SIMPLER FOR THE USER
         //...since we don't really use it yet.
 
-        html += "<div class='hidden col-xs-12 col-sm-6 col-md-4'>";
+        html += "<div class='col-xs-12 col-sm-6 col-md-4'>";
 
-        html += "<div class='form-section clearfix'> <div class='section-title'>" + 
+        html += "<div class='form-section clearfix'> <div class='section-title'>" +
                 i18n.gettext("Edit Data") + "</div>";
 
         html += "<div class='input-group row'>" +
-                "<label class='dataKey col-xs-12 col-md-6 col-lg-5'>Data Key:</label>" + 
+                "<label class='dataKey col-xs-12 col-md-6 col-lg-5'>Data Key:</label>" +
                 "<input type='text' class='dataKey col-xs-12 col-md-6 col-lg-7'/></div>";
 
         html += "<div class='input-group row'>" +
-                "<label class='dataValue col-xs-12 col-md-6 col-lg-5'>" + 
-                i18n.gettext("Data Value:") + "</label>" + 
+                "<label class='dataValue col-xs-12 col-md-6 col-lg-5'>" +
+                i18n.gettext("Data Value:") + "</label>" +
                 "<input type='text' class='dataValue col-xs-12 col-md-6 col-lg-7'/></div>";
 
-        html += "<button class='btn btn-sm pull-right add-data' type='button' >" + 
+        html += "<button class='btn btn-sm pull-right add-data' type='button' >" +
                 i18n.gettext("Add Data") + "</button>";
 
         html += "</div>"; //End of form section
 
-        html += "<div class='input-group reset-data'><label class='data col-xs-12'>" + 
+        html += "<div class='input-group reset-data'><label class='data col-xs-12'>" +
                 i18n.gettext("Select Current Data:") + "</label>";
 
         html += "<select multiple class='data-elements col-xs-12'>";
-        
+
         //Factorise this bit out so that we can redraw the options once data has been updated.
         function drawDataOptions(){
             var optionsHTML = "";
@@ -396,7 +396,7 @@ function drawUserEditor(username){
         html += "<input type='hidden' class='original_username' name='original_username' value='" +
                 data.username + "' />";
 
-        html += "<input type='hidden' class='original_password' name='original_password' value='" + 
+        html += "<input type='hidden' class='original_password' name='original_password' value='" +
                 data.password + "' />";
 
         state = data.state !== "" ? data.state : "new";
@@ -418,7 +418,7 @@ function drawUserEditor(username){
 
         //Add dynamic links across the form
         //---------------------------------
-        
+
         //HANDLE DATA EDITING.
 
         drawDataOptions();
@@ -466,7 +466,7 @@ function drawUserEditor(username){
                 resetData();
                 updateData();
             }
-        });   
+        });
 
         //Delete selected data when clicking the delete button.
         $('button.delete-data').click( function(e){
@@ -484,7 +484,7 @@ function drawUserEditor(username){
                 var confirmString = i18n.gettext("Are you sure you want to delete this data?") +
                                     "\n";
                 for (var y in keys){
-                    var key = keys[y];    
+                    var key = keys[y];
                     confirmString += "     " + key + " | " + data.data[key].val + "\n";
                 }
 
@@ -497,13 +497,13 @@ function drawUserEditor(username){
             }
             //Stop rest kicking in if no deletion happens.
             e.stopPropagation();
-        }); 
+        });
 
         //HANDLE ACCESS LEVELS
 
         drawAccessOptions();
         drawAvailableRoles($('select.country').val());
-        
+
         $('select.country').change(function(){
             drawAvailableRoles($('select.country').val());
         });
@@ -517,7 +517,7 @@ function drawUserEditor(username){
                 data.roles.push( role );
                 drawAccessOptions();
             }
-        });   
+        });
 
         //Delete selected access when clicking the delete button.
         $('button.delete-access').click( function(e){
@@ -534,9 +534,9 @@ function drawUserEditor(username){
                 //Create a confirm dialouge showing the user what access they are about to delete.
                 var confirmString = i18n.gettext("Are you sure you want to delete this access?") +
                                     "\n";
-                for( var y in indicies ){ 
+                for( var y in indicies ){
                     country = data.countries[indicies[y]];
-                    role = data.roles[indicies[y]]; 
+                    role = data.roles[indicies[y]];
                     confirmString += "     " + country + " | " + role + "\n";
                 }
 
@@ -550,17 +550,17 @@ function drawUserEditor(username){
                     data.roles = cleanArray( data.roles );
                     drawAccessOptions();
                 }
-                
+
             }
-            
-        });       
+
+        });
 
         //FORM SUBMISSION
         $('.user-editor .submit-form').click(function(evt){
-            
+
             if( formValid() ){
                 evt.preventDefault();
-                $('.user-editor .submit-form').html( i18n.gettext("Working" ) + 
+                $('.user-editor .submit-form').html( i18n.gettext("Working" ) +
                                                  " <div class='loading'></div>" );
                 //Assemble complete json object.
                 var data = {};
@@ -585,7 +585,7 @@ function drawUserEditor(username){
                         $('#user-table table').bootstrapTable('refresh');
                     },
                     error: function (data) {
-                        alert( i18n.gettext("There has been a server error. " + 
+                        alert( i18n.gettext("There has been a server error. " +
                                             "Please contact administrator and try again later.") );
                         $('.user-editor .submit-form').text( buttonText );
                         $('#user-table table').bootstrapTable('refresh');
@@ -608,35 +608,35 @@ function formValid(){
         var select = document.getElementById('access-levels');
         select.setCustomValidity( i18n.gettext('Must add at least one access level.') );
         valid=false;
-    } 
+    }
 
-    return valid;    
+    return valid;
 }
 
 /**:cleanArray(array)
 
     Recursively cleans an array that contains undefined elements.  When deleting
-    elements from a javascript array, it doesn't actually re-index the array, it 
+    elements from a javascript array, it doesn't actually re-index the array, it
     leaves indexed "undefined"s e.g. ["1", undefined, "2", "3"]. This method
     recursively removes undefined values and re-indexes the array so that the above
-    array would become ["1", "2", "3"]. 
-    
+    array would become ["1", "2", "3"].
+
     :param array array:
-        The array to be cleaned. 
+        The array to be cleaned.
 
     :returns array:
         The cleaned array.
-*/ 
+*/
 function cleanArray( array ){
     first = array.shift();
     if( array.length === 0 ) return first === undefined ? [] : [first];
     else if( first === undefined ) return cleanArray( array );
     else return [first].concat( cleanArray( array ) );
-} 
+}
 
 /**:caps(str)
     Capitalise the first letter of each word.
-*/ 
+*/
 function caps(str){
     return str.replace(/\w\S*/g, function(txt){
         return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
@@ -657,7 +657,7 @@ function caps(str){
     :returns boolean:
         True if they are equal, false if they are not.
 
-*/   
+*/
 function checkEqual( id1, id2 ) {
 
     var email1 = document.getElementById(id1);
@@ -682,9 +682,9 @@ function checkEqual( id1, id2 ) {
 
     :returns boolean:
         True if valid, false if not.
-*/  
+*/
 function checkValidUsername(){
-    
+
     var original = $('.user-editor input.original_username').val();
     var current = $('.user-editor input.username').val();
     var element = document.getElementById('username');
@@ -692,26 +692,26 @@ function checkValidUsername(){
     if( current != original ){
         $.getJSON( root + '/en/users/check_username/' + current, function( data ){
             if( !data.valid ){
-                element.setCustomValidity( 
+                element.setCustomValidity(
                     i18n.gettext("Invalid username.  Username already exists." )
                 );
                 return false;
             }else{
                 element.setCustomValidity( "" );
                 return true;
-            }   
+            }
         });
     }
 }
 
 /**:extractAccess()
 
-    A utility function that takes the multi select 'access-levels' form field 
+    A utility function that takes the multi select 'access-levels' form field
     and structures its contents into a data object that can be posted to the server.
 
     :returns object:
         An object containing two arrays: 'countries' and 'roles'.
-*/  
+*/
 function extractAccess(){
 
     var countries = [];
@@ -730,12 +730,12 @@ function extractAccess(){
 
 /**:extractData()
 
-    A utility function that takes the multi select 'data-elements' form field 
+    A utility function that takes the multi select 'data-elements' form field
     and structures its contents into a data object that can be posted to the server.
 
     :returns object:
         An object containg data elements structured as the server requires.
-*/  
+*/
 function extractData(){
 
     var data = {};
@@ -748,4 +748,3 @@ function extractData(){
 
     return {'data':data};
 }
-

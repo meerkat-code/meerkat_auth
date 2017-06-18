@@ -44,10 +44,14 @@ def login():
     args = request.json
 
     # Try to authenticate the user and set JWT in a cookie
+    # Expiry time is taken from account data, or defaults to config value.
     try:
         user = User.authenticate(args['username'], args['password'])
         current_app.logger.warning("Authenticated: " + str(user))
-        exp = calendar.timegm(time.gmtime()) + app.config['TOKEN_LIFE']
+        exp = user.data.get(
+            'TOKEN_LIFE',
+            calendar.timegm(time.gmtime()) + app.config['TOKEN_LIFE']
+        )
         response = jsonify({'message': 'successful'})
         response.set_cookie(
             app.config['JWT_COOKIE_NAME'],

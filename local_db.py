@@ -184,6 +184,13 @@ if args.populate:
         Role('madagascar', 'root', ' ', ['download', 'admin'])
     ]
 
+    roles += [
+        Role('meerkat', 'logging', ' ', []),
+        Role('meerkat', 'hermes', ' ', []),
+        Role('meerkat', 'admin', ' ', ['logging', 'hermes']),
+        Role('meerkat', 'root', ' ', ['admin'])
+    ]
+
     for role in roles:
         print(role.to_db())
 
@@ -367,8 +374,8 @@ if args.populate:
         'root@test.org.uk',
         ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
          'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
-        countries + ['jordan', 'madagascar', 'somalia'],
-        ['root' for c in countries] + ['root', 'root', 'root'],
+        countries + ['jordan', 'madagascar', 'somalia', 'meerkat'],
+        ['root' for c in countries] + ['root', 'root', 'root', 'root'],
         data={'name': {'val': 'Supreme Omnipotent Overlord'}},
         state='new'
     )]
@@ -400,8 +407,8 @@ if args.populate:
                 dev['username'],
                 dev['email'],
                 dev['password'],
-                countries + ['jordan', 'madagascar', 'somalia'],
-                ['root' for c in countries] + ['root', 'root', 'root'],
+                countries + ['jordan', 'madagascar', 'somalia', 'meerkat'],
+                ['root' for c in countries] + ['root', 'root', 'root', 'root'],
                 data={'name': {
                     'val': '{} {}'.format(dev['first_name'], dev['last_name'])
                 }},

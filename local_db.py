@@ -370,6 +370,24 @@ if args.populate:
         ['ctc', 'dashboard'],
         data={'name': {'val': 'CTC User'}},
         state='new'
+    ), User(
+        'reports-som-ctc',
+        'ctc@test.org.uk',
+        ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+         'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+        ['somalia', 'somalia'],
+        ['ctc', 'reports'],
+        data={'name': {'val': 'CTC Reports'}, 'TOKEN_LIFE': {'val': '60'}},
+        state='new'
+    ), User(
+        'reports-som-sc',
+        'sc@test.org.uk',
+        ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+         'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+        ['somalia', 'somalia'],
+        ['sc', 'reports'],
+        data={'name': {'val': 'SC Reports'}, 'TOKEN_LIFE': {'val': '60'}},
+        state='new'
     )]
 
     # Create a location restricted account for somalia

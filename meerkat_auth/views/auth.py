@@ -48,14 +48,14 @@ def login():
     try:
         user = User.authenticate(args['username'], args['password'])
         current_app.logger.warning("Authenticated: " + str(user))
-        exp = user.data.get(
+        expiry = calendar.timegm(time.gmtime()) + int(user.data.get(
             'TOKEN_LIFE',
-            calendar.timegm(time.gmtime()) + app.config['TOKEN_LIFE']
-        )
+            {'val': app.config['TOKEN_LIFE']}
+        )['val'])
         response = jsonify({'message': 'successful'})
         response.set_cookie(
             app.config['JWT_COOKIE_NAME'],
-            value=user.get_jwt(exp)
+            value=user.get_jwt(expiry)
         )
         return response
 

@@ -165,22 +165,37 @@ if args.populate:
     ]
 
     # Add the madagascar access network.
+    for country in ['somalia', 'madagascar']:
+        roles += [
+            Role(country, 'reports', ' ', []),
+            Role(country, 'dashboard', ' ', ['reports']),
+            Role(country, 'explore', ' ', ['dashboard']),
+            Role(country, 'download', ' ', ['explore']),
+            Role(country, 'personal', ' ', []),
+            Role(country, 'admin', ' ', ['personal']),
+            Role(country, 'emails', ' ', [], visible=['root'])
+        ]
+
     roles += [
-        Role('madagascar', 'reports', ' ', []),
-        Role('madagascar', 'dashboard', ' ', ['reports']),
-        Role('madagascar', 'explore', ' ', ['dashboard']),
-        Role('madagascar', 'download', ' ', ['explore']),
-        Role('madagascar', 'personal', ' ', []),
-        Role('madagascar', 'admin', ' ', ['personal']),
-        Role('madagascar', 'root', ' ', ['download', 'admin']),
-        Role('madagascar', 'emails', ' ', [], visible=['root'])
+        Role('somalia', 'ctc', ' ', []),
+        Role('somalia', 'sc', ' ', []),
+        Role('somalia', 'other', ' ', []),
+        Role('somalia', 'all', ' ', ['ctc', 'sc', 'other']),
+        Role('somalia', 'puntland', ' ', []),
+        Role('somalia', 'southcentral', ' ', []),
+        Role('somalia', 'somaliland', ' ', []),
+        Role('somalia', 'somalia', ' ', ['somaliland', 'puntland', 'southcentral']),
+        Role('somalia', 'root', ' ', ['download', 'admin', 'all', 'somalia']),
+        Role('madagascar', 'root', ' ', ['download', 'admin'])
     ]
+
     roles += [
-        Role('somalia', 'registered', ' ', []),
-        Role('somalia', 'personal', ' ', []),
-        Role('somalia', 'admin', ' ', ['registered', 'personal']),
-        Role('somalia', 'root', ' ', ['admin']),
+        Role('meerkat', 'logging', ' ', []),
+        Role('meerkat', 'hermes', ' ', []),
+        Role('meerkat', 'admin', ' ', ['logging', 'hermes']),
+        Role('meerkat', 'root', ' ', ['admin'])
     ]
+
     for role in roles:
         print(role.to_db())
 
@@ -201,7 +216,7 @@ if args.populate:
             )
         ]
 
-    for country in countries + ["somalia"]:
+    for country in countries:
         # Password for all dev accounts is just 'password'.
         users += [
             User(
@@ -296,54 +311,124 @@ if args.populate:
     ]
 
     # Create some Madagascar accounts
-    users += [
-        User(
-            'madagascar-reports',
-            'reports@madagascartest.org.uk',
-            ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
-             'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
-            ['madagascar'],
-            ['reports'],
-            data={'name': {'value': 'Report Person'}},
-            state='new'
-        ), User(
-            'madagascar-dashboard',
-            'clinic@madagascartest.org.uk',
-            ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
-             'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
-            ['madagascar'],
-            ['dashboard'],
-            data={'name': {'value': 'Dashboard Person'}},
-            state='new'
-        ), User(
-            'madagascar-explore',
-            'central.admin@madagascartest.org.uk',
-            ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
-             'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
-            ['madagascar'],
-            ['explore'],
-            data={'name': {'value': 'Explore Person'}},
-            state='new'
-        ), User(
-            'madagascar-download',
-            'central.admin@madagascartest.org.uk',
-            ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
-             'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
-            ['madagascar'],
-            ['download'],
-            data={'name': {'value': 'Download Person'}},
-            state='new'
-        ), User(
-            'madagascar-admin-download',
-            'central.admin@madagascartest.org.uk',
-            ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
-             'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
-            ['madagascar', 'madagascar'],
-            ['download', 'admin'],
-            data={'name': {'value': 'Central Administrator'}},
-            state='new'
-        )
-    ]
+    for country in ['madagascar', 'somalia']:
+        users += [
+            User(
+                country + '-reports',
+                'reports@madagascartest.org.uk',
+                ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+                 'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+                ['madagascar'],
+                ['reports'],
+                data={'name': {'value': 'Report Person'}},
+                state='new'
+            ), User(
+                country + '-dashboard',
+                'clinic@madagascartest.org.uk',
+                ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+                 'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+                ['madagascar'],
+                ['dashboard'],
+                data={'name': {'value': 'Dashboard Person'}},
+                state='new'
+            ), User(
+                country + '-explore',
+                'central.admin@madagascartest.org.uk',
+                ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+                 'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+                ['madagascar'],
+                ['explore'],
+                data={'name': {'value': 'Explore Person'}},
+                state='new'
+            ), User(
+                country + '-download',
+                'central.admin@madagascartest.org.uk',
+                ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+                 'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+                ['madagascar'],
+                ['download'],
+                data={'name': {'value': 'Download Person'}},
+                state='new'
+            ), User(
+                country + '-admin-download',
+                'central.admin@madagascartest.org.uk',
+                ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+                 'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+                ['madagascar', 'madagascar'],
+                ['download', 'admin'],
+                data={'name': {'value': 'Central Administrator'}},
+                state='new'
+            )
+        ]
+
+    # Create a CTC account for somalia
+    users += [User(
+        'ctc',
+        'ctc@test.org.uk',
+        ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+         'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+        ['somalia', 'somalia'],
+        ['ctc', 'dashboard'],
+        data={'name': {'val': 'CTC User'}},
+        state='new'
+    ), User(
+        'reports-som-ctc',
+        'ctc@test.org.uk',
+        ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+         'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+        ['somalia', 'somalia'],
+        ['ctc', 'reports'],
+        data={'name': {'val': 'CTC Reports'}, 'TOKEN_LIFE': {'val': '60'}},
+        state='new'
+    ), User(
+        'reports-som-sc',
+        'sc@test.org.uk',
+        ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+         'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+        ['somalia', 'somalia'],
+        ['sc', 'reports'],
+        data={'name': {'val': 'SC Reports'}, 'TOKEN_LIFE': {'val': '60'}},
+        state='new'
+    )]
+
+    # Create a location restricted account for somalia
+    users += [User(
+        'puntland',
+        'puntland@test.org.uk',
+        ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+         'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+        ['somalia', 'somalia', 'somalia'],
+        ['puntland', 'download', 'other'],
+        data={'name': {'val': 'Puntland User'}},
+        state='new'
+    ), User(
+        'somaliland',
+        'somaliland@test.org.uk',
+        ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+         'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+        ['somalia', 'somalia', 'somalia'],
+        ['somaliland', 'download', 'other'],
+        data={'name': {'val': 'somaliland User'}},
+        state='new'
+    ), User(
+        'southcentral',
+        'southcentral@test.org.uk',
+        ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+         'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+        ['somalia', 'somalia', 'somalia'],
+        ['southcentral', 'download', 'other'],
+        data={'name': {'val': 'somaliland User'}},
+        state='new'
+    ), User(
+        'somalia',
+        'somalia@test.org.uk',
+        ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+         'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+        ['somalia', 'somalia', 'somalia'],
+        ['somalia', 'download', 'other'],
+        data={'name': {'val': 'somaliland User'}},
+        state='new'
+    )]
 
     # Create an overall root acount with access to everything.
     users += [User(
@@ -351,8 +436,8 @@ if args.populate:
         'root@test.org.uk',
         ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
          'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
-        countries + ['jordan', 'madagascar', 'somalia'],
-        ['root' for c in countries] + ['root', 'root', 'root'],
+        countries + ['jordan', 'madagascar', 'somalia', 'meerkat'],
+        ['root' for c in countries] + ['root', 'root', 'root', 'root'],
         data={'name': {'val': 'Supreme Omnipotent Overlord'}},
         state='new'
     )]
@@ -364,10 +449,10 @@ if args.populate:
         ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
          'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
         countries + countries + ['jordan', 'jordan', 'jordan'] +
-        ['madagascar', 'madagascar'],
+        ['madagascar', 'madagascar'] + ['somalia', 'somalia', 'somalia'],
         ['registered' for c in countries] +
         ['emails' for c in countries] + ['reports', 'emails', 'all'] +
-        ['emails', 'reports'],
+        ['emails', 'reports'] + ['emails', 'reports', 'all'],
         state='new'
     )]
 
@@ -384,8 +469,8 @@ if args.populate:
                 dev['username'],
                 dev['email'],
                 dev['password'],
-                countries + ['jordan', 'madagascar', 'somalia'],
-                ['root' for c in countries] + ['root', 'root', 'root'],
+                countries + ['jordan', 'madagascar', 'somalia', 'meerkat'],
+                ['root' for c in countries] + ['root', 'root', 'root', 'root'],
                 data={'name': {
                     'val': '{} {}'.format(dev['first_name'], dev['last_name'])
                 }},

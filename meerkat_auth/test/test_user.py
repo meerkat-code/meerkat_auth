@@ -12,9 +12,9 @@ import unittest
 import jwt
 import calendar
 import time
-import boto3
+import logging
 import os
-
+import boto3
 
 # Hacky!
 # Need this module to be importable without the whole of meerkat_auth config.
@@ -30,19 +30,21 @@ class MeerkatAuthUserTestCase(unittest.TestCase):
 
     def setUp(self):
         """Setup for testing"""
-        app.config['TESTING'] = True
-        app.config['USERS'] = 'test_auth_users'
-        app.config['ROLES'] = 'test_auth_roles'
+        app.config.from_object('meerkat_auth.config.Testing')
+        app.config.from_envvar('MEERKAT_AUTH_SETTINGS')
         User.DB = boto3.resource(
             'dynamodb',
-            endpoint_url="https://dynamodb.eu-west-1.amazonaws.com",
+            endpoint_url=app.config['DB_URL'],
             region_name='eu-west-1'
         )
         Role.DB = boto3.resource(
             'dynamodb',
-            endpoint_url="https://dynamodb.eu-west-1.amazonaws.com",
+            endpoint_url=app.config['DB_URL'],
             region_name='eu-west-1'
         )
+        logging.warning(app.config['USERS'])
+        logging.warning(app.config['ROLES'])
+        logging.warning(app.config['DB_URL'])
         # The database should have the following objects already in it.
         roles = [
             Role('demo', 'registered', 'Registered.', []),

@@ -178,8 +178,9 @@ if args.populate:
 
     roles += [
         Role('somalia', 'ctc', ' ', []),
+        Role('somalia', 'sc', ' ', []),
         Role('somalia', 'other', ' ', []),
-        Role('somalia', 'all', ' ', ['ctc', 'other']),
+        Role('somalia', 'all', ' ', ['ctc', 'sc', 'other']),
         Role('somalia', 'puntland', ' ', []),
         Role('somalia', 'southcentral', ' ', []),
         Role('somalia', 'somaliland', ' ', []),
@@ -448,10 +449,10 @@ if args.populate:
         ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
          'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
         countries + countries + ['jordan', 'jordan', 'jordan'] +
-        ['madagascar', 'madagascar'],
+        ['madagascar', 'madagascar'] + ['somalia', 'somalia', 'somalia'],
         ['registered' for c in countries] +
         ['emails' for c in countries] + ['reports', 'emails', 'all'] +
-        ['emails', 'reports'],
+        ['emails', 'reports'] + ['emails', 'reports', 'all'],
         state='new'
     )]
 

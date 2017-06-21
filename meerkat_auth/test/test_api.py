@@ -30,18 +30,16 @@ class MeerkatAuthAPITestCase(unittest.TestCase):
 
     def setUp(self):
         """Setup for testing"""
-        app.config['TESTING'] = True
-        app.config['USERS'] = 'test_auth_users'
-        app.config['ROLES'] = 'test_auth_roles'
-        app.config['DB_URL'] = 'https://dynamodb.eu-west-1.amazonaws.com'
+        app.config.from_object('meerkat_auth.config.Testing')
+        app.config.from_envvar('MEERKAT_AUTH_SETTINGS')
         User.DB = boto3.resource(
             'dynamodb',
-            endpoint_url="https://dynamodb.eu-west-1.amazonaws.com",
+            endpoint_url=app.config['DB_URL'],
             region_name='eu-west-1'
         )
         Role.DB = boto3.resource(
             'dynamodb',
-            endpoint_url="https://dynamodb.eu-west-1.amazonaws.com",
+            endpoint_url=app.config['DB_URL'],
             region_name='eu-west-1'
         )
         self.app = meerkat_auth.app.test_client()

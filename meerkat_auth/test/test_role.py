@@ -7,8 +7,8 @@ Unit tests for the utility class role in Meerkat Auth.
 
 from meerkat_auth.role import Role, InvalidRoleException
 from meerkat_auth import app
-
 import unittest
+import logging
 import boto3
 
 
@@ -16,15 +16,17 @@ class MeerkatAuthRoleTestCase(unittest.TestCase):
 
     def setUp(self):
         """Setup for testing"""
-        app.config['TESTING'] = True
-        app.config['USERS'] = 'test_auth_users'
-        app.config['ROLES'] = 'test_auth_roles'
-        app.config['DB_URL'] = 'https://dynamodb.eu-west-1.amazonaws.com'
+        app.config.from_object('meerkat_auth.config.Testing')
+        app.config.from_envvar('MEERKAT_AUTH_SETTINGS')
         Role.DB = boto3.resource(
             'dynamodb',
-            endpoint_url="https://dynamodb.eu-west-1.amazonaws.com",
+            endpoint_url=app.config['DB_URL'],
             region_name='eu-west-1'
         )
+        logging.warning(app.config['USERS'])
+        logging.warning(app.config['ROLES'])
+        logging.warning(app.config['DB_URL'])
+
         # Put some roles into the test db.
         roles = [
             Role('demo', 'registered', 'Registered.', []),
@@ -59,6 +61,7 @@ class MeerkatAuthRoleTestCase(unittest.TestCase):
                         'role': role['role']
                     }
                 )
+
 
     def test_io(self):
         """Test the Role class' database writing/reading/deleting functions."""

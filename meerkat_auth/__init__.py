@@ -3,14 +3,17 @@ meerkat_auth.py
 
 Registering root Flask app services for the Meerkat Authentication module.
 """
-from flask import Flask, abort, g, redirect, render_template, request
+from flask import Flask, abort, g, redirect, render_template
 from flask.ext.babel import Babel
+import os
 
 # Create the Flask app
 app = Flask(__name__)
 babel = Babel(app)
-app.config.from_object('meerkat_auth.config.Production')
+config_object = os.getenv('CONFIG_OBJECT', 'meerkat_auth.config.Production')
+app.config.from_object(config_object)
 app.config.from_envvar('MEERKAT_AUTH_SETTINGS')
+
 
 from meerkat_auth.views.users import users_blueprint
 from meerkat_auth.views.roles import roles_blueprint

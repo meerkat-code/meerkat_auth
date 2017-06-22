@@ -105,7 +105,7 @@ body{
 	}
 }
 
-.tab-title{ 
+.tab-title{
 	display: inline-block;
 	font-size: 24px;
 	line-height: 42px;
@@ -171,7 +171,7 @@ body.blue{
 
 .login-title{
   color: white;
-  font-size: 40px; 
+  font-size: 40px;
   margin: 40px 0 0 40px;
 }
 
@@ -180,7 +180,7 @@ body.blue{
     margin: 15vh auto 0;
 }
 
-.login{ 
+.login{
 
     label{
         display: block;
@@ -217,8 +217,8 @@ body.blue{
         padding: 7px 5px 4px 10px;
     }
 
-    .lang-sel{ 
-        margin: 0px;  
+    .lang-sel{
+        margin: 0px;
     }
 
     .lang{
@@ -239,7 +239,7 @@ body.blue{
     }
 }
 
-.bootstrap-table .table.table-no-bordered > thead > tr > th, 
+.bootstrap-table .table.table-no-bordered > thead > tr > th,
 .bootstrap-table .table.table-no-bordered > tbody > tr > td{
     border-right: none;
     border-left: none;
@@ -296,7 +296,7 @@ body.blue{
     padding: 0px 10px;
 }
 
-.user-editor{ 
+.user-editor{
     button{
         margin-top: 10px;
     }
@@ -399,7 +399,7 @@ table.selected{
 
     td{
         position: relative;
-    }   
+    }
 
 
     .inherits{
@@ -414,7 +414,7 @@ table.selected{
             top: 0px;
             left: 0px;
             width: 100%;
-            
+
         }
 
         .level__description div{
@@ -456,4 +456,12 @@ table.selected{
 
 .no-pad{
     padding: 0px;
+}
+
+.advanced{
+    font-size: 13px;
+}
+
+.data-editor{
+    display: none;
 }

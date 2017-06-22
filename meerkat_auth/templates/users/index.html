@@ -12,9 +12,10 @@
 		<div class="box chartBox">
 			<div class="chartBox__heading">
 				{{ _('User Details') }}
+                <a href='#' class='pull-right advanced' onclick='showAdvanced(); return false;'>Advanced</a>
 			</div>
 			<div class="chartBox__content" >
-			    <div class="intro">					
+			    <div class="intro">
 				</div>
 				<div class="user-editor">
 				</div>
@@ -30,7 +31,7 @@
 				{{ _('Users') }}
 			</div>
 			<div class="chartBox__content" >
-			    <div class="intro">					
+			    <div class="intro">
 				</div>
                 <div class='table-toolbar'></div>
 				<div id='user-table' class="user-table">
@@ -50,5 +51,10 @@ $('.navbar-nav li').removeClass('active');
 $('.navbar-nav__users').addClass('active');
 drawUserTable();
 drawUserEditor("");
+function showAdvanced(){
+    console.log('Advanced');
+    $('.personal-editor').toggleClass('col-md-6 col-md-4');
+    $('.data-editor').toggle();
+}
 </script>
 {% endblock %}

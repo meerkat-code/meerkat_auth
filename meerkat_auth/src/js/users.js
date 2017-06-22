@@ -178,7 +178,7 @@ function drawUserEditor(username){
         //Creating the inputs for editing core details.
         //---------------------------------------------
 
-        html += "<div class='row top-part'><div class='col-xs-12 col-sm-6 col-md-4'>";
+        html += "<div class='row top-part'><div class='personal-editor col-xs-12 col-sm-6 col-md-6'>";
 
         html += "<div class='input-group row'>" +
                 "<label class='username  col-xs-12 col-md-6 col-lg-5'>" + i18n.gettext("Username") +
@@ -241,7 +241,7 @@ function drawUserEditor(username){
         //Now create the access editor.
         //-----------------------------
 
-        html += "<div class='col-xs-12 col-sm-6 col-md-4'>";
+        html += "<div class='access-editor col-xs-12 col-sm-6 col-md-4'>";
 
         html += "<div class='form-section clearfix'> <div class='section-title'> " +
                 i18n.gettext("Add New Access") + " </div>";
@@ -345,7 +345,7 @@ function drawUserEditor(username){
         //FOR NOW HIDE THE DATA EDITOR TO KEEP THINGS SIMPLER FOR THE USER
         //...since we don't really use it yet.
 
-        html += "<div class='col-xs-12 col-sm-6 col-md-4'>";
+        html += "<div class='data-editor col-xs-12 col-sm-6 col-md-4'>";
 
         html += "<div class='form-section clearfix'> <div class='section-title'>" +
                 i18n.gettext("Edit Data") + "</div>";

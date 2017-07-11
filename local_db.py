@@ -424,8 +424,8 @@ if args.populate:
         'somalia@test.org.uk',
         ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
          'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
-        ['somalia', 'somalia', 'somalia'],
-        ['somalia', 'download', 'other'],
+        ['somalia', 'somalia'],
+        ['download', 'other'],
         data={'name': {'val': 'somaliland User'}},
         state='new'
     )]

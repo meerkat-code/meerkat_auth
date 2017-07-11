@@ -140,7 +140,7 @@ def check_username(username):
 def update_user(username='new'):
     """
     Update/create a user. If username is set to "new" it will create and
-    validate as a new user.  Pass the new user details as json int he post
+    validate as a new user.  Pass the new user details as json in the post
     data. Post data should contain the following properties: username, email,
     password, countries (list of str), roles (list of str), state, creation
     (timestamp), data (json object). Look at the db to see the structure of
@@ -162,11 +162,12 @@ def update_user(username='new'):
     # Form's password field default is empty, only update if something entered.
     # Original password hash is stored in hidden input so we don't need to
     # reload user here.
+    logging.warning('New Password Is: ' + str(data["password"]))
     if data["password"]:
         data["password"] = User.hash_password(data["password"])
     else:
         data["password"] = data["original_password"]
-
+    logging.warning('Hashed Password Is: ' + str(data["password"]))
     # Create a user object represented by the form input.
     user = User(
         data["username"],
@@ -191,6 +192,7 @@ def update_user(username='new'):
     # Factor out the multiple lines of error handling for writing to database.
     def write(user):
         try:
+            logging.warning(user.password)
             user.to_db()
         except (InvalidRoleException, InvalidCredentialException) as e:
             return str(e)
@@ -205,6 +207,7 @@ def update_user(username='new'):
     # Changing username shouldn't wipe the state.
     if user.state != data["state"]:
         user = User.from_db(user.username)
+        logging.warning(repr(user))
         user.state = data["state"]
         write(user)
 
@@ -224,23 +227,32 @@ def delete_users():
     Returns:
         A string either stating success or the existance of an error.
     """
-
     # Load the list of users to be deleted.
     users = request.get_json()
+    logging.warning('Users: ' + str(users))
 
     # Try to delete users
-    try:
-        for username in users:
+    message = ""
+    error = False
+    for username in users:
+        try:
             # Check current user has access to delete the specified user.
             user = User.from_db(username)
             auth.check_auth(user.roles, user.countries, logic='AND')
+            logging.warning(
+                g.payload['usr'] + ' is deleting account ' + str(username)
+            )
             # Delete the user
             User.delete(username)
-    except Exception as e:
-        return ("Unfortunately there was an error:\n " + str(e) +
-                "\nContact the administrator if the problem persists.")
+            message += 'Succesfully deleted "{}"\n'.format(username)
+        except Exception as e:
+            error = True
+            message += 'Cannot delete "{}": {}\n'.format(username, e)
 
-    return "Users succesfully deleted."
+    if error:
+        return ("ERROR: There was an error deleting some users.\n" + message)
+    else:
+        return "Users successfully deleted."
 
 
 @users_blueprint.route('/')

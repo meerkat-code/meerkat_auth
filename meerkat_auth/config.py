@@ -44,7 +44,6 @@ class Config(object):
     LOGGING_IMPLEMENTAION = os.getenv("LOGGING_IMPLEMENTAION", "demo")
     ROOT_URL = from_env("ROOT_URL", "/auth")
 
-
 class Production(Config):
     DEBUG = True
     TESTING = False

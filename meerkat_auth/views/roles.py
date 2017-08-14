@@ -5,13 +5,13 @@ A Flask Blueprint module for the role manager page.
 """
 from flask import Blueprint, render_template, jsonify, g
 from meerkat_auth.role import Role
-from meerkat_auth import authorise as auth
+from meerkat_auth.authorise import auth
 from meerkat_auth import app
 
-roles = Blueprint('roles', __name__, url_prefix="/<language>")
+roles_blueprint = Blueprint('roles', __name__, url_prefix="/<language>")
 
 
-@roles.before_request
+@roles_blueprint.before_request
 def requires_auth():
     """
     Checks that the user has authenticated before returning any page from
@@ -20,8 +20,8 @@ def requires_auth():
     auth.check_auth(['admin'], [''])
 
 
-@roles.route('/get_roles')
-@roles.route('/get_roles/<country>')
+@roles_blueprint.route('/get_roles')
+@roles_blueprint.route('/get_roles/<country>')
 def get_roles(country=None):
     """
     Get all the roles for a given country.
@@ -46,7 +46,7 @@ def get_roles(country=None):
     return jsonify({'roles': roles})
 
 
-@roles.route('/get_all_access/<country>/<role>')
+@roles_blueprint.route('/get_all_access/<country>/<role>')
 def get_all_access(country=None, role=None):
     """
     Get's the complete access list for a given role.
@@ -63,11 +63,11 @@ def get_all_access(country=None, role=None):
     return jsonify({'access': access})
 
 
-@roles.route('/')
+@roles_blueprint.route('/')
 def index():
     """Renders the page showing the viewer/editor for access roles."""
     return render_template(
         'roles/index.html',
         user=g.payload,
-        root=app.config["ROOT_URL"]
+        root=app.config['ROOT_URL']
     )

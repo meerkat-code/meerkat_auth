@@ -56,7 +56,10 @@ if all(arg is False for arg in args_dict.values()):
 
 if args.clear:
     db = boto3.resource(
-        'dynamodb', endpoint_url='http://dynamodb:8000', region_name='eu_west')
+        'dynamodb',
+        endpoint_url='http://dynamodb:8000',
+        region_name='eu-west-1'
+    )
     try:
         print('Cleaning the dev db.')
         response = db.Table(meerkat_auth.app.config['USERS']).delete()
@@ -75,7 +78,10 @@ if args.setup:
 
     # Create the client for the local database
     db = boto3.client(
-        'dynamodb', endpoint_url='http://dynamodb:8000', region_name='eu_west')
+        'dynamodb',
+        endpoint_url='http://dynamodb:8000',
+        region_name='eu-west-1'
+    )
 
     # Create the required tables in the database
     response = db.create_table(
@@ -104,6 +110,13 @@ if args.setup:
     print(response)
 
 if args.populate:
+    # Create the client for the local database
+    db = boto3.client(
+        'dynamodb',
+        endpoint_url='http://dynamodb:8000',
+        region_name='eu-west-1'
+    )
+
     print('Populate dev db')
     # Create some roles for each country.
     # TODO: Need a clever solution to match dev to deployment here.
@@ -124,10 +137,13 @@ if args.populate:
                  'A Personal account with access to account settings.', []),
             Role(country, 'root', 'Complete access',
                  ['admin', 'all', 'personal']),
+
+
             Role(country, 'emails', ' ', [], visible=['root']),
 
         ]
-
+    roles += [Role("meerkat", 'server', 'Server account', []),
+              Role("meerkat", 'logging', 'Server logging account', [])]
     # Create the jordan access network
     roles += [
         Role('jordan', 'reports', ' ', []),
@@ -152,22 +168,30 @@ if args.populate:
     ]
 
     # Add the madagascar access network.
+    for country in ['somalia', 'madagascar']:
+        roles += [
+            Role(country, 'reports', ' ', []),
+            Role(country, 'dashboard', ' ', ['reports']),
+            Role(country, 'explore', ' ', ['dashboard']),
+            Role(country, 'download', ' ', ['explore']),
+            Role(country, 'personal', ' ', []),
+            Role(country, 'admin', ' ', ['personal']),
+            Role(country, 'emails', ' ', [], visible=['root'])
+        ]
+
     roles += [
-        Role('madagascar', 'reports', ' ', []),
-        Role('madagascar', 'dashboard', ' ', ['reports']),
-        Role('madagascar', 'explore', ' ', ['dashboard']),
-        Role('madagascar', 'download', ' ', ['explore']),
-        Role('madagascar', 'personal', ' ', []),
-        Role('madagascar', 'admin', ' ', ['personal']),
-        Role('madagascar', 'root', ' ', ['download', 'admin']),
-        Role('madagascar', 'emails', ' ', [], visible=['root'])
+        Role('somalia', 'ctc', ' ', []),
+        Role('somalia', 'sc', ' ', []),
+        Role('somalia', 'other', ' ', []),
+        Role('somalia', 'all', ' ', ['ctc', 'sc', 'other']),
+        Role('somalia', 'puntland', ' ', []),
+        Role('somalia', 'southcentral', ' ', []),
+        Role('somalia', 'somaliland', ' ', []),
+        Role('somalia', 'somalia', ' ', ['somaliland', 'puntland', 'southcentral']),
+        Role('somalia', 'root', ' ', ['download', 'admin', 'all', 'somalia']),
+        Role('madagascar', 'root', ' ', ['download', 'admin'])
     ]
-    roles += [
-        Role('somalia', 'registered', ' ', []),
-        Role('somalia', 'admin', ' ', ['registered']),
-        Role('somalia', 'root', ' ', ['admin']),
-        Role('somalia', 'personal', ' ', []),
-    ]
+
     for role in roles:
         print(role.to_db())
 
@@ -188,7 +212,7 @@ if args.populate:
             )
         ]
 
-    for country in countries + ["somalia"]:
+    for country in countries:
         # Password for all dev accounts is just 'password'.
         users += [
             User(
@@ -283,54 +307,116 @@ if args.populate:
     ]
 
     # Create some Madagascar accounts
-    users += [
-        User(
-            'madagascar-reports',
-            'reports@madagascartest.org.uk',
-            ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
-             'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
-            ['madagascar'],
-            ['reports'],
-            data={'name': {'value': 'Report Person'}},
-            state='new'
-        ), User(
-            'madagascar-dashboard',
-            'clinic@madagascartest.org.uk',
-            ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
-             'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
-            ['madagascar'],
-            ['dashboard'],
-            data={'name': {'value': 'Dashboard Person'}},
-            state='new'
-        ), User(
-            'madagascar-explore',
-            'central.admin@madagascartest.org.uk',
-            ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
-             'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
-            ['madagascar'],
-            ['explore'],
-            data={'name': {'value': 'Explore Person'}},
-            state='new'
-        ), User(
-            'madagascar-download',
-            'central.admin@madagascartest.org.uk',
-            ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
-             'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
-            ['madagascar'],
-            ['download'],
-            data={'name': {'value': 'Download Person'}},
-            state='new'
-        ), User(
-            'madagascar-admin-download',
-            'central.admin@madagascartest.org.uk',
-            ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
-             'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
-            ['madagascar', 'madagascar'],
-            ['download', 'admin'],
-            data={'name': {'value': 'Central Administrator'}},
-            state='new'
-        )
-    ]
+    for country in ['madagascar', 'somalia']:
+        users += [
+            User(
+                country + '-reports',
+                'reports@madagascartest.org.uk',
+                ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+                 'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+                ['madagascar'],
+                ['reports'],
+                data={'name': {'value': 'Report Person'}},
+                state='new'
+            ), User(
+                country + '-dashboard',
+                'clinic@madagascartest.org.uk',
+                ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+                 'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+                ['madagascar'],
+                ['dashboard'],
+                data={'name': {'value': 'Dashboard Person'}},
+                state='new'
+            ), User(
+                country + '-explore',
+                'central.admin@madagascartest.org.uk',
+                ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+                 'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+                ['madagascar'],
+                ['explore'],
+                data={'name': {'value': 'Explore Person'}},
+                state='new'
+            ), User(
+                country + '-download',
+                'central.admin@madagascartest.org.uk',
+                ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+                 'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+                ['madagascar'],
+                ['download'],
+                data={'name': {'value': 'Download Person'}},
+                state='new'
+            ), User(
+                country + '-admin-download',
+                'central.admin@madagascartest.org.uk',
+                ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+                 'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+                ['madagascar', 'madagascar'],
+                ['download', 'admin'],
+                data={'name': {'value': 'Central Administrator'}},
+                state='new'
+            )
+        ]
+
+    # Create a CTC account for somalia
+    users += [User(
+        'ctc',
+        'ctc@test.org.uk',
+        ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+         'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+        ['somalia', 'somalia'],
+        ['ctc', 'dashboard'],
+        data={'name': {'val': 'CTC User'}},
+        state='new'
+    )]
+    users += [User(
+        'nutrition',
+        'ctc@test.org.uk',
+        ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+         'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+        ['somalia', 'somalia'],
+        ['sc', 'dashboard'],
+        data={'name': {'val': 'SC User'}},
+        state='new'
+    )]
+
+    # Create a location restricted account for somalia
+    users += [User(
+        'puntland',
+        'puntland@test.org.uk',
+        ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+         'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+        ['somalia', 'somalia', 'somalia'],
+        ['puntland', 'download', 'other'],
+        data={'name': {'val': 'Puntland User'}},
+        state='new'
+    ), User(
+        'somaliland',
+        'somaliland@test.org.uk',
+        ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+         'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+        ['somalia', 'somalia', 'somalia'],
+        ['somaliland', 'download', 'other'],
+        data={'name': {'val': 'somaliland User'}},
+        state='new'
+    ), User(
+        'southcentral',
+        'southcentral@test.org.uk',
+        ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+         'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+        ['somalia', 'somalia', 'somalia'],
+        ['southcentral', 'download', 'other'],
+        data={'name': {'val': 'somaliland User'}},
+        state='new'
+    ), User(
+        'somalia',
+        'somalia@test.org.uk',
+        ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+         'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+        ['somalia', 'somalia', 'somalia'],
+        ['somalia', 'download', 'other'],
+        data={'name': {'val': 'somaliland User'}},
+        state='new'
+    )]
 
     # Create an overall root acount with access to everything.
     users += [User(
@@ -357,6 +443,16 @@ if args.populate:
         ['emails', 'reports'],
         state='new'
     )]
+    # Create an account to authenticate email sending.
+    users += [User(
+        'server',
+        'server@test.org.uk',
+        ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+         'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+        ["meerkat", "meerkat"],
+        ["server", "logging"],
+        state='new'
+    )]
 
     try:
         # Get developer accounts from file to be inserted into local database.
@@ -371,8 +467,8 @@ if args.populate:
                 dev['username'],
                 dev['email'],
                 dev['password'],
-                countries + ['jordan', 'madagascar'],
-                ['root' for c in countries] + ['root', 'root'],
+                countries + ['jordan', 'madagascar', 'somalia'],
+                ['root' for c in countries] + ['root', 'root', 'root'],
                 data={'name': {
                     'val': '{} {}'.format(dev['first_name'], dev['last_name'])
                 }},
@@ -393,7 +489,7 @@ if args.list:
     db = boto3.resource(
         'dynamodb',
         endpoint_url='http://dynamodb:8000',
-        region_name='eu_west'
+        region_name='eu-west-1'
     )
     try:
         accounts = db.Table(

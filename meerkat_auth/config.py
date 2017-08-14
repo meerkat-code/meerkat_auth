@@ -38,12 +38,12 @@ class Config(object):
     SUPPORTED_LANGUAGES = ["en", "fr"]
 
     DB_URL = from_env("DB_URL", "https://dynamodb.eu-west-1.amazonaws.com")
-    ROOT_URL = from_env("MEERKAT_AUTH_ROOT", "/auth")
-    DROPBOX = {}
     LOGGING_URL = os.getenv("LOGGING_URL", None)
     LOGGING_SOURCE = os.getenv("LOGGING_SOURCE", "frontend")
     LOGGING_SOUCRE_TYPE = "auth"
     LOGGING_IMPLEMENTAION = os.getenv("LOGGING_IMPLEMENTAION", "demo")
+    ROOT_URL = from_env("MEERKAT_AUTH_ROOT", "")
+
 
 class Production(Config):
     DEBUG = True

@@ -137,10 +137,13 @@ if args.populate:
                  'A Personal account with access to account settings.', []),
             Role(country, 'root', 'Complete access',
                  ['admin', 'all', 'personal']),
+
+
             Role(country, 'emails', ' ', [], visible=['root']),
 
         ]
-
+    roles += [Role("meerkat", 'server', 'Server account', []),
+              Role("meerkat", 'logging', 'Server logging account', [])]
     # Create the jordan access network
     roles += [
         Role('jordan', 'reports', ' ', []),
@@ -178,8 +181,9 @@ if args.populate:
 
     roles += [
         Role('somalia', 'ctc', ' ', []),
+        Role('somalia', 'sc', ' ', []),
         Role('somalia', 'other', ' ', []),
-        Role('somalia', 'all', ' ', ['ctc', 'other']),
+        Role('somalia', 'all', ' ', ['ctc', 'sc', 'other']),
         Role('somalia', 'puntland', ' ', []),
         Role('somalia', 'southcentral', ' ', []),
         Role('somalia', 'somaliland', ' ', []),
@@ -364,6 +368,16 @@ if args.populate:
         data={'name': {'val': 'CTC User'}},
         state='new'
     )]
+    users += [User(
+        'nutrition',
+        'ctc@test.org.uk',
+        ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+         'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+        ['somalia', 'somalia'],
+        ['sc', 'dashboard'],
+        data={'name': {'val': 'SC User'}},
+        state='new'
+    )]
 
     # Create a location restricted account for somalia
     users += [User(
@@ -427,6 +441,16 @@ if args.populate:
         ['registered' for c in countries] +
         ['emails' for c in countries] + ['reports', 'emails', 'all'] +
         ['emails', 'reports'],
+        state='new'
+    )]
+    # Create an account to authenticate email sending.
+    users += [User(
+        'server',
+        'server@test.org.uk',
+        ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+         'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+        ["meerkat", "meerkat"],
+        ["server", "logging"],
         state='new'
     )]
 

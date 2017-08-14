@@ -42,7 +42,7 @@ class Config(object):
     LOGGING_SOURCE = os.getenv("LOGGING_SOURCE", "frontend")
     LOGGING_SOUCRE_TYPE = "auth"
     LOGGING_IMPLEMENTAION = os.getenv("LOGGING_IMPLEMENTAION", "demo")
-    ROOT_URL = from_env("MEERKAT_AUTH_ROOT", "")
+    ROOT_URL = from_env("ROOT_URL", "/auth")
 
 
 class Production(Config):

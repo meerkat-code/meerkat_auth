@@ -12,7 +12,7 @@ app = Flask(__name__)
 babel = Babel(app)
 app.config.from_object('meerkat_auth.config.Production')
 app.config.from_envvar('MEERKAT_AUTH_SETTINGS')
-FlaskActivityLogger(app)
+FlaskActivityLogger(app, ["/api/login", "/api/get_user"])
 
 from meerkat_auth.views.users import users_blueprint
 from meerkat_auth.views.roles import roles_blueprint

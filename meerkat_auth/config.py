@@ -40,6 +40,13 @@ class Config(object):
     DB_URL = from_env("DB_URL", "https://dynamodb.eu-west-1.amazonaws.com")
     ROOT_URL = from_env("MEERKAT_AUTH_ROOT", "")
 
+    SENTRY_DNS = os.environ.get('SENTRY_DNS', '')
+    if SENTRY_DNS:
+        # Generate javascript sentry_dns
+        end = SENTRY_DNS.split("@")[1]
+        begining = ":".join(SENTRY_DNS.split(":")[:-1])
+        SENTRY_JS_DNS = begining + "@" + end
+
 
 class Production(Config):
     DEBUG = True

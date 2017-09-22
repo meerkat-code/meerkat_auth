@@ -49,13 +49,13 @@ class Config(object):
 
 
 class Production(Config):
-    DEBUG = True
+    DEBUG = False
     TESTING = False
 
 
 class Development(Config):
     DEBUG = True
-    TESTING = True
+    TESTING = False
 
 
 class Testing(Config):

@@ -3,22 +3,7 @@ config.py
 
 Configuration and settings
 """
-
 import os
-
-
-def from_env(env_var, default):
-    """ Gets value from envrionment variable or uses default
-
-    Args:
-        env_var: name of envrionment variable
-        default: the default value
-    """
-    new = os.environ.get(env_var)
-    if new:
-        return new
-    else:
-        return default
 
 
 class Config(object):
@@ -37,8 +22,11 @@ class Config(object):
     DEFAULT_LANGUAGE = "en"
     SUPPORTED_LANGUAGES = ["en", "fr"]
 
-    DB_URL = from_env("DB_URL", "https://dynamodb.eu-west-1.amazonaws.com")
-    ROOT_URL = from_env("MEERKAT_AUTH_ROOT", "")
+    DB_URL = os.environ.get(
+        "DB_URL",
+        "https://dynamodb.eu-west-1.amazonaws.com"
+    )
+    ROOT_URL = os.environ.get("MEERKAT_AUTH_ROOT", "")
 
     SENTRY_DNS = os.environ.get('SENTRY_DNS', '')
     if SENTRY_DNS:

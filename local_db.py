@@ -455,7 +455,16 @@ if args.populate:
         ['emails', 'reports'] + ['emails', 'reports', 'all'],
         state='new'
     )]
-
+    # Create an account to authenticate email sending.
+    users += [User(
+        'server',
+        'server@test.org.uk',
+        ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+         'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+        ["meerkat"],
+        ["hermes"],
+        state='new'
+    )]
     try:
         # Get developer accounts from file to be inserted into local database.
         fpath = (path.dirname(path.realpath(__file__)) +

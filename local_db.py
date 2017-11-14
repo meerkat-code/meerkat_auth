@@ -165,7 +165,7 @@ if args.populate:
     ]
 
     # Add the madagascar access network.
-    for country in ['somalia', 'madagascar']:
+    for country in ['somalia', 'somaliland', 'madagascar']:
         roles += [
             Role(country, 'reports', ' ', []),
             Role(country, 'dashboard', ' ', ['reports']),
@@ -181,11 +181,16 @@ if args.populate:
         Role('somalia', 'sc', ' ', []),
         Role('somalia', 'other', ' ', []),
         Role('somalia', 'all', ' ', ['ctc', 'sc', 'other']),
+        Role('somaliland', 'ctc', ' ', []),
+        Role('somaliland', 'sc', ' ', []),
+        Role('somaliland', 'other', ' ', []),
+        Role('somaliland', 'all', ' ', ['ctc', 'sc', 'other']),
         Role('somalia', 'puntland', ' ', []),
         Role('somalia', 'southcentral', ' ', []),
         Role('somalia', 'somaliland', ' ', []),
         Role('somalia', 'somalia', ' ', ['somaliland', 'puntland', 'southcentral']),
         Role('somalia', 'root', ' ', ['download', 'admin', 'all', 'somalia']),
+        Role('somaliland', 'root', ' ', ['download', 'admin', 'all']),
         Role('madagascar', 'root', ' ', ['download', 'admin'])
     ]
 
@@ -311,7 +316,7 @@ if args.populate:
     ]
 
     # Create some Madagascar accounts
-    for country in ['madagascar', 'somalia']:
+    for country in ['madagascar', 'somalia', 'somaliland']:
         users += [
             User(
                 country + '-reports',
@@ -436,8 +441,8 @@ if args.populate:
         'root@test.org.uk',
         ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
          'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
-        countries + ['jordan', 'madagascar', 'somalia', 'meerkat'],
-        ['root' for c in countries] + ['root', 'root', 'root', 'root'],
+        countries + ['jordan', 'madagascar', 'somalia', 'meerkat', 'somaliland'],
+        ['root' for c in countries] + ['root', 'root', 'root', 'root', 'root'],
         data={'name': {'val': 'Supreme Omnipotent Overlord'}},
         state='new'
     )]

@@ -315,7 +315,7 @@ if args.populate:
         )
     ]
 
-    # Create some Madagascar accounts
+    # Create some Madagascar, Somalia and Somaliland accounts
     for country in ['madagascar', 'somalia', 'somaliland']:
         users += [
             User(
@@ -436,13 +436,16 @@ if args.populate:
     )]
 
     # Create an overall root acount with access to everything.
+    root_countries = countries + [
+        'jordan', 'madagascar', 'somalia', 'meerkat', 'somaliland'
+    ]
     users += [User(
         'root',
         'root@test.org.uk',
         ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
          'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
-        countries + ['jordan', 'madagascar', 'somalia', 'meerkat', 'somaliland'],
-        ['root' for c in countries] + ['root', 'root', 'root', 'root', 'root'],
+        root_countries,
+        ['root']*len(root_countries),
         data={'name': {'val': 'Supreme Omnipotent Overlord'}},
         state='new'
     )]

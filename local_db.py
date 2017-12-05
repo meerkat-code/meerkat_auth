@@ -165,7 +165,7 @@ if args.populate:
     ]
 
     # Add the madagascar access network.
-    for country in ['somalia', 'somaliland', 'madagascar']:
+    for country in ['somalia', 'somaliland', 'southcentral', 'madagascar']:
         roles += [
             Role(country, 'reports', ' ', []),
             Role(country, 'dashboard', ' ', ['reports']),
@@ -185,12 +185,17 @@ if args.populate:
         Role('somaliland', 'sc', ' ', []),
         Role('somaliland', 'other', ' ', []),
         Role('somaliland', 'all', ' ', ['ctc', 'sc', 'other']),
+        Role('southcentral', 'ctc', ' ', []),
+        Role('southcentral', 'sc', ' ', []),
+        Role('southcentral', 'other', ' ', []),
+        Role('southcentral', 'all', ' ', ['ctc', 'sc', 'other']),
         Role('somalia', 'puntland', ' ', []),
         Role('somalia', 'southcentral', ' ', []),
         Role('somalia', 'somaliland', ' ', []),
         Role('somalia', 'somalia', ' ', ['somaliland', 'puntland', 'southcentral']),
         Role('somalia', 'root', ' ', ['download', 'admin', 'all', 'somalia']),
         Role('somaliland', 'root', ' ', ['download', 'admin', 'all']),
+        Role('southcentral', 'root', ' ', ['download', 'admin', 'all']),
         Role('madagascar', 'root', ' ', ['download', 'admin'])
     ]
 
@@ -315,8 +320,8 @@ if args.populate:
         )
     ]
 
-    # Create some Madagascar, Somalia and Somaliland accounts
-    for country in ['madagascar', 'somalia', 'somaliland']:
+    # Create some user accounts for specific countries.
+    for country in ['madagascar', 'somalia', 'somaliland', 'southcentral']:
         users += [
             User(
                 country + '-reports',
@@ -422,7 +427,7 @@ if args.populate:
          'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
         ['somalia', 'somalia', 'somalia'],
         ['southcentral', 'download', 'other'],
-        data={'name': {'val': 'somaliland User'}},
+        data={'name': {'val': 'southcentral User'}},
         state='new'
     ), User(
         'somalia',
@@ -431,13 +436,14 @@ if args.populate:
          'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
         ['somalia', 'somalia'],
         ['download', 'other'],
-        data={'name': {'val': 'somaliland User'}},
+        data={'name': {'val': 'somalia User'}},
         state='new'
     )]
 
     # Create an overall root acount with access to everything.
     root_countries = countries + [
-        'jordan', 'madagascar', 'somalia', 'meerkat', 'somaliland'
+        'jordan', 'madagascar', 'somalia',
+        'meerkat', 'somaliland', 'southcentral'
     ]
     users += [User(
         'root',

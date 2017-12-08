@@ -165,7 +165,7 @@ if args.populate:
     ]
 
     # Add the madagascar access network.
-    for country in ['somalia', 'somaliland', 'southcentral', 'madagascar']:
+    for country in ['somalia', 'somaliland', 'southcentral', 'puntland', 'madagascar']:
         roles += [
             Role(country, 'reports', ' ', []),
             Role(country, 'dashboard', ' ', ['reports']),
@@ -189,12 +189,17 @@ if args.populate:
         Role('southcentral', 'sc', ' ', []),
         Role('southcentral', 'other', ' ', []),
         Role('southcentral', 'all', ' ', ['ctc', 'sc', 'other']),
+        Role('puntland', 'ctc', ' ', []),
+        Role('puntland', 'sc', ' ', []),
+        Role('puntland', 'other', ' ', []),
+        Role('puntland', 'all', ' ', ['ctc', 'sc', 'other']),
         Role('somalia', 'puntland', ' ', []),
         Role('somalia', 'southcentral', ' ', []),
         Role('somalia', 'somaliland', ' ', []),
         Role('somalia', 'somalia', ' ', ['somaliland', 'puntland', 'southcentral']),
         Role('somalia', 'root', ' ', ['download', 'admin', 'all', 'somalia']),
         Role('somaliland', 'root', ' ', ['download', 'admin', 'all']),
+        Role('puntland', 'root', ' ', ['download', 'admin', 'all']),
         Role('southcentral', 'root', ' ', ['download', 'admin', 'all']),
         Role('madagascar', 'root', ' ', ['download', 'admin'])
     ]
@@ -321,7 +326,7 @@ if args.populate:
     ]
 
     # Create some user accounts for specific countries.
-    for country in ['madagascar', 'somalia', 'somaliland', 'southcentral']:
+    for country in ['madagascar', 'somalia', 'somaliland', 'puntland', 'southcentral']:
         users += [
             User(
                 country + '-reports',
@@ -443,7 +448,7 @@ if args.populate:
     # Create an overall root acount with access to everything.
     root_countries = countries + [
         'jordan', 'madagascar', 'somalia',
-        'meerkat', 'somaliland', 'southcentral'
+        'meerkat', 'somaliland', 'southcentral', 'puntland'
     ]
     users += [User(
         'root',

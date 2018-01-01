@@ -7,7 +7,7 @@
     "del": "~2.0",
     "duplexer2": "~0.0.2",
     "jshint": "~2.9.5",
-    "gulp": "~3.9.0",
+    "gulp": "~4.0.0",
     "gulp-concat": "~2.6.0",
     "gulp-debug": "~2.0.1",
     "gulp-filter": "~2.0.2",

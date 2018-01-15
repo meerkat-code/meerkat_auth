@@ -333,7 +333,7 @@ if args.populate:
                 'reports@madagascartest.org.uk',
                 ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
                  'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
-                ['madagascar'],
+                [country],
                 ['reports'],
                 data={'name': {'value': 'Report Person'}},
                 state='new'
@@ -342,7 +342,7 @@ if args.populate:
                 'clinic@madagascartest.org.uk',
                 ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
                  'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
-                ['madagascar'],
+                [country],
                 ['dashboard'],
                 data={'name': {'value': 'Dashboard Person'}},
                 state='new'
@@ -351,7 +351,7 @@ if args.populate:
                 'central.admin@madagascartest.org.uk',
                 ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
                  'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
-                ['madagascar'],
+                [country],
                 ['explore'],
                 data={'name': {'value': 'Explore Person'}},
                 state='new'
@@ -360,7 +360,7 @@ if args.populate:
                 'central.admin@madagascartest.org.uk',
                 ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
                  'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
-                ['madagascar'],
+                [country],
                 ['download'],
                 data={'name': {'value': 'Download Person'}},
                 state='new'
@@ -369,7 +369,7 @@ if args.populate:
                 'central.admin@madagascartest.org.uk',
                 ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
                  'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
-                ['madagascar', 'madagascar'],
+                [country, country],
                 ['download', 'admin'],
                 data={'name': {'value': 'Central Administrator'}},
                 state='new'

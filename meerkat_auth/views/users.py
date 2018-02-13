@@ -39,9 +39,10 @@ def compare_access(roles, countries):
     access.
 
     Args:
-        roles ([str]): A list of access role names, to compare the current
+        roles ([str]): A list of access role names, to compare the current \
             users access against.
         countries ([str]): The corresponding countries for each role in roles.
+
     """
     user_access = g.payload['acc']
     # Look at each access level the account has.

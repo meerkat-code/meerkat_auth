@@ -39,9 +39,9 @@ def compare_access(roles, countries):
     access.
 
     Args:
-        roles ([str]): A list of access role names, to compare the current \
+        roles ([`str`]): A list of access role names, to compare the current \
             users access against.
-        countries ([str]): The corresponding countries for each role in roles.
+        countries ([`str`]): The corresponding countries for each role in roles.
 
     """
     user_access = g.payload['acc']
@@ -91,7 +91,7 @@ def get_user(username=""):
     Get the specified user as a json reponse.
 
     Args:
-        username (str) The username of the user to get.
+        username (`str`): The username of the user to get.
 
     Returns:
         A json response containing all the details of the specified user
@@ -126,7 +126,7 @@ def check_username(username):
     Checks whether or not the specified username is a valid new username.
 
     Args:
-        username (str) the username to check
+        username (`str`): the username to check
 
     Returns:
         A json response with a single property 'valid', set to true if valid
@@ -148,7 +148,7 @@ def update_user(username='new'):
     data.
 
     Args:
-        username (str) The username of the user to be updated.
+        username (`str`): The username of the user to be updated.
 
     Returns:
         A string stating success or error.

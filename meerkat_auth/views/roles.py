@@ -32,7 +32,6 @@ def get_roles(country=None):
     Returns:
         A json object containing a single property 'roles' which is
             a list of the roles for that country.
-
     """
     roles = Role.get_all(country)
 

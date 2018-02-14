@@ -258,7 +258,9 @@ def delete_users():
 
 @users_blueprint.route('/')
 def index():
-    """Renders the user editor/creator/viewer page."""
+    """
+    Renders the user editor/creator/viewer page.
+    """
     return render_template(
         'users/index.html',
         user=g.payload,

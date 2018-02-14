@@ -4,11 +4,13 @@ python:
 env:
   global:
   - TRAVIS_NODE_VERSION="6.9.1"
-  - MEERKAT_AUTH_SETTINGS="/home/travis/build/meerkat-code/meerkat_libs/meerkat_libs/auth_client/dev_auth_config.py"
+  - MEERKAT_AUTH_SETTINGS="${TRAVIS_BUILD_DIR}/meerkat_libs/meerkat_libs/auth_client/dev_auth_config.py"
   - secure: pv8gR7tqiNsosBlKLOvT5B6KqadquuySJchz79XDgFm65YpV6M8CPm3BuksyVp/lF3xBL2OjbGnTykcrXjkQzR32u2UD4oQmZIPGqTyXySN7dMxTz4TGhhfUq/AwGnRbzqpaKyaDKrUEnKlixMWsaJhFOSK5iyjRmIzAtF2yGf9RagjrcB2Irn5qh//uPXvrjXrMo1AMAFwqYZYdprupmZRYVJDQ8Q0cWbtBYxlwhdQOiXvsx9dcNYKFd3PvThV7fe1rlEZRTXvDZ17MwR3Q0RCNxG6ORsjwzbzZxvECGV/s3+nDD4YTQMAcWZi9SolShz/ui/8l/Cz4KOlTvmfF7+DyCSECMxOTXPqcgft5AxMMJFBdkST7JShVrfVE8rNx2Oj3zoooiP/XWNWmfFwFSIwfv+RVHbaBi1FjIHl50mm68FHccumHhZ7+EFhDCzvor0er1q+KTF8+9rB9DjLqJibRFsLdXgxUNoJlDv661slkFL3KQjV2Iri12YDYlPfn0lZENGm8xCRL8e8XbvVRU5cMg1Oq1nsihZlnmq7efd+vA1m6MAZ8zG/2ygtcGEhJLmS9f9hdUBgYiD9qAahb5gazPHUcbITatZk3pNQDBcfNLW4CXGJIPWEd1snp4PbcArxj8NhBpNqsCt6E87s9SxVfslbRGvuDgt04IFZOq6o=
   - secure: TscpNmmJ8zxGH6L51iHjjFAaOceSzDRk2vqZBNknYiZNKnldw0lAa+4MWkLlWxWi52+fTgEK3QovnAnJgtzvK2NJPycPc6SqiiytKirFnQj8KI4MsgIS/xaLaAJbzIvf5oBkz9ghVSr95jpUM/02lgpx5b98Z5eZjmMIy6ZhnSgmeQtK4RJyAnzfh3KE0KGLJ9xsOGnVd3d/f7hzl5TxXNkcPQ3plL5TcR66NbSORivX+fheXTFvS3a1Jq2Jln5cdQ9StorVxyPjjauirkG9ji3CCITpJ3pw2FcBBwbX5NXT/1QQkfuUdCd401TEgqKCHW6I7UjV8vseg2fEMYoM1Z/pFt+TcFh2niTKFlnSx5vE0xDlLX61mrST7EJ5OWs9GIyX0C4kEHkQtfXLjG+qvseqsshrhH49hREfuD2We7VJab/iAHUTtAqdHAn8Fl0QDhzF34kZgai8oLEduoP4Eac0sYr0GrTGjmW3nVvSvRFH4Ei/tLiAAHbeuMYNNaIOUaMcCbD9MJTBGdQdRoaOwMY2GoTiO3wqpb0NlDVvwq+HZm9AmoEnOnhis/DYFXLlrJEffXA4g220X1eV3Q2rp/Rka/khWO1lsTDgsq6KlGIHvvXhWlOB7Bid06F0G0anCv4GKqIvAvEn3UiFyME76n5TpWzpsz9erKakp6uqE3A=
 install:
-- cd .. && git clone https://github.com/meerkat-code/meerkat_libs.git && cd meerkat_libs && pip install . && cd ../meerkat_auth
+- pip install -r requirements.txt
+- git clone --branch development --single-branch https://github.com/meerkat-code/meerkat_libs.git
+- pip install -r meerkat_libs/requirements.txt
 - export PYTHONPATH=$PYTHONPATH:${TRAVIS_BUILD_DIR}/meerkat_libs/:${TRAVIS_BUILD_DIR}/meerkat_auth/
 - rm -rf ~/.nvm && git clone https://github.com/creationix/nvm.git ~/.nvm && (cd ~/.nvm
   && git checkout `git describe --abbrev=0 --tags`) && source ~/.nvm/nvm.sh && nvm
@@ -19,8 +21,8 @@ before_script:
 - bower install
 - gulp
 script:
-- nosetests --logging-level=WARNING
-- sphinx-build -Wa -b html -d docs/_build/doctrees docs/_source docs/_build/html
+- sphinx-build -a -b html -d docs/_build/doctrees docs/_source docs/_build/html
+- nosetests -v --logging-level=WARNING
 
 notifications:
   slack:

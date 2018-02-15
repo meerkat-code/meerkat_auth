@@ -13,7 +13,7 @@ app = Flask(__name__)
 babel = Babel(app)
 config_object = os.getenv('CONFIG_OBJECT', 'meerkat_auth.config.Production')
 app.config.from_object(config_object)
-app.config.from_envvar('MEERKAT_AUTH_SETTINGS')
+app.config.from_envvar('MEERKAT_AUTH_SETTINGS', silent=True)
 
 # Set up sentry error monitoring
 if app.config["SENTRY_DNS"]:

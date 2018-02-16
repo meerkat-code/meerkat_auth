@@ -16,7 +16,7 @@ from unittest.mock import MagicMock
 # the list of modules to mock below.  This will ensure that the build continues
 # even if the module isn't installed.
 
-MOCK_MODULES = ['meerkat_libs']
+MOCK_MODULES = ['meerkat_libs', 'meerkat_libs.auth_client']
 
 
 class Mock(MagicMock):
@@ -27,6 +27,9 @@ class Mock(MagicMock):
 
 def mock_modules():
     sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
+
+
+mock_modules()
 
 # -- Path setup --------------------------------------------------------------
 

@@ -1,4 +1,4 @@
-Flask==0.10.1
+Flask==0.12.2
 itsdangerous==0.24
 Jinja2==2.8
 Werkzeug==0.10.4
@@ -13,3 +13,7 @@ cryptography==1.6
 flask-babel==0.10
 babel==2.3.4
 raven[flask]==6.0.0
+sphinx==1.6.7
+sphinxcontrib-httpdomain==1.6.0
+sphinxcontrib-napoleon==0.6.1
+numpy==1.11.3

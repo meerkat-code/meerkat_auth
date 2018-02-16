@@ -345,10 +345,12 @@ class User:
     @staticmethod
     def delete(username):
         """
-        Deletes account data corresponding to the given
-        username from the database table specified by config['USERS'].
+        Deletes account data corresponding to the given username from the
+        database table specified by config['USERS'].
+
         Args:
             username (str)
+
         Returns:
             The amazon dynamodb response.
         """
@@ -451,7 +453,7 @@ class User:
             email (str) Must be a valid email address.
             unhashed_pass (str) The unhashed password.
             countries ([str]) A list of countries the account has access to.
-            roles ([str]) A corresponding list of access roles for each country
+            roles ([str]) A corresponding list of access roles for each country \
                 with the same index in the countries argument.
 
         Returns:

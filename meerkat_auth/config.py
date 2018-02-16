@@ -3,14 +3,23 @@ config.py
 
 Configuration and settings
 """
+from importlib import util
 import os
+import logging
 
 
 class Config(object):
 
-    # Load the authentication settings file.
+    # Load the secret settings config file.
+    # File must define JWT_COOKIE_NAME, JWT_ALGORITHM and JWT_PUBLIC_KEY variables.
     filename = os.environ.get('MEERKAT_AUTH_SETTINGS')
-    exec(compile(open(filename, "rb").read(), filename, 'exec'))
+    try:
+        spec = util.spec_from_file_location('config', filename)
+        config = util.module_from_spec(spec)
+        spec.loader.exec_module(config)
+    except AttributeError:
+        logging.warning('Meerkat auth settings do not exist. '
+                        'Will not be able to work with auth tokens')
 
     DEBUG = False
     TESTING = False

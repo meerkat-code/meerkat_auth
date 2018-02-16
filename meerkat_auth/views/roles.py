@@ -25,12 +25,13 @@ def requires_auth():
 def get_roles(country=None):
     """
     Get all the roles for a given country.
+
     Args:
         country (str) The country for which we want all the roles.
 
     Returns:
         A json object containing a single property 'roles' which is
-        a list of the roles for that country.
+            a list of the roles for that country.
     """
     roles = Role.get_all(country)
 

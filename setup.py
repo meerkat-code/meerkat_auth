@@ -16,7 +16,7 @@ setup(
     name='Meerkat Auth',
     version='0.0.1',
     long_description=__doc__,
-    packages=['meerkat_auth'],
+    packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
     install_requires=reqs,

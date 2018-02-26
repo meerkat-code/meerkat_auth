@@ -205,8 +205,9 @@ if args.populate:
     ]
 
     roles += [
+        Role('meerkat', 'slack', ' ', []),
         Role('meerkat', 'logging', ' ', []),
-        Role('meerkat', 'hermes', ' ', []),
+        Role('meerkat', 'hermes', ' ', ['slack']),
         Role('meerkat', 'admin', ' ', ['logging', 'hermes']),
         Role('meerkat', 'root', ' ', ['admin'])
     ]
@@ -482,6 +483,14 @@ if args.populate:
          'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
         ["meerkat"],
         ["hermes"],
+        state='new'
+    ), User(
+        'slack',
+        'slack@test.org.uk',
+        ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+         'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+        ["meerkat"],
+        ["slack"],
         state='new'
     )]
     try:

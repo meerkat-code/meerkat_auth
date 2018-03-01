@@ -35,6 +35,7 @@ class Config(object):
         "DB_URL",
         "https://dynamodb.eu-west-1.amazonaws.com"
     )
+    DB_ADAPTER = os.environ.get("MEERKAT_DB_ADAPTER", "DynamoDBAdapter")
     ROOT_URL = os.environ.get("MEERKAT_AUTH_ROOT", "")
 
     SENTRY_DNS = os.environ.get('SENTRY_DNS', '')

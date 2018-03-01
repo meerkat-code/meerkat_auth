@@ -2,9 +2,8 @@ from datetime import datetime
 from meerkat_auth.role import Role
 from passlib.hash import pbkdf2_sha256
 from flask import jsonify
-from meerkat_auth import app
+from meerkat_auth import app, db
 import logging
-import boto3
 import jwt
 import re
 
@@ -17,12 +16,6 @@ class User:
 
     # The regular expression defining whether an email address is valid.
     EMAIL_REGEX = re.compile(r"[^@]+@[^@]+\.[^@]+")
-    # The database resource
-    DB = boto3.resource(
-        'dynamodb',
-        endpoint_url=app.config['DB_URL'],
-        region_name='eu-west-1'
-    )
 
     def __init__(self,
                  username,
@@ -131,33 +124,28 @@ class User:
         self.validate()
 
         # Write to DB.
-        logging.info("Validated. Writing object to database.")
-        users = User.DB.Table(app.config['USERS'])
+        logging.debug("Validated. Writing object to database.")
 
-        # If new user, set the state as live now it is going into the db.
+        # If new user, set the state as live because it is going into the db.
         # Also add the creation timestamp.
         if self.state == "new":
             self.creation = datetime.now().isoformat()
             self.state = "live"
 
-        logging.warning("Data type: " + str(type(self.data)))
-
-        response = users.update_item(
-            Key={
-                'username': self.username
-            },
-            AttributeUpdates={
-                'email': {'Value': self.email, 'Action': 'PUT'},
-                'password': {'Value': self.password, 'Action': 'PUT'},
-                'countries': {'Value': self.countries, 'Action': 'PUT'},
-                'roles': {'Value': self.roles, 'Action': 'PUT'},
-                'state': {'Value': self.state, 'Action': 'PUT'},
-                'creation': {'Value': self.creation, 'Action': 'PUT'},
-                'updated': {'Value': self.updated, 'Action': 'PUT'},
-                'data': {'Value': self.data, 'Action': 'PUT'}
-            }
+        # Use the configured DB adapter to connect to write the info.
+        response = db.write(
+            app.config['USERS'],
+            {'username': self.username},
+            {'email': self.email,
+             'password': self.password,
+             'countries': self.countries,
+             'roles': self.roles,
+             'state': self.state,
+             'creation': self.creation,
+             'updated': self.updated,
+             'data': self.data}
         )
-        logging.info("Response from database:\n" + str(response))
+        logging.debug("Response from database:\n" + str(response))
 
         return response
 
@@ -243,7 +231,7 @@ class User:
             InvalidCredentialException if a credential is invalid.\n
             InvalidRoleException if an ancestor role is not valid.
         """
-        logging.info("Validating User object:\n" + repr(self))
+        logging.debug("Validating User object:\n" + repr(self))
 
         # Raises an InvalidCredentialException if username not valid.
         if self.state == 'new':
@@ -309,37 +297,35 @@ class User:
             The python User object for the given username.
         """
         # Load data
-        logging.info('Loading user ' + username + ' from database.')
-        users = User.DB.Table(app.config['USERS'])
-        response = users.get_item(
-            Key={
-                'username': username
-            }
+        logging.debug('Loading user ' + username + ' from database.')
+        response = db.read(
+            app.config['USERS'],
+            {'username': username}
         )
-        logging.info('Response from database:\n' + str(response))
+
+        logging.debug('Response from database:\n' + str(response))
 
         # Build and return object
-        if not response.get("Item", None):
+        if not response:
             raise InvalidCredentialException('username', username)
         else:
-            r = response["Item"]
-            logging.info("RESPONSE------------\n" + repr(r))
+            logging.debug("RESPONSE------------\n" + repr(response))
             user = User(
-                r['username'],
-                r['email'],
-                r['password'],
-                r['countries'],
-                r['roles'],
-                state=r.get('state', 'undefined'),
-                updated=r.get('updated', 'undefined'),
-                creation=r.get('creation', 'undefined'),
-                data=r.get('data', {})
+                response['username'],
+                response['email'],
+                response['password'],
+                response['countries'],
+                response['roles'],
+                state=response.get('state', 'undefined'),
+                updated=response.get('updated', 'undefined'),
+                creation=response.get('creation', 'undefined'),
+                data=response.get('data', {})
             )
 
             # We want NO NEW USERS in the database.  Do 2nd clean up here.
             user.state = "live" if user.state == "new" else user.state
 
-            logging.info('Returning user:\n' + repr(user))
+            logging.debug('Returning user:\n' + repr(user))
             return user
 
     @staticmethod
@@ -354,14 +340,12 @@ class User:
         Returns:
             The amazon dynamodb response.
         """
-        logging.info('Deleting user ' + username)
-        users = User.DB.Table(app.config['USERS'])
-        response = users.delete_item(
-            Key={
-                'username': username
-            }
+        logging.debug('Deleting user ' + username)
+        response = db.delete(
+            app.config['USERS'],
+            {'username': username}
         )
-        logging.info("Response from database:\n" + str(response))
+        logging.debug("Response from database:\n" + str(response))
         return response
 
     @staticmethod
@@ -376,12 +360,12 @@ class User:
         Returns:
             bool True if in db, False if not in db.
         """
-        users = User.DB.Table(app.config['USERS'])
-        response = users.get_item(
-            Key={'username': username},
-            AttributesToGet=['username'],
+        response = db.read(
+            app.config['USERS'],
+            {'username': username},
+            attributes=['username']
         )
-        if response.get("Item", None):
+        if response:
             return True
         else:
             return False
@@ -504,8 +488,7 @@ class User:
             A python dictionary storing user accounts by username.
         """
         # Set things up.
-        logging.info('Loading users for ' + str(countries) + ' from database.')
-        table = User.DB.Table(app.config['USERS'])
+        logging.debug('Loading users for ' + str(countries) + ' from database.')
 
         # Allow any value for attributes and countries that equates to false.
         if not attributes:
@@ -523,37 +506,8 @@ class User:
         if attributes and 'username' not in attributes:
             attributes.append('username')
 
-        # Assemble scan arguments programatically, by building a dictionary.
-        kwargs = {}
-
-        # Include AttributesToGet if any are specified.
-        # By not including them we get them all.
-        if attributes:
-            kwargs["AttributesToGet"] = attributes
-
-        if not countries:
-            # If no country is specified, get all users and return as list.
-            return table.scan(**kwargs).get("Items", [])
-
-        else:
-            users = {}
-            # Load data separately for each country
-            # ...because Scan can't perform OR on CONTAINS
-            for country in countries:
-
-                kwargs["ScanFilter"] = {
-                    'countries': {
-                        'AttributeValueList': [country],
-                        'ComparisonOperator': 'CONTAINS'
-                    }
-                }
-
-                # Get and combine the users together in a no-duplications dict.
-                for user in table.scan(**kwargs).get("Items", []):
-                    users[user["username"]] = user
-
-            # Convert the dict to a list by getting values.
-            return list(users.values())
+        # Use the DB Adapter to get and return the data from the DB.
+        return db.get_all_users(countries, attributes)
 
 
 class InvalidCredentialException(Exception):

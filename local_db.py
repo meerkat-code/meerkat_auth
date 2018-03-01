@@ -18,13 +18,17 @@ You can run these commands inside the docker container if there are database
 issues.
 """
 
-import boto3
 from os import path
 import ast
-import meerkat_auth
+from meerkat_auth import db
 import argparse
+import logging
 from meerkat_auth.role import Role
 from meerkat_auth.user import User
+
+logging.basicConfig(level=logging.INFO)
+logging.getLogger("boto3.resources.action").setLevel(logging.WARNING)
+logging.getLogger("botocore").setLevel(logging.WARNING)
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -50,74 +54,19 @@ args = parser.parse_args()
 args_dict = vars(args)
 
 if all(arg is False for arg in args_dict.values()):
-    print("Re-starting the dev database.")
+    logging.info("Re-starting the dev database.")
     for arg in args_dict:
         args_dict[arg] = True
 
 if args.clear:
-    db = boto3.resource(
-        'dynamodb',
-        endpoint_url='http://dynamodb:8000',
-        region_name='eu-west-1'
-    )
-    try:
-        print('Cleaning the dev db.')
-        response = db.Table(meerkat_auth.app.config['USERS']).delete()
-        print(response)
-        response = db.Table(meerkat_auth.app.config['ROLES']).delete()
-        print(response)
-        print('Cleaned the db.')
-    except Exception as e:
-        print(e)
-        print('There has been error, probably because no tables currently '
-              'exist. Skipping the clean process.')
+    db.drop()
 
 
 if args.setup:
-    print('Creating dev db')
-
-    # Create the client for the local database
-    db = boto3.client(
-        'dynamodb',
-        endpoint_url='http://dynamodb:8000',
-        region_name='eu-west-1'
-    )
-
-    # Create the required tables in the database
-    response = db.create_table(
-        TableName=meerkat_auth.app.config['USERS'],
-        AttributeDefinitions=[
-            {'AttributeName': 'username', 'AttributeType': 'S'}],
-        KeySchema=[{'AttributeName': 'username', 'KeyType': 'HASH'}],
-        ProvisionedThroughput={'ReadCapacityUnits': 5, 'WriteCapacityUnits': 5}
-    )
-
-    print(response)
-
-    response = db.create_table(
-        TableName=meerkat_auth.app.config['ROLES'],
-        AttributeDefinitions=[
-            {'AttributeName': 'country', 'AttributeType': 'S'},
-            {'AttributeName': 'role', 'AttributeType': 'S'}
-        ],
-        KeySchema=[
-            {'AttributeName': 'country', 'KeyType': 'HASH'},
-            {'AttributeName': 'role', 'KeyType': 'RANGE'}
-        ],
-        ProvisionedThroughput={'ReadCapacityUnits': 5, 'WriteCapacityUnits': 5}
-    )
-
-    print(response)
+    db.setup()
 
 if args.populate:
-    # Create the client for the local database
-    db = boto3.client(
-        'dynamodb',
-        endpoint_url='http://dynamodb:8000',
-        region_name='eu-west-1'
-    )
-
-    print('Populate dev db')
+    logging.info('Populating dev db')
     # Create some roles for each country.
     # TODO: Need a clever solution to match dev to deployment here.
     # Maybe we define roles for dev and deployment in a sngle file and import.
@@ -213,7 +162,7 @@ if args.populate:
     ]
 
     for role in roles:
-        print(role.to_db())
+        logging.debug(role.to_db())
 
     # Create registered, manager and root user objects for each country.
     users = []
@@ -515,43 +464,18 @@ if args.populate:
             )]
 
     except Exception as e:
-        print('There has been an error with the developer\'s accounts...')
-        print(e)
+        logging.error('There has been an error with the developer\'s accounts...')
+        logging.error(e)
 
     for user in users:
-        print(user.to_db())
+        logging.debug(user.to_db())
 
-    print('Populated dev db')
+    logging.info('Populated dev db')
 
 if args.list:
-    print('Listing data in the database.')
-    db = boto3.resource(
-        'dynamodb',
-        endpoint_url='http://dynamodb:8000',
-        region_name='eu-west-1'
-    )
-    try:
-        accounts = db.Table(
-            meerkat_auth.app.config['USERS']
-        ).scan().get("Items", [])
-
-        if accounts:
-            print("Dev acounts created:")
-            for item in accounts:
-                print("  " + str(User.from_db(item["username"])))
-        else:
-            print("No dev accounts exist.")
-
-        roles = db.Table(
-            meerkat_auth.app.config['ROLES']
-        ).scan().get("Items", [])
-
-        if roles:
-            print("Dev roles created:")
-            for item in roles:
-                print("  " + str(Role.from_db(item["country"], item["role"])))
-        else:
-            print("No dev roles exist.")
-
-    except Exception as e:
-        print("Listing failed. Has database been setup?")
+    logging.info("Listing all users")
+    results = db.get_all_users()
+    logging.info("\n".join([str(User(**x)) for x in results]))
+    logging.info("Listing all roles")
+    results = db.get_all_roles()
+    logging.info("\n".join([str(Role(**x)) for x in results]))

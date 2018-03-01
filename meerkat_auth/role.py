@@ -1,21 +1,14 @@
-from meerkat_auth import app
+from meerkat_auth import app, db
 import logging
-import boto3
 
 
 class Role:
-
-    # The database resource
-    DB = boto3.resource(
-        'dynamodb',
-        endpoint_url=app.config['DB_URL'],
-        region_name='eu-west-1'
-    )
 
     """
     Class to model a single access Role object and includes functions to handle
     writing, reading, deleting details from the database.
     """
+
     def __init__(self, country, role, description, parents, visible=[]):
         """
         Constructor for a role object.
@@ -75,7 +68,7 @@ class Role:
         Raises:
             InvalidRoleException if the self role is not valid.
         """
-        logging.info("Validating object:\n" + repr(self))
+        logging.debug("Validating object:\n" + repr(self))
         # Throws an Invalid Role exception if an ancestor object doesn't exist.
         self.all_access_objs()
 
@@ -90,23 +83,18 @@ class Role:
         # Validate the object.
         self.validate()
 
-        # Write the object to the database.
-        logging.info("Object validated. Writing object to database.")
-        roles = Role.DB.Table(app.config['ROLES'])
-        response = roles.update_item(
-            Key={
-                'country': self.country,
-                'role': self.role
-            },
-            AttributeUpdates={
-                'description': {'Value': self.description, 'Action': 'PUT'},
-                'parents': {'Value': self.parents, 'Action': 'PUT'},
-                'visible': {'Value': self.visible, 'Action': 'PUT'}
-            }
+        # Use the db adapter to write the object to the database.
+        logging.debug("Object validated. Writing object to database.")
+        response = db.write(
+            app.config['ROLES'],
+            {'country': self.country, 'role': self.role},
+            {'description': self.description,
+             'parents': self.parents,
+             'visible': self.visible}
         )
 
         # Return the response.
-        logging.info("Response from database:\n" + str(response))
+        logging.debug("Response from database:\n" + str(response))
         return response
 
     def all_access_objs(self):
@@ -162,33 +150,28 @@ class Role:
             The python User object for the given username.
         """
         # Load data
-        logging.info(
+        logging.debug(
             'Loading role "' + role + '" for ' + country + ' from database.'
         )
-        roles = Role.DB.Table(app.config['ROLES'])
-        response = roles.get_item(
-            Key={
-                'country': country,
-                'role': role
-            }
+        response = db.read(
+            app.config['ROLES'],
+            {'country': country, 'role': role},
         )
         # Build and return object
-        logging.info('Response from database:\n' + str(response))
-        if not response.get('Item', None):
+        logging.debug('Response from database:\n' + str(response))
+        if not response:
             raise InvalidRoleException(
                 country, role, "Role not found in the database."
             )
         else:
-            r = response["Item"]
-
             role = Role(
-                r['country'],
-                r['role'],
-                r['description'],
-                r['parents'],
-                visible=r.get('visible', [])
+                response['country'],
+                response['role'],
+                response['description'],
+                response['parents'],
+                visible=response.get('visible', [])
             )
-            logging.info('Returning role:\n' + repr(role))
+            logging.debug('Returning role:\n' + repr(role))
             return role
 
     @staticmethod
@@ -201,15 +184,12 @@ class Role:
         Returns:
             The amazon dynamodb response.
         """
-        logging.info('Deleting role ' + role + ' in ' + country)
-        roles = Role.DB.Table(app.config['ROLES'])
-        response = roles.delete_item(
-            Key={
-                'country': country,
-                'role': role
-            }
+        logging.debug('Deleting role ' + role + ' in ' + country)
+        response = db.delete(
+            app.config['ROLES'],
+            {'country': country, 'role': role}
         )
-        logging.info("Response from database:\n" + str(response))
+        logging.debug("Response from database:\n" + str(response))
         return response
 
     @staticmethod
@@ -247,10 +227,9 @@ class Role:
         """
 
         # Set things up.
-        logging.info(
+        logging.debug(
             'Loading roles for country ' + str(countries) + ' from database.'
         )
-        table = Role.DB.Table(app.config['ROLES'])
 
         # Allow any value for countries that equates to false.
         if not countries:
@@ -260,23 +239,8 @@ class Role:
         if not isinstance(countries, list):
             countries = [countries]
 
-        if not countries:
-            # If no country is specified, get all roles and return as list.
-            return table.scan({}).get("Items", [])
-
-        else:
-            roles = []
-            # Load data separately for each country because can't query for OR.
-            for country in countries:
-                roles = roles + table.query(
-                    KeyConditions={
-                        'country': {
-                            'AttributeValueList': [country],
-                            'ComparisonOperator': 'EQ'
-                        }
-                    }
-                ).get("Items", [])
-            return roles
+        # Use the db adapter to get and return all roles.
+        return db.get_all_roles(countries)
 
 
 class InvalidRoleException(Exception):

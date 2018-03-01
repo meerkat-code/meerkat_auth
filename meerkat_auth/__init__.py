@@ -8,6 +8,7 @@ from flask.ext.babel import Babel
 from raven.contrib.flask import Sentry
 import os
 
+
 # Create the Flask app
 app = Flask(__name__)
 babel = Babel(app)
@@ -20,6 +21,10 @@ if app.config["SENTRY_DNS"]:
     sentry = Sentry(app, dsn=app.config["SENTRY_DNS"])
 else:
     sentry = None
+
+# The DB is interfaced through an adapter specified in config.
+from meerkat_auth import db_adapters
+db = getattr(db_adapters, app.config['DB_ADAPTER'])()
 
 from meerkat_auth.views.users import users_blueprint
 from meerkat_auth.views.roles import roles_blueprint

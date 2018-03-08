@@ -1,4 +1,4 @@
-from meerkat_auth import app, db
+from meerkat_auth import app
 import logging
 
 
@@ -85,7 +85,7 @@ class Role:
 
         # Use the db adapter to write the object to the database.
         logging.debug("Object validated. Writing object to database.")
-        response = db.write(
+        response = app.db.write(
             app.config['ROLES'],
             {'country': self.country, 'role': self.role},
             {'description': self.description,
@@ -153,7 +153,7 @@ class Role:
         logging.debug(
             'Loading role "' + role + '" for ' + country + ' from database.'
         )
-        response = db.read(
+        response = app.db.read(
             app.config['ROLES'],
             {'country': country, 'role': role},
         )
@@ -185,7 +185,7 @@ class Role:
             The amazon dynamodb response.
         """
         logging.debug('Deleting role ' + role + ' in ' + country)
-        response = db.delete(
+        response = app.db.delete(
             app.config['ROLES'],
             {'country': country, 'role': role}
         )
@@ -240,7 +240,10 @@ class Role:
             countries = [countries]
 
         # Use the db adapter to get and return all roles.
-        return db.get_all_roles(countries)
+        conditions = {'countries': countries}
+        response = app.db.get_all(app.config['ROLES'], conditions)
+        logging.warning(response)
+        return response
 
 
 class InvalidRoleException(Exception):

@@ -6,22 +6,21 @@ Unit tests for the utility class User in Meerkat Auth.
 """
 
 from meerkat_auth.user import User, InvalidCredentialException
-from meerkat_auth.role import Role, InvalidRoleException
-from meerkat_auth import app
+from meerkat_auth.role import InvalidRoleException
+from meerkat_auth import app, db_adapters
+from unittest import mock
 import unittest
 import jwt
 import calendar
 import time
-import logging
 import os
-import boto3
+import importlib.util
 
-# Hacky!
-# Need this module to be importable without the whole of meerkat_auth config.
-# Directly load secret settings file from which to import required config.
-# File must define JWT_COOKIE_NAME, JWT_ALGORITHM and JWT_PUBLIC_KEY variables.
+# Load the secret settings module where the JWT details are stored.
 filename = os.environ.get('MEERKAT_AUTH_SETTINGS')
-exec(compile(open(filename, "rb").read(), filename, 'exec'))
+spec = importlib.util.spec_from_file_location("settings", filename)
+settings = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(settings)
 
 
 class MeerkatAuthUserTestCase(unittest.TestCase):
@@ -32,76 +31,130 @@ class MeerkatAuthUserTestCase(unittest.TestCase):
         """Setup for testing"""
         app.config.from_object('meerkat_auth.config.Testing')
         app.config.from_envvar('MEERKAT_AUTH_SETTINGS')
-        User.DB = boto3.resource(
-            'dynamodb',
-            endpoint_url=app.config['DB_URL'],
-            region_name='eu-west-1'
-        )
-        Role.DB = boto3.resource(
-            'dynamodb',
-            endpoint_url=app.config['DB_URL'],
-            region_name='eu-west-1'
-        )
-        logging.warning(app.config['USERS'])
-        logging.warning(app.config['ROLES'])
-        logging.warning(app.config['DB_URL'])
-        # The database should have the following objects already in it.
+
+        # Mock the db
+        app.db = mock.create_autospec(db_adapters.DynamoDBAdapter)
+        self.db_data = {
+            app.config['ROLES']: {},
+            app.config['USERS']: {}
+        }
+
+        def build_key(keys):
+            return '-'.join(["{}:{}".format(k, v) for (k, v) in keys.items()])
+
+        def read_effect(table, keys, attributes=[]):
+            item = self.db_data[table].get(build_key(keys), {})
+            return {k: item[k] for k in item if k not in attributes}
+
+        def write_effect(table, keys, attributes):
+            self.db_data[table][build_key(keys)] = {**attributes, **keys}
+
+        def delete_effect(table, keys):
+            print(self.db_data[table][build_key(keys)])
+            del self.db_data[table][build_key(keys)]
+
+        app.db.read.side_effect = read_effect
+        app.db.write.side_effect = write_effect
+        app.db.delete.side_effect = read_effect
+
+        # Initialise the db
         roles = [
-            Role('demo', 'registered', 'Registered.', []),
-            Role('demo', 'personal', 'Personal.', ['registered']),
-            Role('demo', 'shared', 'Shared.', ['registered']),
-            Role('demo', 'manager', 'Manager.', ['personal', 'shared']),
-            Role('jordan', 'registered', 'Registered.', []),
-            Role('jordan', 'personal', 'Personal.', ['registered'])
+            {'country': 'demo', 'role': 'registered',
+             'description': 'Registered.', 'parents': []},
+            {'country': 'demo', 'role': 'personal',
+             'description': 'Personal.', 'parents': ['registered']},
+            {'country': 'demo', 'role': 'shared',
+             'description': 'Shared.', 'parents': ['registered']},
+            {'country': 'demo', 'role': 'manager',
+             'description': 'Manager.', 'parents': ['personal', 'shared']},
+            {'country': 'jordan', 'role': 'registered',
+             'description': 'Registered.', 'parents': []},
+            {'country': 'jordan', 'role': 'personal',
+             'description': 'Personal.', 'parents': ['registered']}
         ]
-
-        # Update the objects in case something else spuriously changed them.
         for role in roles:
-            role.to_db()
+            keys = {'country': role['country'], 'role': role['role']}
+            write_effect(
+                app.config['ROLES'],
+                keys,
+                {k: role[k] for k in role if k not in keys}
+            )
 
-    def tearDown(self):
-        """Tear down after testing."""
-        User.delete('testUser')
+    def test_to_db(self):
+        """Test the user to_db() method"""
+        user = {
+            'username': 'testUser',
+            'email': 'test@test.org.uk',
+            'password': ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+                         'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+            'countries': ['demo', 'jordan'],
+            'roles': ['manager', 'personal'],
+            'data': {'name': 'Testy McTestface'},
+            'state': 'new',
+        }
 
-    def test_io(self):
-        """Test the User class' database writing/reading/deleting functions."""
-        user1 = User(
-            'testUser',
-            'test@test.org.uk',
-            ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
-             'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
-            ['demo', 'jordan'],
-            ['manager', 'personal'],
-            data={
-                'name': 'Testy McTestface'
-            },
-            state='new'
+        expected_attributes = {**user.copy(), **{
+            'state': 'live',
+            'creation': mock.ANY,
+            'updated': mock.ANY
+        }}
+        del expected_attributes['username']
+
+        User(**user).to_db()
+        app.db.write.assert_called_with(
+            app.config['USERS'],
+            {'username': user['username']},
+            expected_attributes
         )
-        print('User1:\n' + repr(user1))
 
-        # Put the user into the database and then fetch it again.
-        user1.to_db()
-        user2 = User.from_db(user1.username)
-        print('User2:\n' + repr(user2))
-
-        # Check no alterations have taken place in the above process.
-        self.assertEqual(user1.username, user2.username)
-        self.assertEqual(user1.email, user2.email)
-        self.assertEqual(user1.password, user2.password)
-        self.assertEqual(user1.countries, user2.countries)
-        self.assertEqual(user1.roles, user2.roles)
-        self.assertEqual(user1.data, user2.data)
-        self.assertEqual(len(user1.role_objs), len(user2.role_objs))
-
-        # Check the user can be deleted and then from_db() raises exception.
-        User.delete(user1.username)
+    def test_from_db(self):
+        """Test the user from_db() method"""
+        user = {
+            'username': 'testUser',
+            'email': 'test@test.org.uk',
+            'password': ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+                         'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+            'countries': ['demo', 'jordan'],
+            'roles': ['manager', 'personal'],
+            'data': {'name': 'Testy McTestface'},
+            'state': 'new',
+        }
+        self.db_data[app.config['USERS']]['username:'+user['username']] = user
+        output = User.from_db(user['username'])
+        expected_calls = [
+            mock.call(app.config['USERS'], {'username': 'testUser'}),
+            mock.call(app.config['ROLES'], {'country': 'demo', 'role': 'manager'}),
+            mock.call(app.config['ROLES'], {'country': 'jordan', 'role': 'personal'})
+        ]
+        app.db.read.assert_has_calls(expected_calls)
+        self.assertEqual(User(**user), output)
         self.assertRaises(
             InvalidCredentialException,
-            lambda: User.from_db(user1.username)
+            lambda: User.from_db('nonexistant')
+        )
+
+    def test_delete(self):
+        """Test the user delete() method"""
+        user = {
+            'username': 'testUser',
+            'email': 'test@test.org.uk',
+            'password': ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+                         'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+            'countries': ['demo', 'jordan'],
+            'roles': ['manager', 'personal'],
+            'data': {'name': 'Testy McTestface'},
+            'state': 'new'
+        }
+        self.db_data[app.config['USERS']]['username:'+user['username']] = user
+
+        User.delete(user['username'])
+        app.db.delete.assert_called_with(
+            app.config['USERS'],
+            {'username': user['username']}
         )
 
     def test_get_access(self):
-        """Tests the get_access() method of User objects."""
+        """Test the user get_access() method"""
 
         # Create the test user.
         user = User(
@@ -118,7 +171,6 @@ class MeerkatAuthUserTestCase(unittest.TestCase):
         access = user.get_access()
 
         # Check that the expected access has been returned.
-        print(access)
         demo_expected = ['manager', 'personal', 'shared', 'registered']
         jordan_expected = ['personal', 'registered']
         self.assertEquals(len(access), 2)
@@ -128,13 +180,11 @@ class MeerkatAuthUserTestCase(unittest.TestCase):
         self.assertTrue(set(jordan_expected) == set(access['jordan']))
 
         # Check that get_access breaks appropriately if the roles are wrong.
-        demo_registered = Role.from_db('demo', 'registered')
-        print(Role.delete('demo', 'registered'))
+        del self.db_data[app.config['ROLES']]['country:demo-role:registered']
         self.assertRaises(InvalidRoleException, lambda: user.get_access())
-        demo_registered.to_db()
 
     def test_get_jwt(self):
-        """Tests the get_jwt() method of User objects."""
+        """Test the user get_jwt() method"""
 
         # Create the test user.
         user = User(
@@ -157,13 +207,13 @@ class MeerkatAuthUserTestCase(unittest.TestCase):
         # Decode the JWT and check it is as expected.
         decoded = jwt.decode(
             encoded,
-            JWT_PUBLIC_KEY,
-            JWT_ALGORITHM
+            settings.JWT_PUBLIC_KEY,
+            settings.JWT_ALGORITHM
         )
         user_decoded = jwt.decode(
             user_encoded,
-            JWT_PUBLIC_KEY,
-            JWT_ALGORITHM
+            settings.JWT_PUBLIC_KEY,
+            settings.JWT_ALGORITHM
         )
 
         user_expected = {
@@ -198,17 +248,17 @@ class MeerkatAuthUserTestCase(unittest.TestCase):
         # Check that decoding JWT doesn't complain with ExpiredSignatureError.
         self.assertRaises(jwt.ExpiredSignatureError, lambda: jwt.decode(
             encoded,
-            JWT_PUBLIC_KEY,
-            JWT_ALGORITHM
+            settings.JWT_PUBLIC_KEY,
+            settings.JWT_ALGORITHM
         ))
         self.assertRaises(jwt.ExpiredSignatureError, lambda: jwt.decode(
             user_encoded,
-            JWT_PUBLIC_KEY,
-            JWT_ALGORITHM
+            settings.JWT_PUBLIC_KEY,
+            settings.JWT_ALGORITHM
         ))
 
     def test_validate_user(self):
-        """Tests the validation of user details."""
+        """Test the user validation"""
 
         # Check that a valid set of arguments passes the validation function.
         try:
@@ -299,11 +349,8 @@ class MeerkatAuthUserTestCase(unittest.TestCase):
         except InvalidCredentialException as e:
             self.fail(repr(e))
 
-        # Clean up
-        User.delete('testUser')
-
     def test_authenticate(self):
-        """Test the authenticate method."""
+        """Test the user authenticate() method"""
 
         # Create a test user and write to db.
         user = User(
@@ -338,67 +385,25 @@ class MeerkatAuthUserTestCase(unittest.TestCase):
         )
 
     def test_get_all(self):
-        """Test the staticmethod get_all()."""
-        # Create the test users.
-        # Create a test user and write to db.
-        user1 = User(
-            'testUser1',
-            'test1@test.org.uk',
-            ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
-             'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
-            ['demo', 'jordan'],
-            ['manager', 'personal'],
-            data={
-                'name': 'Testy McTestface'
-            },
-            state='live'
+        """Test the user get_all() method"""
+        # Check call when falsy conds and attrs supplied
+        User.get_all([], [])
+        app.db.get_all.assert_called_with(
+            app.config['USERS'],
+            {'countries': []},
+            []
         )
-        user1.to_db()
-
-        user2 = User(
-            'testUser2',
-            'test2@test.org.uk',
-            ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
-             'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
-            ['demo'],
-            ['personal'],
-            data={
-                'name': 'Tester Testy'
-            },
-            state='live'
+        # Check call when non-lists provided
+        User.get_all('jordan', 'email')
+        app.db.get_all.assert_called_with(
+            app.config['USERS'],
+            {'countries': ['jordan']},
+            ['email', 'username']
         )
-        user2.to_db()
-
-        # Request just users with jordan accounts and check correct return
-        response = User.get_all('jordan', ['email', 'roles'])
-        expected = [{
-            'username': user1.username,
-            'roles': user1.roles,
-            'email': user1.email
-        }]
-
-        self.assertEqual(response, expected)
-
-        # Request different attributes from users with demo or jordan accounts.
-        response = User.get_all(['jordan', 'demo'], 'email')
-
-        # We don't know what order the responses will be returned in.
-        for item in response:
-            if item['username'] == user1.username:
-                self.assertEqual(item['email'], user1.email)
-            elif item['username'] == user2.username:
-                self.assertEqual(item['email'], user2.email)
-            else:
-                self.assertTrue(False)
-
-        # Request all users and all attributes.
-        response = User.get_all([], None)
-
-        # We don't know what order the responses will be returned in.
-        for item in response:
-            if item['username'] == user1.username:
-                self.assertEqual(item, user1.to_dict())
-            elif item['username'] == user2.username:
-                self.assertEqual(item, user2.to_dict())
-            else:
-                self.assertTrue(False)
+        # Check call when username not provided
+        User.get_all(['jordan', 'demo'], ['email', 'roles'])
+        app.db.get_all.assert_called_with(
+            app.config['USERS'],
+            {'countries': ['jordan', 'demo']},
+            ['email', 'roles', 'username']
+        )

@@ -20,7 +20,7 @@ issues.
 
 from os import path
 import ast
-from meerkat_auth import db
+from meerkat_auth import app
 import argparse
 import logging
 from meerkat_auth.role import Role
@@ -59,11 +59,11 @@ if all(arg is False for arg in args_dict.values()):
         args_dict[arg] = True
 
 if args.clear:
-    db.drop()
+    app.db.drop()
 
 
 if args.setup:
-    db.setup()
+    app.db.setup()
 
 if args.populate:
     logging.info('Populating dev db')
@@ -474,8 +474,8 @@ if args.populate:
 
 if args.list:
     logging.info("Listing all users")
-    results = db.get_all_users()
+    results = app.db.get_all(app.config['USERS'])
     logging.info("\n".join([str(User(**x)) for x in results]))
     logging.info("Listing all roles")
-    results = db.get_all_roles()
+    results = app.db.get_all(app.config['ROLES'])
     logging.info("\n".join([str(Role(**x)) for x in results]))

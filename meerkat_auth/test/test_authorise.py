@@ -6,22 +6,21 @@ Unit tests for the authorise.py module in Meerkat Auth
 """
 from werkzeug import exceptions
 from meerkat_auth.user import User
-from meerkat_auth.role import Role
 from meerkat_auth.authorise import Authorise
-from meerkat_auth import app
+from meerkat_auth import app, db_adapters
+from unittest import mock
 import unittest
 import calendar
 import time
 import logging
-import boto3
 import os
+import importlib.util
 
-# Hacky!
-# Need this module to be importable without the whole of meerkat_auth config.
-# Directly load secret settings file from which to import required config.
-# File must define JWT_COOKIE_NAME, JWT_ALGORITHM and JWT_PUBLIC_KEY variables.
+# Load the secret settings module where the JWT details are stored.
 filename = os.environ.get('MEERKAT_AUTH_SETTINGS')
-exec(compile(open(filename, "rb").read(), filename, 'exec'))
+spec = importlib.util.spec_from_file_location("settings", filename)
+settings = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(settings)
 
 
 class MeerkatAuthAuthoriseTestCase(unittest.TestCase):
@@ -30,72 +29,89 @@ class MeerkatAuthAuthoriseTestCase(unittest.TestCase):
         """Setup for testing"""
         app.config.from_object('meerkat_auth.config.Testing')
         app.config.from_envvar('MEERKAT_AUTH_SETTINGS')
-        User.DB = boto3.resource(
-            'dynamodb',
-            endpoint_url=app.config['DB_URL'],
-            region_name='eu-west-1'
-        )
-        Role.DB = boto3.resource(
-            'dynamodb',
-            endpoint_url=app.config['DB_URL'],
-            region_name='eu-west-1'
-        )
-        self.app = app.test_client()
+        # Mock the db
+        app.db = mock.create_autospec(db_adapters.DynamoDBAdapter)
+        self.db_data = {
+            app.config['ROLES']: {},
+            app.config['USERS']: {}
+        }
 
-        # The database should have the following objects already in it.
+        def build_key(keys):
+            return '-'.join(["{}:{}".format(k, v) for (k, v) in keys.items()])
+
+        def read_effect(table, keys, attributes=[]):
+            item = self.db_data[table].get(build_key(keys), {})
+            return {k: item[k] for k in item if k not in attributes}
+
+        def write_effect(table, keys, attributes):
+            self.db_data[table][build_key(keys)] = {**attributes, **keys}
+
+        def delete_effect(table, keys):
+            print(self.db_data[table][build_key(keys)])
+            del self.db_data[table][build_key(keys)]
+
+        app.db.read.side_effect = read_effect
+        app.db.write.side_effect = write_effect
+        app.db.delete.side_effect = read_effect
+
+        # Initialise the db
         roles = [
-            Role('demo', 'clinic', 'clinic description.', []),
-            Role('demo', 'directorate', 'Directorate', ['clinic']),
-            Role('demo', 'central', 'Central.', ['directorate']),
-            Role('jordan', 'clinic', 'Clinic description.', []),
-            Role('jordan', 'directorate', 'Directorate.', ['clinic']),
-            Role('jordan', 'central', 'Central description.', ['directorate']),
-            Role('jordan', 'personal', 'directorate description.', []),
-            Role('jordan', 'admin', 'Backend access.', ['personal'])
+            {'country': 'demo', 'role': 'clinic',
+             'description': 'clinic.', 'parents': []},
+            {'country': 'demo', 'role': 'personal',
+             'description': 'Personal.', 'parents': []},
+            {'country': 'demo', 'role': 'directorate',
+             'description': 'directorate.', 'parents': ['clinic']},
+            {'country': 'jordan', 'role': 'clinic',
+             'description': 'Registered.', 'parents': []},
+            {'country': 'jordan', 'role': 'directorate',
+             'description': 'directorate.', 'parents': ['clinic']},
+            {'country': 'jordan', 'role': 'central',
+             'description': 'central.', 'parents': ['directorate']},
+            {'country': 'jordan', 'role': 'personal',
+             'description': 'Personal.', 'parents': []},
+            {'country': 'jordan', 'role': 'admin',
+             'description': 'admin.', 'parents': ['personal']}
         ]
-
-        # Update objects in case something else spuriously changed them.
         for role in roles:
-            role.to_db()
-
-        # Put into the database a couple of test users.
-        users = [
-            User(
-                'testUser1',
-                'test1@test.org.uk',
-                User.hash_password('password1'),
-                ['jordan'],
-                ['directorate'],
-                data={
-                    'name': 'Testy McTestface'
-                }
-            ),
-            User(
-                'testUser2',
-                'test2@test.org.uk',
-                User.hash_password('password2'),
-                ['demo', 'jordan', 'jordan'],
-                ['directorate', 'central', 'personal'],
-                data={
-                    'name': 'Tester McTestFace'
-                }
+            keys = {'country': role['country'], 'role': role['role']}
+            write_effect(
+                app.config['ROLES'],
+                keys,
+                {k: role[k] for k in role if k not in keys}
             )
+
+        users = [
+            {'username': 'testUser1',
+             'email': 'test1@test.org.uk',
+             'password': User.hash_password('password1'),
+             'countries': ['jordan'],
+             'roles': ['directorate'],
+             'data': {'name': 'Testy McTestface'}},
+            {'username': 'testUser2',
+             'email': 'test2@test.org.uk',
+             'password': User.hash_password('password2'),
+             'countries': ['demo', 'jordan', 'jordan'],
+             'roles': ['directorate', 'central', 'personal'],
+             'data': {'name': 'Tester McTestface'}}
         ]
+
         for user in users:
-            user.to_db()
+            keys = {'username': user['username']}
+            write_effect(
+                app.config['USERS'],
+                keys,
+                {k: user[k] for k in user if k not in keys}
+            )
 
         self.auth = Authorise()
-
-    def tearDown(self):
-        """Tear down after testing."""
-        User.delete('testUser')
 
     def test_get_token(self):
         """Test the get_token() function."""
 
         # get_token() looks in both the cookie and authorization headers.
         auth_h = {'Authorization': 'Bearer headertoken'}
-        cookie_h = {'Cookie': JWT_COOKIE_NAME + '=cookietoken'}
+        cookie_h = {'Cookie': settings.JWT_COOKIE_NAME + '=cookietoken'}
 
         # Check that function responds correctly to the different headers.
         with app.test_request_context('/', headers=auth_h):
@@ -108,7 +124,7 @@ class MeerkatAuthAuthoriseTestCase(unittest.TestCase):
             self.assertEqual(self.auth.get_token(), '')
 
     def test_check_access(self):
-        """Test the check access function. Really important test!"""
+        """Test the check_access() function. Really important test!"""
 
         # Access to one level in one country that inherits one level.
         acc = User.from_db('testUser1').get_access()
@@ -211,7 +227,7 @@ class MeerkatAuthAuthoriseTestCase(unittest.TestCase):
         ))
 
     def test_check_auth(self):
-        """Test the check_auth function."""
+        """Test the check_auth() function."""
 
         # Make a request with no token.
         with app.test_request_context('/'):
@@ -237,7 +253,7 @@ class MeerkatAuthAuthoriseTestCase(unittest.TestCase):
         # Create an expired token to try and authenticate the request.
         u = User.from_db('testUser1')
         token = u.get_jwt(calendar.timegm(time.gmtime()) - 1).decode('UTF-8')
-        cookie_headers = {'Cookie': JWT_COOKIE_NAME + "=" + token}
+        cookie_headers = {'Cookie': settings.JWT_COOKIE_NAME + "=" + token}
 
         # Make a request using the expired token
         with app.test_request_context('/', headers=cookie_headers):

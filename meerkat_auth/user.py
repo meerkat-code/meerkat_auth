@@ -2,7 +2,7 @@ from datetime import datetime
 from meerkat_auth.role import Role
 from passlib.hash import pbkdf2_sha256
 from flask import jsonify
-from meerkat_auth import app, db
+from meerkat_auth import app
 import logging
 import jwt
 import re
@@ -133,7 +133,7 @@ class User:
             self.state = "live"
 
         # Use the configured DB adapter to connect to write the info.
-        response = db.write(
+        response = app.db.write(
             app.config['USERS'],
             {'username': self.username},
             {'email': self.email,
@@ -298,7 +298,8 @@ class User:
         """
         # Load data
         logging.debug('Loading user ' + username + ' from database.')
-        response = db.read(
+        logging.warning(dir(app.db))
+        response = app.db.read(
             app.config['USERS'],
             {'username': username}
         )
@@ -341,7 +342,7 @@ class User:
             The amazon dynamodb response.
         """
         logging.debug('Deleting user ' + username)
-        response = db.delete(
+        response = app.db.delete(
             app.config['USERS'],
             {'username': username}
         )
@@ -360,7 +361,7 @@ class User:
         Returns:
             bool True if in db, False if not in db.
         """
-        response = db.read(
+        response = app.db.read(
             app.config['USERS'],
             {'username': username},
             attributes=['username']
@@ -502,12 +503,15 @@ class User:
         if not isinstance(attributes, list):
             attributes = [attributes]
 
-        # Return dict is indexed by username, so ensure added.
+        # Add the primary key
         if attributes and 'username' not in attributes:
             attributes.append('username')
 
         # Use the DB Adapter to get and return the data from the DB.
-        return db.get_all_users(countries, attributes)
+        conditions = {'countries': countries}
+        response = app.db.get_all(app.config['USERS'], conditions, attributes)
+        logging.warning(response)
+        return response
 
 
 class InvalidCredentialException(Exception):

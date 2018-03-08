@@ -24,7 +24,7 @@ else:
 
 # The DB is interfaced through an adapter specified in config.
 from meerkat_auth import db_adapters
-db = getattr(db_adapters, app.config['DB_ADAPTER'])()
+app.db = getattr(db_adapters, app.config['DB_ADAPTER'])()
 
 from meerkat_auth.views.users import users_blueprint
 from meerkat_auth.views.roles import roles_blueprint

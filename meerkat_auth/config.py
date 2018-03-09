@@ -4,6 +4,7 @@ config.py
 Configuration and settings
 """
 from importlib import util
+from psycopg2 import sql
 import os
 import logging
 
@@ -30,12 +31,6 @@ class Config(object):
 
     DEFAULT_LANGUAGE = "en"
     SUPPORTED_LANGUAGES = ["en", "fr"]
-
-    DB_URL = os.environ.get(
-        "DB_URL",
-        "https://dynamodb.eu-west-1.amazonaws.com"
-    )
-    DB_ADAPTER = os.environ.get("MEERKAT_DB_ADAPTER", "DynamoDBAdapter")
     ROOT_URL = os.environ.get("MEERKAT_AUTH_ROOT", "")
 
     SENTRY_DNS = os.environ.get('SENTRY_DNS', '')
@@ -44,6 +39,61 @@ class Config(object):
         end = SENTRY_DNS.split("@")[1]
         begining = ":".join(SENTRY_DNS.split(":")[:-1])
         SENTRY_JS_DNS = begining + "@" + end
+
+    # DB Adapters from meerkat libs enable us to use different dbs.
+    DB_ADAPTER = os.environ.get("MEERKAT_DB_ADAPTER", "DynamoDBAdapter")
+    DB_ADAPTER_CONFIGS = {
+        "DynamoDBAdapter": {
+            'db_url': os.environ.get(
+                "DB_URL",
+                "https://dynamodb.eu-west-1.amazonaws.com"
+            ),
+            "structure": {
+                ROLES: {
+                    "TableName": ROLES,
+                    "AttributeDefinitions": [
+                        {'AttributeName': 'country', 'AttributeType': 'S'},
+                        {'AttributeName': 'role', 'AttributeType': 'S'}
+                    ],
+                    "KeySchema": [
+                        {'AttributeName': 'country', 'KeyType': 'HASH'},
+                        {'AttributeName': 'role', 'KeyType': 'RANGE'}
+                    ],
+                    "ProvisionedThroughput": {
+                        'ReadCapacityUnits': 5,
+                        'WriteCapacityUnits': 5
+                    }
+                },
+                USERS: {
+                    "TableName": USERS,
+                    "AttributeDefinitions": [
+                        {'AttributeName': 'username', 'AttributeType': 'S'}
+                    ],
+                    "KeySchema": [
+                        {'AttributeName': 'username', 'KeyType': 'HASH'}
+                    ],
+                    "ProvisionedThroughput": {
+                        'ReadCapacityUnits': 5,
+                        'WriteCapacityUnits': 5
+                    }
+                }
+            }
+        },
+        'PostgreSQLAdapter': {
+            'db_name': 'meerkat_auth',
+            'structure': {
+                USERS: [
+                    ("username", sql.SQL("username VARCHAR(50) PRIMARY KEY")),
+                    ("data",  sql.SQL("data JSON"))
+                ],
+                ROLES: [
+                    ("country", sql.SQL("country VARCHAR(50)")),
+                    ("role", sql.SQL("role VARCHAR(50)")),
+                    ("data", sql.SQL("data JSON"))
+                ]
+            }
+        }
+    }
 
 
 class Production(Config):

@@ -4,6 +4,7 @@ meerkat_auth.py
 Registering root Flask app services for the Meerkat Authentication module.
 """
 from flask import Flask, abort, g, redirect, render_template
+from meerkat_libs import db_adapters
 from flask.ext.babel import Babel
 from raven.contrib.flask import Sentry
 import os
@@ -22,9 +23,10 @@ if app.config["SENTRY_DNS"]:
 else:
     sentry = None
 
-# The DB is interfaced through an adapter specified in config.
-from meerkat_auth import db_adapters
-app.db = getattr(db_adapters, app.config['DB_ADAPTER'])()
+# The DB is interfaced through an adapter determined by configs.
+DBAdapter = getattr(db_adapters, app.config['DB_ADAPTER'])
+db_configs = app.config['DB_ADAPTER_CONFIGS'][app.config['DB_ADAPTER']]
+app.db = DBAdapter(**db_configs)
 
 from meerkat_auth.views.users import users_blueprint
 from meerkat_auth.views.roles import roles_blueprint

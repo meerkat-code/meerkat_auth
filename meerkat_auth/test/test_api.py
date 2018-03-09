@@ -7,7 +7,8 @@ Unit tests for REST API resources in Meerkat Auth.
 from meerkat_auth.user import User
 from meerkat_auth.role import Role
 from unittest import mock
-from meerkat_auth import app, db_adapters
+from meerkat_auth import app
+from meerkat_libs import db_adapters
 import meerkat_auth
 import json
 import unittest

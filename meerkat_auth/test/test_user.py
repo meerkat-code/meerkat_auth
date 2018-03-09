@@ -7,7 +7,8 @@ Unit tests for the utility class User in Meerkat Auth.
 
 from meerkat_auth.user import User, InvalidCredentialException
 from meerkat_auth.role import InvalidRoleException
-from meerkat_auth import app, db_adapters
+from meerkat_auth import app
+from meerkat_libs import db_adapters
 from unittest import mock
 import unittest
 import jwt

@@ -7,7 +7,8 @@ Unit tests for the authorise.py module in Meerkat Auth
 from werkzeug import exceptions
 from meerkat_auth.user import User
 from meerkat_auth.authorise import Authorise
-from meerkat_auth import app, db_adapters
+from meerkat_auth import app
+from meerkat_libs import db_adapters
 from unittest import mock
 import unittest
 import calendar

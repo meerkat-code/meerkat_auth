@@ -59,7 +59,7 @@ if all(arg is False for arg in args_dict.values()):
         args_dict[arg] = True
 
 if args.clear:
-    app.db.drop()
+    app.db.drop_all_tables()
 
 
 if args.setup:

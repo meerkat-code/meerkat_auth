@@ -53,7 +53,7 @@ class MeerkatAuthAuthoriseTestCase(unittest.TestCase):
 
         app.db.read.side_effect = read_effect
         app.db.write.side_effect = write_effect
-        app.db.delete.side_effect = read_effect
+        app.db.delete.side_effect = delete_effect
 
         # Initialise the db
         roles = [

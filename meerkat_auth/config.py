@@ -84,12 +84,12 @@ class Config(object):
             'structure': {
                 USERS: [
                     ("username", sql.SQL("username VARCHAR(50) PRIMARY KEY")),
-                    ("data",  sql.SQL("data JSON"))
+                    ("data",  sql.SQL("data JSONB"))
                 ],
                 ROLES: [
                     ("country", sql.SQL("country VARCHAR(50)")),
-                    ("role", sql.SQL("role VARCHAR(50)")),
-                    ("data", sql.SQL("data JSON"))
+                    ("role", sql.SQL("role VARCHAR(50), PRIMARY KEY(country,role)")),
+                    ("data", sql.SQL("data JSONB")),
                 ]
             }
         }

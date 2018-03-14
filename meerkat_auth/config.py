@@ -42,12 +42,18 @@ class Config(object):
 
     # DB Adapters from meerkat libs enable us to use different dbs.
     DB_ADAPTER = os.environ.get("MEERKAT_DB_ADAPTER", "DynamoDBAdapter")
+    POSTGRESQL_DSN = os.environ.get(
+        "MEERKAT_POSTGRESQL_DSN",
+        "host='db' dbname='meerkat_auth' user='postgres'"
+    )
+    POSTGRESQL_ROOT_DSN = os.environ.get(
+        "MEERKAT_POSTGRESQL_DSN",
+        "host='db' dbname='postgres' user='postgres'"
+    )
+    DYNAMODB_URL = os.environ.get("DB_URL", "http://dynamodb:8000")
     DB_ADAPTER_CONFIGS = {
         "DynamoDBAdapter": {
-            'db_url': os.environ.get(
-                "DB_URL",
-                "https://dynamodb.eu-west-1.amazonaws.com"
-            ),
+            'db_url': DYNAMODB_URL,
             "structure": {
                 ROLES: {
                     "TableName": ROLES,
@@ -80,7 +86,8 @@ class Config(object):
             }
         },
         'PostgreSQLAdapter': {
-            'db_name': 'meerkat_auth',
+            'connection_dsn': POSTGRESQL_DSN,
+            'root_connection_dsn': POSTGRESQL_ROOT_DSN,
             'structure': {
                 USERS: [
                     ("username", sql.SQL("username VARCHAR(50) PRIMARY KEY")),
@@ -111,4 +118,3 @@ class Testing(Config):
     TESTING = True
     USERS = 'test_auth_users'
     ROLES = 'test_auth_roles'
-    DB_URL = "https://dynamodb.eu-west-1.amazonaws.com"

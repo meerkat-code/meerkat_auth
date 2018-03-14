@@ -27,6 +27,7 @@ else:
 DBAdapter = getattr(db_adapters, app.config['DB_ADAPTER'])
 db_configs = app.config['DB_ADAPTER_CONFIGS'][app.config['DB_ADAPTER']]
 app.db = DBAdapter(**db_configs)
+app.db.connect_to_db()
 
 from meerkat_auth.views.users import users_blueprint
 from meerkat_auth.views.roles import roles_blueprint

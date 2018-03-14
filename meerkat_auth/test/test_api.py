@@ -68,7 +68,8 @@ class MeerkatAuthAPITestCase(unittest.TestCase):
                 ['manager', 'personal'],
                 data={
                     'name': 'Testy McTestface'
-                }
+                },
+                state='new'
             ),
             User(
                 'testUser2',
@@ -78,7 +79,8 @@ class MeerkatAuthAPITestCase(unittest.TestCase):
                 ['personal'],
                 data={
                     'name': 'Tester McTestFace'
-                }
+                },
+                state='new'
             )
         ]
         for user in users:
@@ -86,7 +88,8 @@ class MeerkatAuthAPITestCase(unittest.TestCase):
 
     def tearDown(self):
         """Tear down after testing."""
-        User.delete('testUser')
+        User.delete('testUser1')
+        User.delete('testUser2')
 
     @mock.patch('flask.Response.set_cookie')
     def test_login(self, request_mock):

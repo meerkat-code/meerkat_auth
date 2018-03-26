@@ -213,7 +213,7 @@ class Role:
         obj.all_access_objs()
 
     @staticmethod
-    def get_all(countries):
+    def get_all(country):
         """
         Fetches from the database the requested all roles that belong to the
         specified country.
@@ -228,19 +228,15 @@ class Role:
 
         # Set things up.
         logging.debug(
-            'Loading roles for country ' + str(countries) + ' from database.'
+            'Loading roles for country ' + str(country) + ' from database.'
         )
 
         # Allow any value for countries that equates to false.
-        if not countries:
-            countries = []
-
-        # If a single value is specified, but not as a list, turn into a list.
-        if not isinstance(countries, list):
-            countries = [countries]
+        conditions = {}
+        if country:
+            conditions = {'country': country}
 
         # Use the db adapter to get and return all roles.
-        conditions = {'countries': countries}
         response = app.db.get_all(app.config['ROLES'], conditions)
         logging.warning(response)
         return response

@@ -34,7 +34,6 @@ def get_roles(country=None):
             a list of the roles for that country.
     """
     roles = Role.get_all(country)
-
     # Remove roles that should be hidden from the user.
     # iterate backwards to avoid index changes when deleting items.
     for r in range(len(roles)-1, -1, -1):

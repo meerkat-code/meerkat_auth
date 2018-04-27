@@ -2,8 +2,9 @@
 """
 This is a utility script to help set up some accounts for testing and
 development. It create a registered, manager and root account for every country
-currently under active development. NOTE: the passwords for every account is
-just 'password'.
+currently under active development.
+
+NOTE: the passwords for every account is just 'password'.
 
 Run:
     `local_db.py --clear` (To get rid of any existing db)
@@ -201,10 +202,10 @@ if args.populate:
         Role('somaliland', 'root', ' ', ['download', 'admin', 'all']),
         Role('puntland', 'root', ' ', ['download', 'admin', 'all']),
         Role('southcentral', 'root', ' ', ['download', 'admin', 'all']),
-        Role('madagascar', 'root', ' ', ['download', 'admin'])
-    ]
-
-    roles += [
+        Role('madagascar', 'malaria', ' ', []),
+        Role('madagascar', 'other', ' ', []),
+        Role('madagascar', 'cd', ' ', ['malaria', 'other']),
+        Role('madagascar', 'root', ' ', ['download', 'admin', 'cd']),
         Role('meerkat', 'slack', ' ', []),
         Role('meerkat', 'logging', ' ', []),
         Role('meerkat', 'hermes', ' ', ['slack']),
@@ -229,12 +230,7 @@ if args.populate:
                 ['registered', 'cd'],
                 data={'name': {'val': 'Testy McTestface'}},
                 state='new'
-            )
-        ]
-
-    for country in countries:
-        # Password for all dev accounts is just 'password'.
-        users += [
+            ),
             User(
                 '{}-registered'.format(country),
                 'registered@{}test.org.uk'.format(country),
@@ -326,8 +322,67 @@ if args.populate:
         )
     ]
 
+    # Create some madagascar accounts.
+    users += [
+        User(
+            'madagascar-reports',
+            'reports@madagascartest.org.uk',
+            ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+             'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+            ['madagascar', 'madagascar'],
+            ['reports', 'cd'],
+            data={'name': {'value': 'Report Person'}},
+            state='new'
+        ), User(
+            'madagascar-dashboard',
+            'clinic@madagascartest.org.uk',
+            ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+             'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+            ['madagascar', 'madagascar'],
+            ['dashboard', 'cd'],
+            data={'name': {'value': 'Dashboard Person'}},
+            state='new'
+        ), User(
+            'madagascar-explore',
+            'central.admin@madagascartest.org.uk',
+            ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+             'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+            ['madagascar', 'madagascar'],
+            ['explore', 'cd'],
+            data={'name': {'value': 'Explore Person'}},
+            state='new'
+        ), User(
+            'madagascar-download',
+            'central.admin@madagascartest.org.uk',
+            ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+             'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+            ['madagascar', 'madagascar'],
+            ['download', 'cd'],
+            data={'name': {'value': 'Download Person'}},
+            state='new'
+        ), User(
+            'madagascar-admin-download',
+            'central.admin@madagascartest.org.uk',
+            ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+             'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+            ['madagascar', 'madagascar', 'madagascar'],
+            ['download', 'admin', 'cd'],
+            data={'name': {'value': 'Central Administrator'}},
+            state='new'
+        ), User(
+            'malaria',
+            'malaria@madagascartest.org.uk',
+            ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+             'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+            ['madagascar', 'madagascar', ],
+            ['malaria', 'download'],
+            data={'name': {'value': 'Malaria User'}},
+            state='new'
+        )
+    ]
+
     # Create some user accounts for specific countries.
-    for country in ['madagascar', 'somalia', 'somaliland', 'puntland', 'southcentral']:
+    for country in ['somalia', 'somaliland', 'puntland', 'southcentral']:
         users += [
             User(
                 country + '-reports',

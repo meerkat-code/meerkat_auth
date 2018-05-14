@@ -62,6 +62,8 @@ class MeerkatAuthUserTestCase(unittest.TestCase):
     def tearDown(self):
         """Tear down after testing."""
         User.delete('testUser')
+        User.delete('testUser1')
+        User.delete('testUser2')
 
     def test_io(self):
         """Test the User class' database writing/reading/deleting functions."""
@@ -300,7 +302,8 @@ class MeerkatAuthUserTestCase(unittest.TestCase):
             self.fail(repr(e))
 
         # Clean up
-        User.delete('testUser')
+        User.delete('testUser1')
+        User.delete('testUser2')
 
     def test_authenticate(self):
         """Test the authenticate method."""
@@ -351,7 +354,7 @@ class MeerkatAuthUserTestCase(unittest.TestCase):
             data={
                 'name': 'Testy McTestface'
             },
-            state='live'
+            state='new'
         )
         user1.to_db()
 
@@ -365,7 +368,7 @@ class MeerkatAuthUserTestCase(unittest.TestCase):
             data={
                 'name': 'Tester Testy'
             },
-            state='live'
+            state='new'
         )
         user2.to_db()
 

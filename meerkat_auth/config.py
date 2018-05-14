@@ -3,29 +3,23 @@ config.py
 
 Configuration and settings
 """
-
+from importlib import util
 import os
-
-
-def from_env(env_var, default):
-    """ Gets value from envrionment variable or uses default
-
-    Args:
-        env_var: name of envrionment variable
-        default: the default value
-    """
-    new = os.environ.get(env_var)
-    if new:
-        return new
-    else:
-        return default
+import logging
 
 
 class Config(object):
 
-    # Load the authentication settings file.
+    # Load the secret settings config file.
+    # File must define JWT_COOKIE_NAME, JWT_ALGORITHM and JWT_PUBLIC_KEY variables.
     filename = os.environ.get('MEERKAT_AUTH_SETTINGS')
-    exec(compile(open(filename, "rb").read(), filename, 'exec'))
+    try:
+        spec = util.spec_from_file_location('config', filename)
+        config = util.module_from_spec(spec)
+        spec.loader.exec_module(config)
+    except AttributeError:
+        logging.warning('Meerkat auth settings do not exist. '
+                        'Will not be able to work with auth tokens')
 
     DEBUG = False
     TESTING = False
@@ -37,8 +31,11 @@ class Config(object):
     DEFAULT_LANGUAGE = "en"
     SUPPORTED_LANGUAGES = ["en", "fr"]
 
-    DB_URL = from_env("DB_URL", "https://dynamodb.eu-west-1.amazonaws.com")
-    ROOT_URL = from_env("MEERKAT_AUTH_ROOT", "")
+    DB_URL = os.environ.get(
+        "DB_URL",
+        "https://dynamodb.eu-west-1.amazonaws.com"
+    )
+    ROOT_URL = os.environ.get("MEERKAT_AUTH_ROOT", "")
 
     SENTRY_DNS = os.environ.get('SENTRY_DNS', '')
     if SENTRY_DNS:
@@ -49,13 +46,13 @@ class Config(object):
 
 
 class Production(Config):
-    DEBUG = True
+    DEBUG = False
     TESTING = False
 
 
 class Development(Config):
     DEBUG = True
-    TESTING = True
+    TESTING = False
 
 
 class Testing(Config):

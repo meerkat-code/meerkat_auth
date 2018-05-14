@@ -23,21 +23,20 @@ def login():
     """
     Try to log a new user in. If a correct username and password have been
     provided we return a jwt to the user that can be used to login into any
-    part of meerkat.
+    part of meerkat. Parameters are passed in the POST request data.
 
-    Arguments are passed in the request data.
-
-    Post data json args:
-        username (str)\n
-        password (str)\n
+    Args:
+        username (str): The users username
+        password (str): The users password
 
     Returns:
-        A json object containing a single argument 'message', stating
-        'successful' or the error message.
+        A json object containing a single argument 'message', stating \
+            'successful' or the error message.
 
     Raises:
-        InvalidRoleException
-        InvalidCredentialException
+        InvalidRoleException: Indicating the user doesn't have a valid role.
+        InvalidCredentialException: Indicating the user has specified an
+            invalid username or password.
     """
 
     # Load the form's data.
@@ -82,12 +81,11 @@ def get_user():
     Return all user data that doesn't need to be in the header. Headers need
     to be kept small, and our "access" dictionary was starting to get too big.
     The access details, personal data and account settings are bundled up in a
-    big signed JWT that is servered upon request.
-
-    Arguments are passed in the request data.
+    big signed JWT that is servered upon request. Parameters are passed in the
+    POST request data.
 
     Args:
-        jwt (str)
+        jwt (str): The signed JWT for which we should get the user details.
 
     Returns:
         A json object detailing the user associated with the given JWT.
@@ -124,10 +122,11 @@ def logout():
     Logs a user out. This involves delete the current jwt stored in a cookie
     and redirecting to the specified page.  We delete a cookie by changing it's
     expiration date to immediately. Set the page to be redirected to using url
-    params, eg. /logout?url=https://www.google.com
+    params, eg. /logout?url=https://www.google.com. Parameters are passed as
+    GET args in the request.
 
-    Get Args:
-        url (str) The url of the page to redirect to after logging out.
+    Args:
+        url (str): The url of the page to redirect to after logging out.
 
     Returns:
         A redirect response object that also sets the cookie's expiration time
@@ -145,15 +144,16 @@ def update_user():
     An API call that updates the specified users details.  Can be used to reset
     passwords. THIS IS AUTHENTICATED using the the username and password
     given in the post args, which is why no other authorisation is needed.
+    Parameters are passed as POST args in the request.
 
-    POST Args:
-        username (str) The username of the user to be updated.
-        old_password (str) The original user's passowrd (it may be changed).
-        Any of the attributes of a user's object can also be suplied.
+    Args:
+        username (str): The username of the user to be updated.
+        old_password (str): The original user's passowrd (it may be changed). \
+            Any of the attributes of a user's object can also be suplied.
 
     Returns:
-        A jsonified message response either detailing the error or stating
-        "successful".
+        A json object containing a single argument 'message', stating \
+        'successful' or the error message.
     """
     # Load the form's data.
     args = request.json

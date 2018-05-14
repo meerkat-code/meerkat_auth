@@ -68,7 +68,8 @@ class MeerkatAuthAuthoriseTestCase(unittest.TestCase):
                 ['directorate'],
                 data={
                     'name': 'Testy McTestface'
-                }
+                },
+                state='new'
             ),
             User(
                 'testUser2',
@@ -78,7 +79,8 @@ class MeerkatAuthAuthoriseTestCase(unittest.TestCase):
                 ['directorate', 'central', 'personal'],
                 data={
                     'name': 'Tester McTestFace'
-                }
+                },
+                state='new'
             )
         ]
         for user in users:
@@ -88,7 +90,8 @@ class MeerkatAuthAuthoriseTestCase(unittest.TestCase):
 
     def tearDown(self):
         """Tear down after testing."""
-        User.delete('testUser')
+        User.delete('testUser1')
+        User.delete('testUser2')
 
     def test_get_token(self):
         """Test the get_token() function."""

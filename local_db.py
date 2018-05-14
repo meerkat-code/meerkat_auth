@@ -2,8 +2,9 @@
 """
 This is a utility script to help set up some accounts for testing and
 development. It create a registered, manager and root account for every country
-currently under active development. NOTE: the passwords for every account is
-just 'password'.
+currently under active development.
+
+NOTE: the passwords for every account is just 'password'.
 
 Run:
     `local_db.py --clear` (To get rid of any existing db)
@@ -165,7 +166,7 @@ if args.populate:
     ]
 
     # Add the madagascar access network.
-    for country in ['somalia', 'madagascar']:
+    for country in ['somalia', 'somaliland', 'southcentral', 'puntland', 'madagascar']:
         roles += [
             Role(country, 'reports', ' ', []),
             Role(country, 'dashboard', ' ', ['reports']),
@@ -181,17 +182,33 @@ if args.populate:
         Role('somalia', 'sc', ' ', []),
         Role('somalia', 'other', ' ', []),
         Role('somalia', 'all', ' ', ['ctc', 'sc', 'other']),
+        Role('somaliland', 'ctc', ' ', []),
+        Role('somaliland', 'sc', ' ', []),
+        Role('somaliland', 'other', ' ', []),
+        Role('somaliland', 'all', ' ', ['ctc', 'sc', 'other']),
+        Role('southcentral', 'ctc', ' ', []),
+        Role('southcentral', 'sc', ' ', []),
+        Role('southcentral', 'other', ' ', []),
+        Role('southcentral', 'all', ' ', ['ctc', 'sc', 'other']),
+        Role('puntland', 'ctc', ' ', []),
+        Role('puntland', 'sc', ' ', []),
+        Role('puntland', 'other', ' ', []),
+        Role('puntland', 'all', ' ', ['ctc', 'sc', 'other']),
         Role('somalia', 'puntland', ' ', []),
         Role('somalia', 'southcentral', ' ', []),
         Role('somalia', 'somaliland', ' ', []),
         Role('somalia', 'somalia', ' ', ['somaliland', 'puntland', 'southcentral']),
         Role('somalia', 'root', ' ', ['download', 'admin', 'all', 'somalia']),
-        Role('madagascar', 'root', ' ', ['download', 'admin'])
-    ]
-
-    roles += [
+        Role('somaliland', 'root', ' ', ['download', 'admin', 'all']),
+        Role('puntland', 'root', ' ', ['download', 'admin', 'all']),
+        Role('southcentral', 'root', ' ', ['download', 'admin', 'all']),
+        Role('madagascar', 'malaria', ' ', []),
+        Role('madagascar', 'other', ' ', []),
+        Role('madagascar', 'cd', ' ', ['malaria', 'other']),
+        Role('madagascar', 'root', ' ', ['download', 'admin', 'cd']),
+        Role('meerkat', 'slack', ' ', []),
         Role('meerkat', 'logging', ' ', []),
-        Role('meerkat', 'hermes', ' ', []),
+        Role('meerkat', 'hermes', ' ', ['slack']),
         Role('meerkat', 'admin', ' ', ['logging', 'hermes']),
         Role('meerkat', 'root', ' ', ['admin'])
     ]
@@ -213,12 +230,7 @@ if args.populate:
                 ['registered', 'cd'],
                 data={'name': {'val': 'Testy McTestface'}},
                 state='new'
-            )
-        ]
-
-    for country in countries:
-        # Password for all dev accounts is just 'password'.
-        users += [
+            ),
             User(
                 '{}-registered'.format(country),
                 'registered@{}test.org.uk'.format(country),
@@ -310,15 +322,74 @@ if args.populate:
         )
     ]
 
-    # Create some Madagascar accounts
-    for country in ['madagascar', 'somalia']:
+    # Create some madagascar accounts.
+    users += [
+        User(
+            'madagascar-reports',
+            'reports@madagascartest.org.uk',
+            ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+             'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+            ['madagascar', 'madagascar'],
+            ['reports', 'cd'],
+            data={'name': {'value': 'Report Person'}},
+            state='new'
+        ), User(
+            'madagascar-dashboard',
+            'clinic@madagascartest.org.uk',
+            ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+             'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+            ['madagascar', 'madagascar'],
+            ['dashboard', 'cd'],
+            data={'name': {'value': 'Dashboard Person'}},
+            state='new'
+        ), User(
+            'madagascar-explore',
+            'central.admin@madagascartest.org.uk',
+            ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+             'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+            ['madagascar', 'madagascar'],
+            ['explore', 'cd'],
+            data={'name': {'value': 'Explore Person'}},
+            state='new'
+        ), User(
+            'madagascar-download',
+            'central.admin@madagascartest.org.uk',
+            ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+             'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+            ['madagascar', 'madagascar'],
+            ['download', 'cd'],
+            data={'name': {'value': 'Download Person'}},
+            state='new'
+        ), User(
+            'madagascar-admin-download',
+            'central.admin@madagascartest.org.uk',
+            ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+             'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+            ['madagascar', 'madagascar', 'madagascar'],
+            ['download', 'admin', 'cd'],
+            data={'name': {'value': 'Central Administrator'}},
+            state='new'
+        ), User(
+            'malaria',
+            'malaria@madagascartest.org.uk',
+            ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+             'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+            ['madagascar', 'madagascar', ],
+            ['malaria', 'download'],
+            data={'name': {'value': 'Malaria User'}},
+            state='new'
+        )
+    ]
+
+    # Create some user accounts for specific countries.
+    for country in ['somalia', 'somaliland', 'puntland', 'southcentral']:
         users += [
             User(
                 country + '-reports',
                 'reports@madagascartest.org.uk',
                 ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
                  'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
-                ['madagascar'],
+                [country],
                 ['reports'],
                 data={'name': {'value': 'Report Person'}},
                 state='new'
@@ -327,7 +398,7 @@ if args.populate:
                 'clinic@madagascartest.org.uk',
                 ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
                  'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
-                ['madagascar'],
+                [country],
                 ['dashboard'],
                 data={'name': {'value': 'Dashboard Person'}},
                 state='new'
@@ -336,7 +407,7 @@ if args.populate:
                 'central.admin@madagascartest.org.uk',
                 ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
                  'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
-                ['madagascar'],
+                [country],
                 ['explore'],
                 data={'name': {'value': 'Explore Person'}},
                 state='new'
@@ -345,7 +416,7 @@ if args.populate:
                 'central.admin@madagascartest.org.uk',
                 ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
                  'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
-                ['madagascar'],
+                [country],
                 ['download'],
                 data={'name': {'value': 'Download Person'}},
                 state='new'
@@ -354,7 +425,7 @@ if args.populate:
                 'central.admin@madagascartest.org.uk',
                 ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
                  'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
-                ['madagascar', 'madagascar'],
+                [country, country],
                 ['download', 'admin'],
                 data={'name': {'value': 'Central Administrator'}},
                 state='new'
@@ -417,7 +488,7 @@ if args.populate:
          'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
         ['somalia', 'somalia', 'somalia'],
         ['southcentral', 'download', 'other'],
-        data={'name': {'val': 'somaliland User'}},
+        data={'name': {'val': 'southcentral User'}},
         state='new'
     ), User(
         'somalia',
@@ -426,18 +497,22 @@ if args.populate:
          'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
         ['somalia', 'somalia'],
         ['download', 'other'],
-        data={'name': {'val': 'somaliland User'}},
+        data={'name': {'val': 'somalia User'}},
         state='new'
     )]
 
     # Create an overall root acount with access to everything.
+    root_countries = countries + [
+        'jordan', 'madagascar', 'somalia',
+        'meerkat', 'somaliland', 'southcentral', 'puntland'
+    ]
     users += [User(
         'root',
         'root@test.org.uk',
         ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
          'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
-        countries + ['jordan', 'madagascar', 'somalia', 'meerkat'],
-        ['root' for c in countries] + ['root', 'root', 'root', 'root'],
+        root_countries,
+        ['root']*len(root_countries),
         data={'name': {'val': 'Supreme Omnipotent Overlord'}},
         state='new'
     )]
@@ -455,7 +530,24 @@ if args.populate:
         ['emails', 'reports'] + ['emails', 'reports', 'all'],
         state='new'
     )]
-
+    # Create an account to authenticate email sending.
+    users += [User(
+        'server',
+        'server@test.org.uk',
+        ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+         'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+        ["meerkat"],
+        ["hermes"],
+        state='new'
+    ), User(
+        'slack',
+        'slack@test.org.uk',
+        ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+         'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+        ["meerkat"],
+        ["slack"],
+        state='new'
+    )]
     try:
         # Get developer accounts from file to be inserted into local database.
         fpath = (path.dirname(path.realpath(__file__)) +

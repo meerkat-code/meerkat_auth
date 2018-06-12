@@ -33,11 +33,8 @@
     "snyk": "^1.82.1"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "snyk-protect": "snyk protect",
-    "prepare": "npm run snyk-protect"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
-  "license": "ISC",
-  "snyk": true
+  "license": "ISC"
 }

@@ -28,3 +28,12 @@ patch:
         patched: '2018-06-12T07:06:06.579Z'
     - gulp > vinyl-fs > glob-watcher > gaze > globule > glob > minimatch:
         patched: '2018-06-12T07:06:06.579Z'
+  'npm:hoek:20180212':
+    - gulp-sass > node-sass > node-gyp > request > hawk > hoek:
+        patched: '2018-06-18T22:11:34.616Z'
+    - gulp-sass > node-sass > node-gyp > request > hawk > boom > hoek:
+        patched: '2018-06-18T22:11:34.616Z'
+    - gulp-sass > node-sass > node-gyp > request > hawk > sntp > hoek:
+        patched: '2018-06-18T22:11:34.616Z'
+    - gulp-sass > node-sass > node-gyp > request > hawk > cryptiles > boom > hoek:
+        patched: '2018-06-18T22:11:34.616Z'

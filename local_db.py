@@ -123,6 +123,10 @@ if args.populate:
     # TODO: Need a clever solution to match dev to deployment here.
     # Maybe we define roles for dev and deployment in a sngle file and import.
     countries = ['demo', 'rms']
+    all_countries = countries + [
+        'jordan', 'madagascar', 'somalia',
+        'meerkat', 'somaliland', 'southcentral', 'puntland'
+    ]
     roles = []
 
     for country in countries:
@@ -502,17 +506,13 @@ if args.populate:
     )]
 
     # Create an overall root acount with access to everything.
-    root_countries = countries + [
-        'jordan', 'madagascar', 'somalia',
-        'meerkat', 'somaliland', 'southcentral', 'puntland'
-    ]
     users += [User(
         'root',
         'root@test.org.uk',
         ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
          'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
-        root_countries,
-        ['root']*len(root_countries),
+        all_countries,
+        ['root']*len(all_countries),
         data={'name': {'val': 'Supreme Omnipotent Overlord'}},
         state='new'
     )]

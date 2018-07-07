@@ -146,6 +146,11 @@ if args.populate:
 
         ]
 
+    for country in all_countries:
+        roles += [
+            Role(country, 'consul', 'Access to consul integration service.', [])
+        ]
+
     # Create the jordan access network
     roles += [
         Role('jordan', 'reports', ' ', []),
@@ -530,6 +535,18 @@ if args.populate:
         ['emails', 'reports'] + ['emails', 'reports', 'all'],
         state='new'
     )]
+
+    # Create an account to authenticate request to consul
+    users += [User(
+        'consul-dev-user',
+        'consul-dev-user@test.org.uk',
+        ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+         'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+        all_countries,
+        ['consul']*len(all_countries),
+        state='new'
+    )]
+
     # Create an account to authenticate email sending.
     users += [User(
         'server',

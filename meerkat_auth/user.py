@@ -31,8 +31,8 @@ class User:
                  countries,
                  roles,
                  state="live",
-                 updated=datetime.now().isoformat(),
-                 creation=datetime.now().isoformat(),
+                 updated=None,
+                 creation=None,
                  data={}):
         """Create a User object."""
 
@@ -43,6 +43,10 @@ class User:
         self.countries = countries
         self.roles = roles
         self.state = state
+        if not creation:
+            creation = datetime.now().isoformat()
+        if not updated:
+            updated = datetime.now().isoformat()
         self.creation = creation
         self.updated = updated
         self.data = data

@@ -539,6 +539,16 @@ if args.populate:
             ['consul']*len(all_countries),
             state='new'
         ),
+        # Create an account to authenticate download requests to api
+        User(
+            'api-dev-user',
+            'api-dev-user@test.org.uk',
+            ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+             'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+            all_countries,
+            ['admin']*len(all_countries),
+            state='new'
+        ),
         # Create an account to authenticate email sending.
         User(
             'server',

@@ -123,10 +123,8 @@ if args.populate:
     # TODO: Need a clever solution to match dev to deployment here.
     # Maybe we define roles for dev and deployment in a sngle file and import.
     countries = ['demo', 'rms']
-    all_countries = countries + [
-        'jordan', 'madagascar', 'somalia',
-        'meerkat', 'somaliland', 'southcentral', 'puntland'
-    ]
+    somalia_countries = ['somalia', 'somaliland', 'puntland', 'southcentral']
+    all_countries = countries + somalia_countries + ['jordan', 'madagascar', 'meerkat']
     roles = []
 
     for country in countries:
@@ -388,7 +386,7 @@ if args.populate:
     ]
 
     # Create some user accounts for specific countries.
-    for country in ['somalia', 'somaliland', 'puntland', 'southcentral']:
+    for country in somalia_countries:
         users += [
             User(
                 country + '-reports',
@@ -535,18 +533,18 @@ if args.populate:
             'consul-dev-user@test.org.uk',
             ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
              'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
-            all_countries,
-            ['consul']*len(all_countries),
+            somalia_countries,
+            ['download']*len(somalia_countries),
             state='new'
         ),
         # Create an account to authenticate download requests to api
         User(
-            'api-dev-user',
-            'api-dev-user@test.org.uk',
+            'abacus-dev-user',
+            'abacus-dev-user@test.org.uk',
             ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
              'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
             all_countries,
-            ['admin']*len(all_countries),
+            ['consul']*len(all_countries),
             state='new'
         ),
         # Create an account to authenticate email sending.

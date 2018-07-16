@@ -238,8 +238,13 @@ def delete_users():
     for username in users:
         try:
             # Check current user has access to delete the specified user.
-            user = User.from_db(username)
-            auth.check_auth(user.roles, user.countries, logic='AND')
+            user_to_delete = User.from_db(username)
+            try:
+                auth.check_auth(['admin'], ['meerkat'])
+            except HTTPException:
+                countries_list = user_to_delete.countries
+                admin_role_list = ['admin'] * len(countries_list)
+                auth.check_auth(admin_role_list, countries_list, logic='AND')
             logging.warning(
                 g.payload['usr'] + ' is deleting account ' + str(username)
             )

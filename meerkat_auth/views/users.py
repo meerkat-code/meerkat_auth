@@ -4,6 +4,8 @@ users.py
 A Flask Blueprint module for the user manager page.
 """
 from flask import Blueprint, render_template, request, jsonify, g, abort
+from werkzeug.exceptions import HTTPException
+
 from meerkat_auth.user import User, InvalidCredentialException
 from meerkat_auth.role import InvalidRoleException
 from meerkat_auth.authorise import auth

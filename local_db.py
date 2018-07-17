@@ -123,6 +123,8 @@ if args.populate:
     # TODO: Need a clever solution to match dev to deployment here.
     # Maybe we define roles for dev and deployment in a sngle file and import.
     countries = ['demo', 'rms']
+    somalia_countries = ['somalia', 'somaliland', 'puntland', 'southcentral']
+    all_countries = countries + somalia_countries + ['jordan', 'madagascar', 'meerkat']
     roles = []
 
     for country in countries:
@@ -140,6 +142,11 @@ if args.populate:
                  ['admin', 'all', 'personal']),
             Role(country, 'emails', ' ', [], visible=['root']),
 
+        ]
+
+    for country in all_countries:
+        roles += [
+            Role(country, 'consul', 'Access to consul integration service.', [])
         ]
 
     # Create the jordan access network
@@ -319,11 +326,8 @@ if args.populate:
             ['pip', 'clinic'],
             data={'name': {'value': 'Pip user'}},
             state='new'
-        )
-    ]
-
-    # Create some madagascar accounts.
-    users += [
+        ),
+        # Create some madagascar accounts.
         User(
             'madagascar-reports',
             'reports@madagascartest.org.uk',
@@ -382,7 +386,7 @@ if args.populate:
     ]
 
     # Create some user accounts for specific countries.
-    for country in ['somalia', 'somaliland', 'puntland', 'southcentral']:
+    for country in somalia_countries:
         users += [
             User(
                 country + '-reports',
@@ -429,125 +433,140 @@ if args.populate:
                 ['download', 'admin'],
                 data={'name': {'value': 'Central Administrator'}},
                 state='new'
-            )
-        ]
+            )]
 
-    # Create a CTC account for somalia
-    users += [User(
-        'ctc',
-        'ctc@test.org.uk',
-        ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
-         'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
-        ['somalia', 'somalia'],
-        ['ctc', 'dashboard'],
-        data={'name': {'val': 'CTC User'}},
-        state='new'
-    ), User(
-        'reports-som-ctc',
-        'ctc@test.org.uk',
-        ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
-         'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
-        ['somalia', 'somalia'],
-        ['ctc', 'reports'],
-        data={'name': {'val': 'CTC Reports'}, 'TOKEN_LIFE': {'val': '60'}},
-        state='new'
-    ), User(
-        'reports-som-sc',
-        'sc@test.org.uk',
-        ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
-         'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
-        ['somalia', 'somalia'],
-        ['sc', 'reports'],
-        data={'name': {'val': 'SC Reports'}, 'TOKEN_LIFE': {'val': '60'}},
-        state='new'
-    )]
-
-    # Create a location restricted account for somalia
-    users += [User(
-        'puntland',
-        'puntland@test.org.uk',
-        ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
-         'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
-        ['somalia', 'somalia', 'somalia'],
-        ['puntland', 'download', 'other'],
-        data={'name': {'val': 'Puntland User'}},
-        state='new'
-    ), User(
-        'somaliland',
-        'somaliland@test.org.uk',
-        ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
-         'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
-        ['somalia', 'somalia', 'somalia'],
-        ['somaliland', 'download', 'other'],
-        data={'name': {'val': 'somaliland User'}},
-        state='new'
-    ), User(
-        'southcentral',
-        'southcentral@test.org.uk',
-        ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
-         'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
-        ['somalia', 'somalia', 'somalia'],
-        ['southcentral', 'download', 'other'],
-        data={'name': {'val': 'southcentral User'}},
-        state='new'
-    ), User(
-        'somalia',
-        'somalia@test.org.uk',
-        ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
-         'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
-        ['somalia', 'somalia'],
-        ['download', 'other'],
-        data={'name': {'val': 'somalia User'}},
-        state='new'
-    )]
-
-    # Create an overall root acount with access to everything.
-    root_countries = countries + [
-        'jordan', 'madagascar', 'somalia',
-        'meerkat', 'somaliland', 'southcentral', 'puntland'
+    users += [
+        # Create a CTC account for somalia
+        User(
+            'ctc',
+            'ctc@test.org.uk',
+            ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+             'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+            ['somalia', 'somalia'],
+            ['ctc', 'dashboard'],
+            data={'name': {'val': 'CTC User'}},
+            state='new'
+        ), User(
+            'reports-som-ctc',
+            'ctc@test.org.uk',
+            ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+             'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+            ['somalia', 'somalia'],
+            ['ctc', 'reports'],
+            data={'name': {'val': 'CTC Reports'}, 'TOKEN_LIFE': {'val': '60'}},
+            state='new'
+        ), User(
+            'reports-som-sc',
+            'sc@test.org.uk',
+            ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+             'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+            ['somalia', 'somalia'],
+            ['sc', 'reports'],
+            data={'name': {'val': 'SC Reports'}, 'TOKEN_LIFE': {'val': '60'}},
+            state='new'
+        ),
+        # Create a location restricted account for somalia
+        User(
+            'puntland',
+            'puntland@test.org.uk',
+            ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+             'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+            ['somalia', 'somalia', 'somalia'],
+            ['puntland', 'download', 'other'],
+            data={'name': {'val': 'Puntland User'}},
+            state='new'
+        ), User(
+            'somaliland',
+            'somaliland@test.org.uk',
+            ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+             'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+            ['somalia', 'somalia', 'somalia'],
+            ['somaliland', 'download', 'other'],
+            data={'name': {'val': 'somaliland User'}},
+            state='new'
+        ), User(
+            'southcentral',
+            'southcentral@test.org.uk',
+            ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+             'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+            ['somalia', 'somalia', 'somalia'],
+            ['southcentral', 'download', 'other'],
+            data={'name': {'val': 'southcentral User'}},
+            state='new'
+        ), User(
+            'somalia',
+            'somalia@test.org.uk',
+            ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+             'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+            ['somalia', 'somalia'],
+            ['download', 'other'],
+            data={'name': {'val': 'somalia User'}},
+            state='new'
+        ),
+        # Create an overall root acount with access to everything.
+        User(
+            'root',
+            'root@test.org.uk',
+            ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+             'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+            all_countries,
+            ['root']*len(all_countries),
+            data={'name': {'val': 'Supreme Omnipotent Overlord'}},
+            state='new'
+        ),
+        # Create an account to authenticate email sending.
+        User(
+            'report-emails',
+            'report-emails@test.org.uk',
+            ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+             'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+            countries + countries + ['jordan', 'jordan', 'jordan'] +
+            ['madagascar', 'madagascar'] + ['somalia', 'somalia', 'somalia'],
+            ['registered' for c in countries] +
+            ['emails' for c in countries] + ['reports', 'emails', 'all'] +
+            ['emails', 'reports'] + ['emails', 'reports', 'all'],
+            state='new'
+        ),
+        # Create an account to authenticate request to consul
+        User(
+            'consul-dev-user',
+            'consul-dev-user@test.org.uk',
+            ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+             'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+            somalia_countries,
+            ['download']*len(somalia_countries),
+            state='new'
+        ),
+        # Create an account to authenticate download requests to api
+        User(
+            'abacus-dev-user',
+            'abacus-dev-user@test.org.uk',
+            ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+             'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+            all_countries,
+            ['consul']*len(all_countries),
+            state='new'
+        ),
+        # Create an account to authenticate email sending.
+        User(
+            'server',
+            'server@test.org.uk',
+            ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+             'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+            ["meerkat"],
+            ["hermes"],
+            state='new'
+        ), User(
+            'slack',
+            'slack@test.org.uk',
+            ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
+             'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
+            ["meerkat"],
+            ["slack"],
+            state='new'
+        )
     ]
-    users += [User(
-        'root',
-        'root@test.org.uk',
-        ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
-         'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
-        root_countries,
-        ['root']*len(root_countries),
-        data={'name': {'val': 'Supreme Omnipotent Overlord'}},
-        state='new'
-    )]
 
-    # Create an account to authenticate email sending.
-    users += [User(
-        'report-emails',
-        'report-emails@test.org.uk',
-        ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
-         'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
-        countries + countries + ['jordan', 'jordan', 'jordan'] +
-        ['madagascar', 'madagascar'] + ['somalia', 'somalia', 'somalia'],
-        ['registered' for c in countries] +
-        ['emails' for c in countries] + ['reports', 'emails', 'all'] +
-        ['emails', 'reports'] + ['emails', 'reports', 'all'],
-        state='new'
-    )]
-    # Create an account to authenticate email sending.
-    users += [User(
-        'server',
-        'server@test.org.uk',
-        ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
-         'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
-        ["meerkat"],
-        ["hermes"],
-        state='new'
-    ), User(
-        'slack',
-        'slack@test.org.uk',
-        ('$pbkdf2-sha256$29000$UAqBcA6hVGrtvbd2LkW'
-         'odQ$4nNngNTkEn0d3WzDG31gHKRQ2sVvnJuLudwoynT137Y'),
-        ["meerkat"],
-        ["slack"],
-        state='new'
-    )]
     try:
         # Get developer accounts from file to be inserted into local database.
         fpath = (path.dirname(path.realpath(__file__)) +

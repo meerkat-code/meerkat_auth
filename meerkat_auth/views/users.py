@@ -4,6 +4,8 @@ users.py
 A Flask Blueprint module for the user manager page.
 """
 from flask import Blueprint, render_template, request, jsonify, g, abort
+from werkzeug.exceptions import HTTPException
+
 from meerkat_auth.user import User, InvalidCredentialException
 from meerkat_auth.role import InvalidRoleException
 from meerkat_auth.authorise import auth
@@ -238,8 +240,13 @@ def delete_users():
     for username in users:
         try:
             # Check current user has access to delete the specified user.
-            user = User.from_db(username)
-            auth.check_auth(user.roles, user.countries, logic='AND')
+            user_to_delete = User.from_db(username)
+            try:
+                auth.check_auth(['admin'], ['meerkat'])
+            except HTTPException:
+                countries_list = user_to_delete.countries
+                admin_role_list = ['admin'] * len(countries_list)
+                auth.check_auth(admin_role_list, countries_list, logic='AND')
             logging.warning(
                 g.payload['usr'] + ' is deleting account ' + str(username)
             )

@@ -165,12 +165,10 @@ def update_user(username='new'):
     # Form's password field default is empty, only update if something entered.
     # Original password hash is stored in hidden input so we don't need to
     # reload user here.
-    logging.warning('New Password Is: ' + str(data["password"]))
     if data["password"]:
         data["password"] = User.hash_password(data["password"])
     else:
         data["password"] = data["original_password"]
-    logging.warning('Hashed Password Is: ' + str(data["password"]))
     # Create a user object represented by the form input.
     user = User(
         data["username"],

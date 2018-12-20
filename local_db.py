@@ -124,7 +124,7 @@ if args.populate:
     # Maybe we define roles for dev and deployment in a sngle file and import.
     countries = ['demo', 'rms']
     somalia_countries = ['somalia', 'somaliland', 'puntland', 'southcentral']
-    all_countries = countries + somalia_countries + ['jordan', 'madagascar', 'meerkat']
+    all_countries = countries + somalia_countries + ['jordan', 'madagascar','car','meerkat']
     roles = []
 
     for country in countries:
@@ -173,7 +173,7 @@ if args.populate:
     ]
 
     # Add the madagascar access network.
-    for country in ['somalia', 'somaliland', 'southcentral', 'puntland', 'madagascar']:
+    for country in ['somalia', 'somaliland', 'southcentral', 'puntland', 'madagascar', 'car']:
         roles += [
             Role(country, 'reports', ' ', []),
             Role(country, 'dashboard', ' ', ['reports']),
@@ -213,6 +213,10 @@ if args.populate:
         Role('madagascar', 'other', ' ', []),
         Role('madagascar', 'cd', ' ', ['malaria', 'other']),
         Role('madagascar', 'root', ' ', ['download', 'admin', 'cd']),
+        Role('car', 'malaria', ' ', []),
+        Role('car', 'other', ' ', []),
+        Role('car', 'cd', ' ', ['malaria', 'other']),
+        Role('car', 'root', ' ', ['download', 'admin', 'cd']),
         Role('meerkat', 'slack', ' ', []),
         Role('meerkat', 'logging', ' ', []),
         Role('meerkat', 'hermes', ' ', ['slack']),

@@ -157,7 +157,7 @@ def update_user(username='new'):
     """
     # Load the form's data and check the current user has access to edit.
     data = request.get_json()
-    auth.check_access(data["roles"], data["countries"], 'AND')
+    auth.check_auth(data["roles"], data["countries"], 'AND')
     if username != 'new':
         user = User.from_db(username)
         auth.check_auth(user.roles, user.countries, 'AND')

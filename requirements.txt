@@ -13,6 +13,6 @@ cryptography==2.2
 flask-babel==0.10
 babel==2.3.4
 raven[flask]==6.0.0
-sphinx==1.6.7
+sphinx==3.0.4
 sphinxcontrib-httpdomain==1.6.0
 sphinxcontrib-napoleon==0.6.1

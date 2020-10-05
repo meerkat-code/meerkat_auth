@@ -4,7 +4,7 @@ meerkat_auth.py
 Registering root Flask app services for the Meerkat Authentication module.
 """
 from flask import Flask, abort, g, redirect, render_template
-from flask.ext.babel import Babel
+from flask_babel import Babel
 from raven.contrib.flask import Sentry
 import os
 

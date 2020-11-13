@@ -262,7 +262,7 @@ class Role:
 
         if not countries:
             # If no country is specified, get all roles and return as list.
-            return table.scan({}).get("Items", [])
+            return table.scan().get("Items", [])
 
         else:
             roles = []
